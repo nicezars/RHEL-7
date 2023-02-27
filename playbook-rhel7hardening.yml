@@ -1,0 +1,47 @@
+---
+#
+# Copyright 2020
+# description: this playbook is dedicated for Telkomsel Indonesia
+#
+- hosts: all
+  become: yes
+  any_errors_fatal: false
+  gather_facts: true
+  vars:
+    all_results: {}
+
+  tasks:
+    - block:
+      - name: Create directory for config backup
+        tempfile:
+          state: directory
+        register: backup_temp
+      - name: Change permission
+        file:
+          path: "{{ backup_temp.path }}"
+          mode: '0755'
+      tags: always
+
+    - block:
+      - name: Execute CIS benchmark hardening for RHEL 7
+        include_role:
+          name: rhel7hardening
+        tags: always
+      always:
+        - name: Cache remediate results
+          block:
+            - debug:
+                var: result
+            - debug:
+                var: all_results
+              tags: always
+            - copy:
+                content: "{{ all_results }}"
+                dest: /var/report/facts.d/{{ ansible_hostname }}.json
+              become: no
+              delegate_to: localhost
+              tags: always
+
+    - name: MySQL DB Security Dashboard
+      import_tasks: dash-dbquery-remediation-job.yml
+      tags: always

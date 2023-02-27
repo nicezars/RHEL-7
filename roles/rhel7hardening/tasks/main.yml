@@ -1,0 +1,85 @@
+---
+#
+# Copyright 2020
+# Description: this playbook is dedicated for Telkomsel Indonesia
+# Playbooks contains below 6 Sections
+#
+#  Section 1: Initial setup hardening
+#  Section 2: OS services
+#  Section 3: Network Configuration and Firewalls
+#  Section 4: Logging and Auditing
+#  Section 5: System Access, Authentication and Authoriazation
+#  Section 6: System Maintenance
+  - name: Fetching config files
+    copy:
+      src: "{{ item }}"
+      dest: "{{ backup_temp.path }}/"
+      mode: '0755'
+      remote_src: yes
+    loop:
+      - /etc/modprobe.d/usb_storage.conf
+      - /etc/yum.conf
+      - /etc/yum.repos.d/*
+      - /etc/sudoers
+      - /boot/grub2/grub.cfg
+      - /usr/lib/systemd/system/rescue.service
+      - /usr/lib/systemd/system/emergency.service
+      - /etc/security/limits.conf
+      - /etc/sysctl.conf
+      - /etc/systemd/coredump.conf
+      - /etc/selinux/config
+      - /etc/motd
+      - /etc/issue
+      - /etc/issue.net
+      - /etc/dconf/db/gdm.d/*
+      - /etc/dconf/profile/*
+      - /etc/chrony.conf
+      - /etc/sysconfig/chronyd
+      - /etc/ntp.conf
+      - /etc/postfix/main.cf
+      - /etc/default/grub
+      - /etc/sysctl.conf
+      - /etc/ssh/sshd_config
+      - /etc/modprobe.d/dccp.conf
+      - /etc/modprobe.d/sctp.conf
+      - /etc/audit/auditd.conf
+      - /etc/audit/rules.d/*
+      - /etc/rsyslog.conf
+      - /etc/systemd/journald.conf
+      - /etc/cron*
+      - /etc/at*
+      - /etc/security/pwquality.conf
+      - /etc/pam.d/*
+      - /etc/login.defs
+      - /etc/default/useradd
+      - /etc/profile
+      - /etc/passwd
+      - /etc/shadow
+      - /etc/group
+      - /etc/gshadow
+      - /etc/passwd-
+      - /etc/shadow-
+      - /etc/group-
+      - /etc/gshadow-
+    ignore_errors: yes
+  #  tags:
+  #    - always
+
+  - import_tasks: section1-harden.yml
+    when: section01 | bool
+    tags: section01
+  - import_tasks: section2-harden.yml
+    when: section02 | bool
+    tags: section02
+  - import_tasks: section3-harden.yml
+    when: section03 | bool
+    tags: section03
+  - import_tasks: section4-harden.yml
+    when: section04 | bool
+    tags: section04
+  - import_tasks: section5-harden.yml
+    when: section05 | bool
+    tags: section05
+  - import_tasks: section6-harden.yml
+    when: section06 | bool
+    tags: section06

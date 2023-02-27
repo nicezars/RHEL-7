@@ -1,0 +1,1102 @@
+---
+#
+# Copyright 2020
+# This section contains 46 rules
+# Has Hash-out all the rules apart From Mandatory Checklist
+#
+#####
+  - name: " 5.1.1 | SCAN |  Ensure cron daemon is enabled and running"
+    block:
+      - name: " 5.1.1 | SCAN |  Ensure cron daemon is enabled and running"
+        shell:    systemctl is-enabled crond
+        register: rhel7cis_rule_5_1_1_a_rc
+        ignore_errors: yes
+      - shell:     "systemctl status crond | grep 'Active: active (running) '"
+        register: rhel7cis_rule_5_1_1_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_1_1_result: false
+        when: rhel7cis_rule_5_1_1_a_rc.stdout != "enabled" or rhel7cis_rule_5_1_1_b_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.1':rhel7cis_rule_5_1_1_result|default(true)}) }}"
+    when: rhel7cis_rule_5_1_1
+    tags:
+     - level1
+     - scan
+     - rule_5.1.1
+     - rhel7
+
+#####
+  - name: " 5.1.2 | SCAN | Ensure permissions on /etc/crontab are configured"
+    block:
+      - name: " 5.1.2 | SCAN |  Ensure permissions on /etc/crontab are configured"
+        shell:  stat  /etc/crontab | grep -E '(0600/)'
+        register: rhel7cis_rule_5_1_2_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_1_2_result: false
+        when: rhel7cis_rule_5_1_2_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.2':rhel7cis_rule_5_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_5_1_2
+    tags:
+     - level1
+     - scan
+     - rule_5.1.2
+     - rhel7
+
+#####
+  - name: " 5.1.3 | SCAN |  Ensure permissions on /etc/cron.hourly are configured "
+    block:
+      - name: " 5.1.3 | SCAN |  Ensure permissions on /etc/cron.hourly are configured "
+        shell:  stat  /etc/cron.hourly/ | grep -E '(0700/)'
+        register: rhel7cis_rule_5_1_3_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_1_3_result: false
+        when: rhel7cis_rule_5_1_3_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.3':rhel7cis_rule_5_1_3_result|default(true)}) }}"
+    when: rhel7cis_rule_5_1_3
+    tags:
+     - level1
+     - scan
+     - rule_5.1.3
+     - rhel7
+
+#####
+  - name: " 5.1.4 | SCAN | Ensure permissions on /etc/cron.daily are configured "
+    block:
+      - name: " 5.1.4 | SCAN | Ensure permissions on /etc/cron.daily are configured "
+        shell:  stat  /etc/cron.daily/ | grep -E '(0700/)'
+        register: rhel7cis_rule_5_1_4_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_1_4_result: false
+        when: rhel7cis_rule_5_1_4_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.4':rhel7cis_rule_5_1_4_result|default(true)}) }}"
+    when: rhel7cis_rule_5_1_4
+    tags:
+     - level1
+     - scan
+     - rule_5.1.4
+     - rhel7
+
+#####
+  - name: " 5.1.5 | SCAN |  Ensure permissions on /etc/cron.weekly are configured  "
+    block:
+      - name: " 5.1.5 | SCAN |  Ensure permissions on /etc/cron.weekly are configured  "
+        shell:  stat /etc/cron.weekly | grep -E '(0700/)'
+        register: rhel7cis_rule_5_1_5_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_1_5_result: false
+        when: rhel7cis_rule_5_1_5_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.5':rhel7cis_rule_5_1_5_result|default(true)}) }}"
+    when: rhel7cis_rule_5_1_5
+    tags:
+     - level1
+     - scan
+     - rule_5.1.5
+     - rhel7
+
+#####
+  - name: " 5.1.6 | SCAN | Ensure permissions on /etc/cron.monthly are configured  "
+    block:
+      - name: " 5.1.6 | SCAN |  Ensure permissions on /etc/cron.monthly are configured "
+        shell:  stat  /etc/cron.monthly/ | grep -E '(0700/)'
+        register: rhel7cis_rule_5_1_6_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_1_6_result: false
+        when: rhel7cis_rule_5_1_6_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.6':rhel7cis_rule_5_1_6_result|default(true)}) }}"
+    when: rhel7cis_rule_5_1_6
+    tags:
+     - level1
+     - scan
+     - rule_5.1.6
+     - rhel7
+
+#####
+  - name: " 5.1.7 | SCAN | Ensure permissions on /etc/cron.d are configured "
+    block:
+      - name: " 5.1.7 | SCAN | Ensure permissions on /etc/cron.d are configured "
+        shell:  stat /etc/cron.d | grep -E '(0700/)'
+        register: rhel7cis_rule_5_1_7_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_1_7_result: false
+        when: rhel7cis_rule_5_1_7_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.7':rhel7cis_rule_5_1_7_result|default(true)}) }}"
+    when: rhel7cis_rule_5_1_7
+    tags:
+     - level1
+     - scan
+     - rule_5.1.7
+     - rhel7
+
+#####
+  - name: " 5.1.8 | SCAN |  Ensure cron is restricted to authorized users "
+    block:
+      - name: " 5.1.8 | SCAN |  Ensure cron is restricted to authorized users "
+        shell:  stat /etc/cron.allow | grep -E '(0600/)'
+        register: rhel7cis_rule_5_1_8_b_rc
+        ignore_errors: yes
+      - shell:  stat /etc/cron.deny
+        register: rhel7cis_rule_5_1_8_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_1_8_result: false
+        when: rhel7cis_rule_5_1_8_b_rc.rc != 0 or rhel7cis_rule_5_1_8_a_rc.rc == 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.8':rhel7cis_rule_5_1_8_result|default(true)}) }}"
+    when: rhel7cis_rule_5_1_8
+    tags:
+     - level1
+     - scan
+     - rule_5.1.8
+     - rhel7
+
+  #####
+  - name: " 5.1.9 | SCAN |  Ensure at is restricted to authorized users "
+    block:
+      - name: " 5.1.9 | SCAN |  Ensure at is restricted to authorized users "
+        shell:  stat /etc/at.allow | grep -E '(0600/)'
+        register: rhel7cis_rule_5_1_9_b_rc
+        ignore_errors: yes
+      - shell:  stat /etc/at.deny
+        register: rhel7cis_rule_5_1_9_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_1_9_result: false
+        when: rhel7cis_rule_5_1_9_b_rc.rc != 0 or rhel7cis_rule_5_1_9_a_rc.rc == 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.9':rhel7cis_rule_5_1_9_result|default(true)}) }}"
+    when: rhel7cis_rule_5_1_9
+    tags:
+     - level1
+     - scan
+     - rule_5.1.9
+     - rhel7
+
+#####
+  - name: " 5.2.1 | SCAN | Ensure permissions on /etc/ssh/sshd_config are configured "
+    block:
+      - name: " 5.2.1 | SCAN | Ensure permissions on /etc/ssh/sshd_config are configured "
+        shell:  stat /etc/ssh/sshd_config | grep -E '(0600/)'
+        register: rhel7cis_rule_5_2_1_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_1_result: false
+        when:  rhel7cis_rule_5_2_1_a_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.1':rhel7cis_rule_5_2_1_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_1
+    tags:
+     - level1
+     - scan
+     - rule_5.2.1
+     - rhel7
+
+#####
+  - name: " 5.2.2 | SCAN | Ensure permissions on SSH private host key files are configured "
+    block:
+      - name: " 5.2.2 | SCAN | Ensure permissions on SSH private host key files are configured "
+        shell:  find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec stat {} \; | grep '^  File' | wc -l
+        register: rhel7cis_rule_5_2_2_a_rc
+        ignore_errors: yes
+      - shell:  find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec stat {} \; | grep -E '(0640/|0600/)' | wc -l
+        register: rhel7cis_rule_5_2_2_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_2_result: false
+        when: rhel7cis_rule_5_2_2_a_rc.stdout != rhel7cis_rule_5_2_2_b_rc.stdout
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.2':rhel7cis_rule_5_2_2_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_2
+    tags:
+     - level1
+     - scan
+     - rule_5.2.2
+     - rhel7
+
+#####
+  - name: " 5.2.3 | SCAN | Ensure permissions on SSH public host key files are configured "
+    block:
+      - name: " 5.2.3 | SCAN | Ensure permissions on SSH public host key files are configured "
+        shell:  find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec stat {} \; | grep '^  File' | wc -l
+        register: rhel7cis_rule_5_2_3_a_rc
+        ignore_errors: yes
+      - shell:  find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec stat {} \; | grep -E '(0644/|0600/|0640/|0604/)' | wc -l
+        register: rhel7cis_rule_5_2_3_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_3_result: false
+        when: rhel7cis_rule_5_2_3_a_rc.stdout != rhel7cis_rule_5_2_3_b_rc.stdout
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.3':rhel7cis_rule_5_2_3_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_3
+    tags:
+     - level1
+     - scan
+     - rule_5.2.3
+     - rhel7
+
+#####
+  - name: " 5.2.4 | SCAN | Ensure SSH access is limited "
+    block:
+      - name: " 5.2.4 | SCAN | Ensure SSH access is limited "
+        shell:  sshd -T | grep -E '^\s*(allow|deny)(users|groups)\s+\S+'
+        register: rhel7cis_rule_5_2_4_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_4_result: false
+        when: rhel7cis_rule_5_2_4_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.4':rhel7cis_rule_5_2_4_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_4
+    tags:
+     - level1
+     - scan
+     - rule_5.2.4
+     - rhel7
+
+#####
+  - name: " 5.2.5 | SCAN | Ensure SSH LogLevel is appropriate "
+    block:
+      - name: " 5.2.5 | SCAN | Ensure SSH LogLevel is appropriate "
+        shell:  sshd -T | grep loglevel  | grep -E '(INFO|VERBOSE)'
+        register: rhel7cis_rule_5_2_5_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_5_result: false
+        when: rhel7cis_rule_5_2_5_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.5':rhel7cis_rule_5_2_5_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_5
+    tags:
+     - level1
+     - scan
+     - rule_5.2.5
+     - rhel7
+
+#####
+  - name: " 5.2.6 | SCAN |  Ensure SSH X11 forwarding is disabled "
+    block:
+      - name: " 5.2.6 | SCAN |  Ensure SSH X11 forwarding is disabled "
+        shell:  sshd -T | grep -i x11forwarding | grep no
+        register: rhel7cis_rule_5_2_6_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_6_result: false
+        when: rhel7cis_rule_5_2_6_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.6':rhel7cis_rule_5_2_6_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_6
+    tags:
+     - level2
+     - scan
+     - rule_5.2.6
+     - rhel7
+
+#####
+  - name: " 5.2.7 | SCAN |   Ensure SSH MaxAuthTries is set to 4 or less "
+    block:
+      - name: " 5.2.7 | SCAN |   Ensure SSH MaxAuthTries is set to 4 or less "
+        shell:  sshd -T | grep maxauthtries | grep -E '(4|3|2|1|0)'
+        register: rhel7cis_rule_5_2_7_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_7_result: false
+        when: rhel7cis_rule_5_2_7_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.7':rhel7cis_rule_5_2_7_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_7
+    tags:
+     - level1
+     - scan
+     - rule_5.2.7
+     - rhel7
+
+#####
+  - name: " 5.2.8 | SCAN |   Ensure SSH IgnoreRhosts is enabled "
+    block:
+      - name: " 5.2.8 | SCAN |   Ensure SSH IgnoreRhosts is enabled "
+        shell:   sshd -T | grep ignorerhosts | grep yes
+        register: rhel7cis_rule_5_2_8_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_8_result: false
+        when: rhel7cis_rule_5_2_8_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.8':rhel7cis_rule_5_2_8_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_8
+    tags:
+     - level1
+     - scan
+     - rule_5.2.8
+     - rhel7
+
+#####
+  - name: " 5.2.9 | SCAN | Ensure SSH HostbasedAuthentication is disabled "
+    block:
+      - name: " 5.2.9 | SCAN | Ensure SSH HostbasedAuthentication is disabled"
+        shell:   sshd -T | grep hostbasedauthentication | grep no
+        register: rhel7cis_rule_5_2_9_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_9_result: false
+        when: rhel7cis_rule_5_2_9_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.9':rhel7cis_rule_5_2_9_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_9
+    tags:
+     - level1
+     - scan
+     - rule_5.2.9
+     - rhel7
+
+#####
+# As CIS it should be no, but it's TSEL exceptions
+  - name: " 5.2.10 | SCAN | Ensure SSH root login is disabled "
+    block:
+      - name: " 5.2.10 | SCAN | Ensure SSH root login is disabled"
+        shell:   sshd -T | grep permitrootlogin | grep yes
+        register: rhel7cis_rule_5_2_10_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_10_result: false
+        when: rhel7cis_rule_5_2_10_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.10':rhel7cis_rule_5_2_10_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_10
+    tags:
+     - level1
+     - scan
+     - rule_5.2.10
+     - rhel7
+
+#####
+  - name: " 5.2.11 | SCAN | Ensure SSH PermitEmptyPasswords is disabled  "
+    block:
+      - name: " 5.2.11 | SCAN | Ensure SSH PermitEmptyPasswords is disabled "
+        shell:    sshd -T | grep permitemptypasswords | grep no
+        register: rhel7cis_rule_5_2_11_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_11_result: false
+        when: rhel7cis_rule_5_2_11_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.11':rhel7cis_rule_5_2_11_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_11
+    tags:
+     - level1
+     - scan
+     - rule_5.2.11
+     - rhel7
+
+#####
+  - name: " 5.2.12 | SCAN |  Ensure SSH PermitUserEnvironment is disabled  "
+    block:
+      - name: " 5.2.12 | SCAN |  Ensure SSH PermitUserEnvironment is disabled "
+        shell:   sshd -T | grep permituserenvironment | grep no
+        register: rhel7cis_rule_5_2_12_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_12_result: false
+        when: rhel7cis_rule_5_2_12_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.12':rhel7cis_rule_5_2_12_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_12
+    tags:
+     - level1
+     - scan
+     - rule_5.2.12
+     - rhel7
+
+#####
+  - name: " 5.2.13 | SCAN |  Ensure only strong Ciphers are used  "
+    block:
+      - name: " 5.2.13 | SCAN |  Ensure only strong Ciphers are used "
+        shell: |
+          sshd -T | grep ciphers | awk '$1=$1' FS="," OFS="\n" |grep -E '(3des-cbc|aes128-cbc|aes192-cbc|aes256-cbc|arcfour|arcfour128|arcfour256|blowfish-cbc|cast128-cbc|rijndael-cbc@lysator.liu.se)'
+        register: rhel7cis_rule_5_2_13_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_13_result: false
+        when: rhel7cis_rule_5_2_13_rc.rc == 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.13':rhel7cis_rule_5_2_13_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_13
+    tags:
+     - level1
+     - scan
+     - rule_5.2.13
+     - rhel7
+
+#####
+  - name: " 5.2.14 | SCAN |  Ensure only strong MAC algorithms are used "
+    block:
+      - name: " 5.2.14 | SCAN | Ensure only strong MAC algorithms are used "
+        shell: |
+          sshd -T | grep -i "MACs" | awk '$1=$1' FS="," OFS="\n" | grep -E '(hmac-sha2-512-etm@openssh.com|hmac-sha2-256-etm@openssh.com|hmac-sha2-512|hmac-sha2-256)'
+        register: rhel7cis_rule_5_2_14_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_14_result: false
+        when: rhel7cis_rule_5_2_14_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.14':rhel7cis_rule_5_2_14_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_14
+    tags:
+     - level1
+     - scan
+     - rule_5.2.14
+     - rhel7
+
+#####
+  - name: " 5.2.15 | SCAN |  Ensure only strong Key Exchange algorithms are used "
+    block:
+      - name: " 5.2.15 | SCAN | Ensure only strong Key Exchange algorithms are used "
+        shell:  sshd -T | grep kexalgorithms | awk '$1=$1' FS="," OFS="\n" | grep -E '(diffie-hellman-group1-sha1|diffie-hellman-group14-sha1|diffie-hellman-group-exchange-sha1)'
+        register: rhel7cis_rule_5_2_15_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_15_result: false
+        when: rhel7cis_rule_5_2_15_rc.rc == 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.15':rhel7cis_rule_5_2_15_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_15
+    tags:
+     - level1
+     - scan
+     - rule_5.2.15
+     - rhel7
+
+#####
+  - name: " 5.2.16 | SCAN | Ensure SSH Idle Timeout Interval is configured "
+    block:
+      - name: " 5.2.16 | SCAN | Ensure SSH Idle Timeout Interval is configured "
+        shell:   sshd -T | grep clientaliveinterval | awk '{print $2}'
+        register: rhel7cis_rule_5_2_16_a_rc
+        ignore_errors: yes
+
+      - assert:
+          that:
+            - "{{ rhel7cis_rule_5_2_16_a_rc.stdout|int }} >= 1"
+            - "{{ rhel7cis_rule_5_2_16_a_rc.stdout|int }} <= 300"
+        register: rhel7cis_rule_5_2_16_b_rc
+        ignore_errors: yes
+
+      - shell:    sshd -T | grep clientalivecountmax | awk '{print $2}'
+        register: rhel7cis_rule_5_2_16_c_rc
+        ignore_errors: yes
+
+      - assert:
+          that:
+            - "{{ rhel7cis_rule_5_2_16_c_rc.stdout|int }} >= 1"
+            - "{{ rhel7cis_rule_5_2_16_c_rc.stdout|int }} <= 3"
+        register: rhel7cis_rule_5_2_16_d_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_5_2_16_result: false
+        when: rhel7cis_rule_5_2_16_b_rc.msg == "Assertion failed" or rhel7cis_rule_5_2_16_d_rc.msg == "Assertion failed"
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.16':rhel7cis_rule_5_2_16_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_16
+    tags:
+     - level1
+     - scan
+     - rule_5.2.16
+     - rhel7
+
+#####
+  - name: " 5.2.17 | SCAN | Ensure SSH LoginGraceTime is set to one minute or less "
+    block:
+      - name: " 5.2.17 | SCAN | Ensure SSH LoginGraceTime is set to one minute or less "
+        shell:    sshd -T | grep logingracetime | awk '{print $2}'
+        register: rhel7cis_rule_5_2_17_a_rc
+        ignore_errors: yes
+
+      - assert:
+          that:
+            - "{{ rhel7cis_rule_5_2_17_a_rc.stdout|int }} >= 1"
+            - "{{ rhel7cis_rule_5_2_17_a_rc.stdout|int }} <= 60"
+        register: rhel7cis_rule_5_2_17_b_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_5_2_17_result: false
+        when: rhel7cis_rule_5_2_17_b_rc.msg == "Assertion failed"
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.17':rhel7cis_rule_5_2_17_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_17
+    tags:
+     - level1
+     - scan
+     - rule_5.2.17
+     - rhel7
+
+#####
+  - name: " 5.2.18 | SCAN | Ensure SSH warning banner is configured "
+    block:
+      - name: " 5.2.18 | SCAN | Ensure SSH warning banner is configured "
+        shell:  sshd -T | grep banner | grep -Ei 'banner\s/etc/issue.net'
+        register: rhel7cis_rule_5_2_18_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_18_result: false
+        when: rhel7cis_rule_5_2_18_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.18':rhel7cis_rule_5_2_18_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_18
+    tags:
+     - level1
+     - scan
+     - rule_5.2.18
+     - rhel7
+
+#####
+  - name: " 5.2.19 | SCAN |  Ensure SSH PAM is enabled "
+    block:
+      - name: " 5.2.19 | SCAN |  Ensure SSH PAM is enabled "
+        shell:  sshd -T | grep -i usepam | grep -Ei 'usepam\syes'
+        register: rhel7cis_rule_5_2_19_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_19_result: false
+        when: rhel7cis_rule_5_2_19_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.19':rhel7cis_rule_5_2_19_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_19
+    tags:
+     - level1
+     - scan
+     - rule_5.2.19
+     - rhel7
+
+#####
+  - name: " 5.2.20 | SCAN |  Ensure SSH AllowTcpForwarding is disabled  "
+    block:
+      - name: " 5.2.20 | SCAN | Ensure SSH AllowTcpForwarding is disabled "
+        shell:  sshd -T | grep -i allowtcpforwarding | grep -Ei 'allowtcpforwarding\sno'
+        register: rhel7cis_rule_5_2_20_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_20_result: false
+        when: rhel7cis_rule_5_2_20_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.20':rhel7cis_rule_5_2_20_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_20
+    tags:
+     - level1
+     - scan
+     - rule_5.2.20
+     - rhel7
+#####
+  - name: " 5.2.21 | SCAN |  Ensure SSH MaxStartups is configured  "
+    block:
+      - name: " 5.2.21 | SCAN |  Ensure SSH MaxStartups is configured "
+        shell:  sshd -T | grep -Ei 'maxstartups\s10:30:60' #or site policy
+        register: rhel7cis_rule_5_2_21_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_2_21_result: false
+        when: rhel7cis_rule_5_2_21_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.21':rhel7cis_rule_5_2_21_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_21
+    tags:
+     - level1
+     - scan
+     - rule_5.2.21
+     - rhel7
+
+#####
+  - name: " 5.2.22 | SCAN | Ensure SSH MaxSessions is limited  "
+    block:
+      - name: " 5.2.22 | SCAN | Ensure SSH MaxSessions is limited "
+        shell:   sshd -T | grep -i 'maxsessions' | awk '{print $2}' #or site policy
+        register: rhel7cis_rule_5_2_22_a_rc
+        ignore_errors: yes
+
+      - assert:
+          that:
+            - "{{ rhel7cis_rule_5_2_22_a_rc.stdout|int }} >= 1"
+            - "{{ rhel7cis_rule_5_2_22_a_rc.stdout|int }} <= 10"
+        register: rhel7cis_rule_5_2_22_b_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_5_2_22_result: false
+        when: rhel7cis_rule_5_2_22_b_rc.msg == "Assertion failed"
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.2.22':rhel7cis_rule_5_2_22_result|default(true)}) }}"
+    when: rhel7cis_rule_5_2_22
+    tags:
+     - level1
+     - scan
+     - rule_5.2.22
+     - rhel7
+
+#####
+  - name: " 5.3.1 | SCAN | Ensure password creation requirements are configured  "
+    block:
+      - name: " 5.3.1 | SCAN |  Ensure password creation requirements are configured "
+        shell:   grep '^\s*minlen\s*' /etc/security/pwquality.conf | awk '{print $3}'
+        register: rhel7cis_rule_5_3_1_a_rc
+        ignore_errors: yes
+      - assert:
+          that:
+            - "{{ rhel7cis_rule_5_3_1_a_rc.stdout|int }} >= 14"
+        register: rhel7cis_rule_5_3_1_b_rc
+        ignore_errors: yes
+
+      - shell:    grep '^\s*minclass\s*' /etc/security/pwquality.conf | grep -Ei 'minclass\s+=\s4'
+        register: rhel7cis_rule_5_3_1_c_rc
+        ignore_errors: yes
+
+      - shell: |
+          grep -E '^\s*[duol]credit\s*' /etc/security/pwquality.conf | grep -Ei 'dcredit\s+=\s{{ dcredit }}' | wc -l | sed "s: ::g"
+          grep -E '^\s*[duol]credit\s*' /etc/security/pwquality.conf | grep -Ei 'ucredit\s+=\s{{ ucredit }}' | wc -l | sed "s: ::g"
+          grep -E '^\s*[duol]credit\s*' /etc/security/pwquality.conf | grep -Ei 'lcredit\s+=\s{{ lcredit }}' | wc -l | sed "s: ::g"
+          grep -E '^\s*[duol]credit\s*' /etc/security/pwquality.conf | grep -Ei 'ocredit\s+=\s{{ ocredit }}' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_5_3_1_d_rc
+        ignore_errors: yes
+      - shell: |
+           grep -P '^\s*password\s+(?:requisite|required)\s+pam_pwquality\.so\s+(?:\S+\s+)*(?!\2)(retry=[1-3]|try_first_pass)\s+(?:\S+\s+)*(?!\1)(retry=[1-3]|try_first_pass)\s*(?:\s+\S+\s*)*(?:\s+#.*)?$' /etc/pam.d/password-auth | wc -l | sed "s: ::g"
+           grep -P '^\s*password\s+(?:requisite|required)\s+pam_pwquality\.so\s+(?:\S+\s+)*(?!\2)(retry=[1-3]|try_first_pass)\s+(?:\S+\s+)*(?!\1)(retry=[1-3]|try_first_pass)\s*(?:\s+\S+\s*)*(?:\s+#.*)?$' /etc/pam.d/system-auth | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_5_3_1_e_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_5_3_1_result: false
+        when: >
+          (rhel7cis_rule_5_3_1_b_rc.msg == "Assertion failed") or
+          ((rhel7cis_rule_5_3_1_c_rc.rc !=0) and ('0' in rhel7cis_rule_5_3_1_d_rc.stdout)) or
+          ('0' in rhel7cis_rule_5_3_1_e_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.3.1':rhel7cis_rule_5_3_1_result|default(true)}) }}"
+    when: rhel7cis_rule_5_3_1
+    tags:
+     - level1
+     - scan
+     - rule_5.3.1
+     - rhel7
+
+#####
+#  - name: " 5.3.2 | SCAN_faillock | Ensure lockout for failed password attempts is configured "
+#    block:
+#      - name: " 5.3.2  | SCAN_faillock | Ensure lockout for failed password attempts is configured"
+#        shell: |
+#          grep -E '^\s*auth\s+\S+\s+pam_(faillock|unix)\.so' /etc/pam.d/system-auth /etc/pam.d/password-auth | wc -l | sed "s: ::g"
+#          grep -E '^\s*account\s+required\s+pam_faillock.so\s*' /etc/pam.d/system-auth /etc/pam.d/password-auth | wc -l | sed "s: ::g"
+#        register: rhel7cis_rule_5_3_2_a_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_5_3_2_result: false
+#        when: ( '0' in rhel7cis_rule_5_3_2_a_rc.stdout )
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'5.3.2':rhel7cis_rule_5_3_2_result|default(true)}) }}"
+#    when: pam_faillock == true
+#    tags:
+#     - level1
+#     - scan
+#     - rule_5.3.2
+#     - rhel7
+#
+#  - name: " 5.3.2  | SCAN_tally2 | Ensure lockout for failed password attempts is configured"
+#    block:
+#      - name: " 5.3.2  | SCAN_tally2 | Ensure lockout for failed password attempts is configured "
+#        shell: |
+#          grep -E '^\s*auth\s+\S+\s+pam_(tally2|unix)\.so' /etc/pam.d/system-auth /etc/pam.d/password-auth | wc -l | sed "s: ::g"
+#        register: rhel7cis_rule_5_3_2_b_rc
+#        ignore_errors: yes
+#
+#      - set_fact:
+#          rhel7cis_rule_5_3_2_result: false
+#        when: ( '0' in rhel7cis_rule_5_3_2_b_rc.stdout )
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'5.3.2':rhel7cis_rule_5_3_2_result|default(true)}) }}"
+#    when: pam_tally2 == true and rhel7cis_rule_5_3_2
+#    tags:
+#     - level1
+#     - scan
+#     - rule_5.3.2
+#     - rhel7
+#####
+#  - name: " 5.3.3 | SCAN |  Ensure password hashing algorithm is SHA-512  "
+#    block:
+#      - name: " 5.3.3 | SCAN |  Ensure password hashing algorithm is SHA-512 "
+#        shell:  grep -E '^\s*password\s+(\S+\s+)+pam_unix\.so\s+(\S+\s+)*sha512\s*(\S+\s*)*(\s+#.*)?$' /etc/pam.d/system-auth /etc/pam.d/password-auth | grep sha512
+#        register: rhel7cis_rule_5_3_3_rc
+#        ignore_errors: yes
+#
+#      - set_fact:
+#          rhel7cis_rule_5_3_3_result: false
+#        when: rhel7cis_rule_5_3_3_rc.rc != 0
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'5.3.3':rhel7cis_rule_5_3_3_result|default(true)}) }}"
+#    when: rhel7cis_rule_5_3_3
+#    tags:
+#     - level1
+#     - scan
+#     - rule_5.3.3
+#     - rhel7
+#
+#####
+#  - name: " 5.3.4  | SCAN | Ensure password reuse is limited"
+#    block:
+#      - name: " 5.3.4  | SCAN | Ensure password reuse is limited "
+#        shell:  grep -P '^\s*password\s+(requisite|required)\s+pam_pwhistory\.so\s+([^#]+\s+)*remember=([5-9]|[1-9][0-9]+)\b' /etc/pam.d/system-auth /etc/pam.d/password-auth | grep -i '/etc/pam.d/system-auth:password[[:blank:]]\+required[[:blank:]]\+pam_pwhistory.so[[:blank:]]\+remember=5'
+#        register: rhel7cis_rule_5_3_4_a_rc
+#        ignore_errors: yes
+#      - shell:  grep -P '^\s*password\s+(requisite|required)\s+pam_pwhistory\.so\s+([^#]+\s+)*remember=([5-9]|[1-9][0-9]+)\b' /etc/pam.d/system-auth /etc/pam.d/password-auth | grep -i '/etc/pam.d/password-auth:password[[:blank:]]\+required[[:blank:]]\+pam_pwhistory.so[[:blank:]]\+remember=5'
+#        register: rhel7cis_rule_5_3_4_b_rc
+#        ignore_errors: yes
+#
+#      - set_fact:
+#          rhel7cis_rule_5_3_4_result: false
+#        when: rhel7cis_rule_5_3_4_a_rc.rc != 0 or rhel7cis_rule_5_3_4_b_rc.rc != 0
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'5.3.4':rhel7cis_rule_5_3_4_result|default(true)}) }}"
+#    when: pam_pwhistory == true and rhel7cis_rule_5_3_4
+#    tags:
+#     - level1
+#     - scan
+#     - rule_5.3.4
+#     - rhel7
+#
+#  - name: " 5.3.4  | SCAN | Ensure password reuse is limited"
+#    block:
+#      - name: " 5.3.4  | SCAN | Ensure password reuse is limited "
+#        shell:  grep -P '^\s*password\s+(sufficient|requisite|required)\s+pam_unix\.so\s+([^#]+\s+)*remember=([5-9]|[1-9][0-9]+)\b' /etc/pam.d/system-auth /etc/pam.d/password-auth | grep -i '/etc/pam.d/system-auth:password[[:blank:]]\+sufficient[[:blank:]]\+pam_unix.so[[:blank:]]\+remember=5'
+#        register: rhel7cis_rule_5_3_4_c_rc
+#        ignore_errors: yes
+#      - shell:  grep -P '^\s*password\s+(sufficient|requisite|required)\s+pam_unix\.so\s+([^#]+\s+)*remember=([5-9]|[1-9][0-9]+)\b' /etc/pam.d/system-auth /etc/pam.d/password-auth | grep -i '/etc/pam.d/password-auth:password[[:blank:]]\+sufficient[[:blank:]]\+pam_unix.so[[:blank:]]\+remember=5'
+#        register: rhel7cis_rule_5_3_4_d_rc
+#        ignore_errors: yes
+#
+#      - set_fact:
+#          rhel7cis_rule_5_3_4_result: false
+#        when: rhel7cis_rule_5_3_4_c_rc.rc != 0 or rhel7cis_rule_5_3_4_d_rc.rc != 0
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'5.3.4':rhel7cis_rule_5_3_4_result|default(true)}) }}"
+#    when: pam_unix == true and rhel7cis_rule_5_3_4
+#    tags:
+#     - level1
+#     - scan
+#     - rule_5.3.4
+#     - rhel7
+#####
+#####
+  - name: " 5.4.1.1 | SCAN | Ensure password expiration is 365 days or less"
+    block:
+      - name: " 5.4.1.1 | SCAN | Ensure password expiration is 365 days or less "
+        shell:   grep ^\s*PASS_MAX_DAYS /etc/login.defs | awk '{print $2}' #or site policy
+        register: rhel7cis_rule_5_4_1_1_a_rc
+        ignore_errors: yes
+
+      - assert:
+          that:
+            - "{{ rhel7cis_rule_5_4_1_1_a_rc.stdout|int }} >= 1"
+            - "{{ rhel7cis_rule_5_4_1_1_a_rc.stdout|int }} <= 365"
+        register: rhel7cis_rule_5_4_1_1_b_rc
+        ignore_errors: yes
+
+      - shell:  " grep -E '^[^:]+:[^!*]' /etc/shadow | cut -d: -f5 "  #or site policy
+        register: rhel7cis_rule_5_4_1_1_c_rc
+        ignore_errors: yes
+      - assert:
+          that:
+            - "{{ item|int }} >= 1"
+            - "{{ item|int }} <= 365"
+        loop: "{{ rhel7cis_rule_5_4_1_1_c_rc.stdout_lines }}"
+        register: rhel7cis_rule_5_4_1_1_d_rc
+        ignore_errors: yes
+      - debug:
+          var: rhel7cis_rule_5_4_1_1_d_rc
+
+      - set_fact:
+          rhel7cis_rule_5_4_1_1_result: false
+        when: rhel7cis_rule_5_4_1_1_b_rc.msg == "Assertion failed" or rhel7cis_rule_5_4_1_1_d_rc.failed is defined
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.1.1':rhel7cis_rule_5_4_1_1_result|default(true)}) }}"
+    when: rhel7cis_rule_5_4_1_1
+    tags:
+     - level1
+     - scan
+     - rule_5.4.1.1
+     - rhel7
+
+#####
+  - name: " 5.4.1.2 | SCAN |  Ensure minimum days between password changes is configured"
+    block:
+      - name: " 5.4.1.2 | SCAN |  Ensure minimum days between password changes is configured "
+        shell:    grep ^\s*PASS_MIN_DAYS /etc/login.defs | awk '{print $2}'
+        register: rhel7cis_rule_5_4_1_2_a_rc
+        ignore_errors: yes
+      - assert:
+          that:
+            - "{{ rhel7cis_rule_5_4_1_2_a_rc.stdout|int }} >= 1"
+        register: rhel7cis_rule_5_4_1_2_b_rc
+        ignore_errors: yes
+
+      - shell:  'grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f4 '
+        register: rhel7cis_rule_5_4_1_2_c_rc
+        ignore_errors: yes
+      - assert:
+          that:
+            - "{{ item|int }} >= 1"
+        loop: "{{ rhel7cis_rule_5_4_1_2_c_rc.stdout_lines }}"
+        register: rhel7cis_rule_5_4_1_2_d_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_5_4_1_2_result: false
+        when: rhel7cis_rule_5_4_1_2_b_rc.msg == "Assertion failed" or rhel7cis_rule_5_4_1_2_d_rc.failed is defined
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.1.2':rhel7cis_rule_5_4_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_5_4_1_2
+    tags:
+     - level1
+     - scan
+     - rule_5.4.1.2
+     - rhel7
+
+#####
+  - name: " 5.4.1.3 | SCAN |   Ensure password expiration warning days is 7 or more"
+    block:
+      - name: " 5.4.1.3 | SCAN |   Ensure password expiration warning days is 7 or more "
+        shell:    grep ^\s*PASS_WARN_AGE /etc/login.defs | awk '{print $2}'
+        register: rhel7cis_rule_5_4_1_3_a_rc
+        ignore_errors: yes
+      - assert:
+          that:
+            - "{{ rhel7cis_rule_5_4_1_3_a_rc.stdout|int }} >= 7"
+        register: rhel7cis_rule_5_4_1_3_b_rc
+        ignore_errors: yes
+
+      - shell:  'grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f6 '
+        register: rhel7cis_rule_5_4_1_3_c_rc
+        ignore_errors: yes
+      - assert:
+          that:
+            - "{{ item|int }} >= 7"
+        loop: "{{ rhel7cis_rule_5_4_1_3_c_rc.stdout_lines }}"
+        register: rhel7cis_rule_5_4_1_3_d_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_4_1_3_result: false
+        when: rhel7cis_rule_5_4_1_3_b_rc.msg == "Assertion failed" or rhel7cis_rule_5_4_1_3_d_rc.failed is defined
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.1.3':rhel7cis_rule_5_4_1_3_result|default(true)}) }}"
+    when: rhel7cis_rule_5_4_1_3
+    tags:
+     - level1
+     - scan
+     - rule_5.4.1.3
+     - rhel7
+
+#####
+#  - name: " 5.4.1.4 | SCAN |  Ensure inactive password lock is 30 days or less "
+#    block:
+#      - name: " 5.4.1.4 | SCAN |   Ensure inactive password lock is 30 days or less  "
+#        shell:    useradd -D | grep INACTIVE | grep -i 'INACTIVE=30'
+#        register: rhel7cis_rule_5_4_1_4_a_rc
+#        ignore_errors: yes
+#
+#      - shell:  ' grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f7'
+#        register: rhel7cis_rule_5_4_1_4_b_rc
+#        ignore_errors: yes
+#      - assert:
+#          that: item|int(31) <= 30
+#        loop: "{{ rhel7cis_rule_5_4_1_4_b_rc.stdout_lines }}"
+#        register: rhel7cis_rule_5_4_1_4_c_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_5_4_1_4_result: false
+#        when: rhel7cis_rule_5_4_1_4_a_rc.rc != 0 or rhel7cis_rule_5_4_1_4_c_rc.failed is defined
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'5.4.1.4':rhel7cis_rule_5_4_1_4_result|default(true)}) }}"
+#    when: rhel7cis_rule_5_4_1_4
+#    tags:
+#     - level1
+#     - scan
+#     - rule_5.4.1.4
+#     - rhel7
+#
+#####
+#  - name: " 5.4.1.5 | SCAN | Ensure all users last password change date is in the past    "
+#    block:
+#      - name: " 5.4.1.5 | SCAN | Ensure all users last password change date is in the past  "
+#        shell: |
+#           for usr in $(cut -d: -f1 /etc/shadow)
+#            do
+#             [[ $(chage --list $usr | grep '^Last password change' | cut -d: -f2) > $(date) ]] && echo "$usr :$(chage --list $usr | grep '^Last password change' | cut -d: -f2)"
+#            done
+#        register: rhel7cis_rule_5_4_1_5_rc
+#        ignore_errors: yes
+#      - debug:
+#          msg: "{{ rhel7cis_rule_5_4_1_5_rc }}"
+#      - set_fact:
+#          rhel7cis_rule_5_4_1_5_result: false
+#        when: rhel7cis_rule_5_4_1_5_rc.rc == 0
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'5.4.1.5':rhel7cis_rule_5_4_1_5_result|default(true)}) }}"
+#    when: rhel7cis_rule_5_4_1_5
+#    tags:
+#     - level1
+#     - scan
+#     - rule_5.4.1.5
+#     - rhel7
+#
+#####
+  - name: " 5.4.2 | SCAN | Ensure system accounts are secured "
+    block:
+      - name: " 5.4.2 | SCAN | Ensure system accounts are secured  "
+        command: |
+          awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $1!~/^\+/ && $3<'"$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)"' && $7!="'"$(which nologin)"'" && $7!="/bin/false") {print}' /etc/passwd
+        register: rhel7cis_rule_5_4_2_a_rc
+        ignore_errors: yes
+      - command: |
+          awk -F: '($1!="root" && $1!~/^\+/ && $3<'"$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)"') {print $1}' /etc/passwd | xargs -I '{}' passwd -S '{}' | awk '($2!="L" && $2!="LK") {print $1}'
+        register: rhel7cis_rule_5_4_2_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_4_2_result: false
+        when: rhel7cis_rule_5_4_2_a_rc.stdout != ""  or rhel7cis_rule_5_4_2_b_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.2':rhel7cis_rule_5_4_2_result|default(true)}) }}"
+    when: rhel7cis_rule_5_4_2
+    tags:
+     - level1
+     - scan
+     - rule_5.4.2
+     - rhel7
+
+#####
+  - name: " 5.4.3 | SCAN |  Ensure default group for the root account is GID 0"
+    block:
+      - name: " 5.4.3 | SCAN |  Ensure default group for the root account is GID 0 "
+        shell:  ' grep "^root:" /etc/passwd | cut -f4 -d: '
+        register: rhel7cis_rule_5_4_3_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_4_3_result: false
+        when: rhel7cis_rule_5_4_3_rc.stdout != "0"
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.3':rhel7cis_rule_5_4_3_result|default(true)}) }}"
+    when: rhel7cis_rule_5_4_3
+    tags:
+     - level1
+     - scan
+     - rule_5.4.3
+     - rhel7
+
+#####
+  - name: " 5.4.4 | SCAN | Ensure default user shell timeout is configured"
+    block:
+      - name: " 5.4.4 | SCAN | Ensure default user shell timeout is configured "
+        shell: |
+          for f in /etc/bashrc /etc/profile /etc/profile.d/*.sh
+            do
+              grep -Ei '^(.*)TMOUT(.*)=(.*)900(.*)?$' > /dev/null 2>&1 $f && echo "TMOUT correctly configured in file: $f"
+            done
+        register: rhel7cis_rule_5_4_4_a_rc
+        ignore_errors: yes
+      - shell:   grep -Ei '^(.*)TMOUT(.*)=(.*)900(.*)?$' /etc/profile /etc/profile.d/*.sh /etc/bashrc
+        register: rhel7cis_rule_5_4_4_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_4_4_result: false
+        when: rhel7cis_rule_5_4_4_a_rc.stdout == ""  or rhel7cis_rule_5_4_4_b_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.4':rhel7cis_rule_5_4_4_result|default(true)}) }}"
+    when: rhel7cis_rule_5_4_4
+    tags:
+     - level1
+     - scan
+     - rule_5.4.4
+     - rhel7
+
+#####
+#  - name: " 5.4.5 | SCAN |  Ensure default user umask is configured "
+#    block:
+#      - name: " 5.4.5 | SCAN |  Ensure default user umask is configured  "
+#        shell:  grep -Ev '^\s*umask\s+\s*(0[0-7][2-7]7|[0-7][2-7]7|u=(r?|w?|x?)(r?|w?|x?)(r?|w?|x?),g=(r?x?|x?r?),o=)\s*(\s*#.*)?$' /etc/profile /etc/profile.d/*.sh /etc/bashrc | grep -E '(^|^[^#]*)umask'
+#        register: rhel7cis_rule_5_4_5_a_rc
+#        ignore_errors: yes
+#      - shell:  grep -E '^\s*umask\s+\s*(0[0-7][2-7]7|[0-7][2-7]7|u=(r?|w?|x?)(r?|w?|x?)(r?|w?|x?),g=(r?x?|x?r?),o=)\s*(\s*#.*)?$' /etc/profile /etc/profile.d/*.sh /etc/bashrc
+#        register: rhel7cis_rule_5_4_5_b_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_5_4_5_result: false
+#        when: rhel7cis_rule_5_4_5_a_rc.rc == 0 or rhel7cis_rule_5_4_5_b_rc.rc != 0
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'5.4.5':rhel7cis_rule_5_4_5_result|default(true)}) }}"
+#    when: rhel7cis_rule_5_4_5
+#    tags:
+#     - level1
+#     - scan
+#     - rule_5.4.5
+#     - rhel7
+#
+#####
+  - name: " 5.5 | SCAN | Ensure root login is restricted to system console "
+    block:
+    - name: " 5.5 | SCAN | Ensure root login is restricted to system console "
+      shell:  cat /etc/securetty
+      register: rhel7cis_rule_5_5_rc
+      ignore_errors: yes
+
+
+    - name: " 5.5 | MANUAL_CHECK | Ensure root login is restricted to system console"
+      block:
+      - name: " 5.5 | MANUAL_CHECK | Ensure root login is restricted to system console"
+        debug:
+          var: rhel7cis_rule_5_5_rc.stdout_lines
+#          msg:
+#          - "The following contains a list of terminals that may be logged in directly as root: {{ rhel7cis_rule_5_5_rc.stdout_lines | list }}. "
+#          - "The file /etc/securetty contains a list of valid terminals that may be logged in directly as root. Please review them."
+#          - "Once verified, please set rhel7cis_rule_5_5 to true in default/main.yml ."
+        register: rhel7cis_rule_5_5_console_list
+
+      when: rhel7cis_rule_5_5_rc.rc == 0
+
+    when: rhel7cis_rule_5_5
+    tags:
+     - level1
+     - scan
+     - rule_5.5
+     - rhel7
+#####
+  - name: " 5.6 | SCAN | Ensure access to the su command is restricted  "
+    block:
+      - name: " 5.6 | SCAN | Ensure access to the su command is restricted  "
+        shell: grep -E '^\s*auth\s+required\s+pam_wheel\.so\s+(\S+\s+)*use_uid\s+(\S+\s+)*group=\S+\s*(\S+\s*)*(\s+#.*)?$' /etc/pam.d/su | grep -i 'auth required pam_wheel.so use_uid group'
+        register: rhel7cis_rule_5_6_a_rc
+        ignore_errors: yes
+      - shell: ' grep sugroup /etc/group | cut -d: -f4 '
+        register: rhel7cis_rule_5_6_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_6_result: false
+        when: rhel7cis_rule_5_6_a_rc.rc != 0 or rhel7cis_rule_5_6_b_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.6':rhel7cis_rule_5_6_result|default(true)}) }}"
+    when: rhel7cis_rule_5_6
+    tags:
+     - level1
+     - scan
+     - rule_5.6
+     - rhel7
+
+#####
+#####

@@ -1,0 +1,942 @@
+---
+#
+# Copyright 2020
+# This section contains 28 rules
+#
+#####
+  - name: " 2.1.1 | HARDEN | Ensure xinetd is not installed "
+    block:
+    - name: " 2.1.1 | HARDEN | Ensure xinetd is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_1_1: "{{ pf['xinetd']|default([]) }}"
+      ignore_errors: yes
+    - name: " 2.1.1 | HARDEN | Ensure xinetd is not installed "
+      package:
+        name: xinetd
+        state: absent
+      register: result_2_1_1
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.1.1':{'result':result_2_1_1|default({}),'audits':before_2_1_1|default({})}}) }}"
+    when: rhel7cis_rule_2_1_1
+    tags:
+     - level1
+     - harden
+     - rule_2.1.1
+     - rhel7
+
+#####
+  - name: " 2.2.1.1 | HARDEN | Ensure time synchronization is in use "
+    block:
+    - name: " 2.2.1.1 | HARDEN | Ensure NTP installed "
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_1_1: "{{ pf['ntp']|default({'results': 'none'}) }}"
+      when: synchronize_service_name == "ntp"
+    - set_fact:
+        before_2_2_1_1: "{{ pf['chrony']|default({'results': 'none'}) }}"
+      when: synchronize_service_name == "chrony"
+    - yum:
+        name: ntp
+        state: present
+        conf_file: '/etc/yum.conf'
+      register: result_ntp
+      ignore_errors: yes
+      when: synchronize_service_name == "ntp"
+    - name: " 2.2.1.1 | HARDEN | Ensure chrony installed "
+      yum:
+        name: chrony
+        state: present
+        conf_file: '/etc/yum.conf'
+      register: result_chrony
+      ignore_errors: yes
+      when: synchronize_service_name == "chrony"
+#    - name: "2.2.1.2 - Setup audit variable"
+#      set_fact:
+#        before_2_2_1_1: "{{ before_2_2_1_1|default([]) + [item] }}"
+#      loop:
+#        - "{{ before_ntp }}"
+#        - "{{ before_chrony }}"
+#      ignore_errors: yes
+    - name: "2.2.1.1- Setup result variable"
+      set_fact:
+        result_2_2_1_1: "{{ result_2_2_1_1|default([]) + [item] }}"
+      loop:
+        - "{{ result_ntp }}"
+        - "{{ result_chrony }}"
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.1.1':{'result':result_2_2_1_1|default({}),'audits':before_2_2_1_1|default({})}}) }}"
+    when: rhel7cis_rule_2_2_1_1
+    tags:
+     - level1
+     - harden
+     - rule_2.2.1.1
+     - rhel7
+
+#####
+  - name: " 2.2.1.2 | HARDEN | Ensure chrony is configured "
+    block:
+    - name: " 2.2.1.2 | HARDEN | Ensure chrony is configured "
+      slurp:
+        src: /etc/chrony.conf
+      register: before_chrony
+      ignore_errors: yes
+    - slurp:
+        src: /etc/sysconfig/chronyd
+      register: before_chronyd
+      ignore_errors: yes
+    - name: 2.2.1.2 | HARDEN | Ensure chrony is configured - modify
+      lineinfile:
+        path: /etc/chrony.conf
+        line: server {{ item }}
+        state: present
+      with_items:
+        - '{{ ntp_servers.split("|") }}'
+      register: result_chrony
+      ignore_errors: yes
+      diff: yes
+    - lineinfile:
+        path: /etc/sysconfig/chronyd
+        line: 'OPTIONS="-u chrony"'
+        create: yes
+      diff: yes
+      register: result_chronyd
+      ignore_errors: yes
+    - name: "2.2.1.2 - Setup audit variable"
+      set_fact:
+        before_2_2_1_2: "{{ before_2_2_1_2|default([]) + [item] }}"
+      loop:
+      - "{{ before_chrony }}"
+      - "{{ before_chronyd }}"
+
+    - name: "2.2.1.2- Setup result variable"
+      set_fact:
+        result_2_2_1_2: "{{ result_2_2_1_2|default([]) + [item] }}"
+      loop:
+      - "{{ result_chrony }}"
+      - "{{ result_chronyd }}"
+
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.1.2':{'result':result_2_2_1_2|default({}),'audits':before_2_2_1_2|default({})}}) }}"
+    when: rhel7cis_rule_2_2_1_2 and synchronize_service_name == "chrony"
+    tags:
+     - level1
+     - harden
+     - rule_2.2.1.2
+     - rhel7
+
+#####
+  - name: " 2.2.1.3 | HARDEN | Ensure ntp is configured "
+    block:
+    - name: " 2.2.1.3 | HARDEN | Ensure ntp is configured "
+      slurp:
+        src: /etc/ntp.conf
+      register: before_chrony
+      ignore_errors: yes
+    - slurp:
+        src:  /etc/sysconfig/ntpd
+      register: before_chronyd
+      ignore_errors: yes
+    - name: 2.2.1.3 | HARDEN | Ensure ntp is configured - modify
+      lineinfile:
+        path: /etc/ntp.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      with_items:
+      - { regexp: '^restrict -4 default kod nomodify notrap nopeer noquery', line: 'restrict -4 default kod nomodify notrap nopeer noquery ' }
+      - { regexp: '^restrict -6 default kod nomodify notrap nopeer noquery', line: 'restrict -6 default kod nomodify notrap nopeer noquery ' }
+      register: result_chrony1
+      ignore_errors: yes
+      diff: yes
+    - lineinfile:
+        path: /etc/ntp.conf
+        line: server {{ item }}
+        state: present
+      with_items:
+        - '{{ ntp_servers.split("|") }}'
+      register: result_chrony2
+      ignore_errors: yes
+      diff: yes
+    - ini_file:
+        path:  /etc/sysconfig/ntpd
+        section: null
+        option: 'OPTIONS'
+        value: '-u ntp:ntp'
+        create: yes
+        no_extra_spaces: yes
+      diff: yes
+      register: result_chronyd
+      ignore_errors: yes
+    - name: "2.2.1.3 - Setup audit variable"
+      set_fact:
+        before_2_2_1_3: "{{ before_2_2_1_3|default([]) + [item] }}"
+      loop:
+      - "{{ before_chrony }}"
+      - "{{ before_chronyd }}"
+    - name: "2.2.1.3- Setup result variable"
+      set_fact:
+        result_2_2_1_3: "{{ result_2_2_1_3|default([]) + [item] }}"
+      loop:
+      - "{{ result_chrony1 }}"
+      - "{{ result_chrony2 }}"
+      - "{{ result_chronyd }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.1.3':{'result':result_2_2_1_3|default({}),'audits':before_2_2_1_3|default({})}}) }}"
+    when: rhel7cis_rule_2_2_1_3 and synchronize_service_name == "ntp"
+    tags:
+     - level1
+     - harden
+     - rule_2.2.1.3
+     - rhel7
+
+#####
+  - name: " 2.2.2 | HARDEN | Ensure X11 Server components are not installed"
+    block:
+    - name: " 2.2.2 | HARDEN | Ensure X11 Server components are not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before: "{{ pf['xorg-x11-server*']|default([]) }}"
+      ignore_errors: yes
+    - name: " 2.2.2 | HARDEN | Ensure X11 Server components are not installed"
+      package:
+        name: xorg-x11-server*
+        state: absent
+      register: result
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.2':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when: rhel7cis_rule_2_2_2 and rhel7cis_rule_1_10_gdm_required == false
+    tags:
+     - level1
+     - harden
+     - rule_2.2.2
+     - rhel7
+
+#####
+  - name: " 2.2.3 | HARDEN |  Ensure Avahi Server is not installed"
+    block:
+    - name: " 2.2.3 | HARDEN |  Ensure Avahi Server is not installed - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_socket: "{{ sf['avahi-daemon.socket']|default({'state': 'none', 'status': 'none'}) }}"
+        before_service: "{{ sf['avahi-daemon.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.3 | HARDEN |  Ensure Avahi Server is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_autopid: "{{ pf['avahi-autoipd']|default({'results': 'none'}) }}"
+        before_avahi: "{{ pf['avahi']|default({'results': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.3 | HARDEN |  Ensure Avahi Server is not installed"
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      with_items:
+        - avahi-daemon.socket
+        - avahi-daemon.service
+      register: result_stop
+      ignore_errors: yes
+    - name: " 2.2.3 | HARDEN |  Ensure Avahi Server is not installed"
+      package:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - avahi-autoipd
+        - avahi
+      register: result_remove
+      ignore_errors: yes
+    - name: "2.2.3 - Setup audit variable"
+      set_fact:
+        before_2_2_3: "{{ before_2_2_3|default([]) + [item] }}"
+      loop:
+        - "{{ before_socket|default({}) }}"
+        - "{{ before_service|default({}) }}"
+        - "{{ before_autopid|default({}) }}"
+        - "{{ before_avahi|default({}) }}"
+    - name: "2.2.3 - Setup result variable"
+      set_fact:
+        result_2_2_3: "{{ result_2_2_3|default([]) + [item] }}"
+      loop:
+        - "{{ result_stop|default({}) }}"
+        - "{{ result_remove|default({}) }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.3':{'result_2_2_3':result_2_2_3|default({}),'audits':before_2_2_3|default({})}}) }}"
+    when: rhel7cis_rule_2_2_3
+    tags:
+     - level1
+     - harden
+     - rule_2.2.3
+     - rhel7
+
+#####
+  - name: " 2.2.4 | HARDEN |  Ensure CUPS is not installed "
+    block:
+    - name: " 2.2.4 | HARDEN |  Ensure CUPS is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_4: "{{ pf['cups']|default([]) }}"
+      ignore_errors: yes
+    - name: " 2.2.4 | HARDEN |  Ensure CUPS is not installed "
+      package:
+        name: cups
+        state: absent
+      register: result_2_2_4
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.4':{'result':result_2_2_4|default({}),'audits':before_2_2_4|default({})}}) }}"
+    when: rhel7cis_rule_2_2_4
+    tags:
+     - level1
+     - harden
+     - rule_2.2.4
+     - rhel7
+
+#####
+  - name: " 2.2.5 | HARDEN | Ensure DHCP Server is not installed or not running "
+    block:
+    - name: " 2.2.5 | HARDEN | Ensure DHCP Server is not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_5: "{{ sf['dhcpd.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.5 | HARDEN | Ensure DHCP Server is not running "
+      systemd:
+        name: "dhcpd"
+        state: stopped
+        masked: yes
+      register: result_2_2_5
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.5':{'result':result_2_2_5|default({}),'audits':before_2_2_5|default({})}}) }}"
+    when: rhel7cis_rule_2_2_5
+    tags:
+     - level1
+     - harden
+     - rule_2.2.5
+     - rhel7
+
+#####
+  - name: " 2.2.6 | HARDEN | Ensure LDAP server is not installed or not running"
+    block:
+    - name: " 2.2.6 | HARDEN | Ensure LDAP server is not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_5: "{{ sf['slapd.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.6 | HARDEN | Ensure LDAP server is not running "
+      systemd:
+        name: "slapd"
+        state: stopped
+        masked: yes
+      register: result_2_2_6
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.6':{'result':result_2_2_6|default({}),'audits':before_2_2_6|default({})}}) }}"
+    when: rhel7cis_rule_2_2_6
+    tags:
+     - level1
+     - harden
+     - rule_2.2.6
+     - rhel7
+
+#####
+  - name: " 2.2.7 | HARDEN | Ensure nfs-utils is not installed or the nfs-server service is masked"
+    block:
+    - name: " 2.2.7 | HARDEN | Ensure nfs-utils is not installed or the nfs-server service is masked - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_7: "{{ sf['nfs-server.service']|default([]) }}"
+      ignore_errors: yes
+    - name: " 2.2.7 | HARDEN | Ensure nfs-utils is not installed or the nfs-server service is masked"
+      systemd:
+        name: "nfs-server"
+        state: stopped
+        masked: yes
+      register: result_2_2_7
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.7':{'result':result_2_2_7|default({}),'audits':before_2_2_7|default({})}}) }}"
+    when: rhel7cis_rule_2_2_7
+    tags:
+     - level1
+     - harden
+     - rule_2.2.7
+     - rhel7
+
+#####
+# https://access.redhat.com/solutions/4091631
+# Starting 'rpcbind.service' also starts 'rpcbind.socket'. This is because of dependency added.
+# This was not there in 0.2.0-42.el7.x86_64.
+#
+  - name: " 2.2.8 | HARDEN |  Ensure rpcbind is not installed or the rpcbind services are masked "
+    block:
+    - name: " 2.2.8 | HARDEN |  Ensure rpcbind is not installed or the rpcbind services are masked - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_rpcbind: "{{ sf['rpcbind.service']|default({'state': 'none', 'status': 'none'}) }}"
+        before_socket: "{{ sf['rpcbind.socket']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.8 | HARDEN |  Ensure rpcbind is not installed or the rpcbind services are masked "
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+        masked: yes
+      register: result_2_2_8
+      ignore_errors: yes
+      with_items:
+      - rpcbind.service
+      - rpcbind.socket
+    - name: "2.2.8 - Setup audit variable"
+      set_fact:
+        before_2_2_8: "{{ before_2_2_8|default([]) + [item] }}"
+      loop:
+      - "{{ before_rpcbind }}"
+      - "{{ before_socket }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.8':{'result':result_2_2_8|default({}),'audits':before_2_2_8|default({})}}) }}"
+    when: rhel7cis_rule_2_2_8
+    tags:
+     - level1
+     - harden
+     - rule_2.2.8
+     - rhel7
+
+#####
+  - name: " 2.2.9 | HARDEN | Ensure DNS server is not installed or not running"
+    block:
+    - name: " 2.2.9 | HARDEN | Ensure DNS server is not installed or not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_9: "{{ sf['named.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.9 | HARDEN | Ensure DNS server is not running "
+      systemd:
+        name: "named"
+        state: stopped
+        masked: yes
+      register: result_2_2_9
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.9':{'result':result_2_2_9|default({}),'audits':before_2_2_9|default({})}}) }}"
+    when: rhel7cis_rule_2_2_9
+    tags:
+     - level1
+     - harden
+     - rule_2.2.9
+     - rhel7
+
+#####
+  - name: " 2.2.10 | HARDEN | Ensure FTP Server is not installed or not running "
+    block:
+    - name: " 2.2.10 | HARDEN | Ensure FTP Server is not installed or not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_10: "{{ sf['vsftpd.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.10 | HARDEN | Ensure FTP Server is not running "
+      systemd:
+        name: "vsftpd"
+        state: stopped
+        masked: yes
+      register: result_2_2_10
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.10':{'result':result_2_2_10|default({}),'audits':before_2_2_10|default({})}}) }}"
+    when: rhel7cis_rule_2_2_10
+    tags:
+     - level1
+     - harden
+     - rule_2.2.10
+     - rhel7
+
+#####
+  - name: " 2.2.11 | HARDEN | Ensure HTTP Server is not installed or not running"
+    block:
+    - name: " 2.2.11 | HARDEN | Ensure HTTP Server is not installed or not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_11: "{{ sf['httpd.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.11 | HARDEN | Ensure HTTP Server is not running "
+      systemd:
+        name: "httpd"
+        state: stopped
+        masked: yes
+      register: result_2_2_11
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.11':{'result':result_2_2_11|default({}),'audits':before_2_2_11|default({})}}) }}"
+    when: rhel7cis_rule_2_2_11
+    tags:
+     - level1
+     - harden
+     - rule_2.2.11
+     - rhel7
+
+
+#####
+  - name: " 2.2.12 | HARDEN | Ensure IMAP and POP3 server is not installed or not running "
+    block:
+    - name: " 2.2.12 | HARDEN | Ensure IMAP and POP3 server is not installed or not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_12: "{{ sf['dovecot.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.12 | HARDEN | Ensure IMAP and POP3 server is not running"
+      systemd:
+        name: "dovecot"
+        state: stopped
+        masked: yes
+      register: result_2_2_12
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.12':{'result':result_2_2_12|default({}),'audits':before_2_2_12|default({})}}) }}"
+    when: rhel7cis_rule_2_2_12
+    tags:
+     - level1
+     - harden
+     - rule_2.2.12
+     - rhel7
+
+#####
+  - name: " 2.2.13 | HARDEN | Ensure Samba is not installed or not running "
+    block:
+    - name: " 2.2.13 | HARDEN | Ensure Samba is not installed or not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_13: "{{ sf['smb.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.13 | HARDEN | Ensure Samba is not running"
+      systemd:
+        name: "smb.service"
+        state: stopped
+        masked: yes
+      register: result_2_2_13
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.13':{'result':result_2_2_13|default({}),'audits':before_2_2_13|default({})}}) }}"
+    when: rhel7cis_rule_2_2_13
+    tags:
+     - level1
+     - harden
+     - rule_2.2.13
+     - rhel7
+
+#####
+  - name: " 2.2.14 | HARDEN | Ensure HTTP Proxy Server is not installed or not running"
+    block:
+    - name: " 2.2.14 | HARDEN | Ensure HTTP Proxy Server is not installed or not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_14: "{{ sf['squid.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.14 | HARDEN | Ensure HTTP Proxy Server is not running "
+      systemd:
+        name: "squid.service"
+        state: stopped
+        masked: yes
+      register: result_2_2_14
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.14':{'result':result_2_2_14|default({}),'audits':before_2_2_14|default({})}}) }}"
+    when: rhel7cis_rule_2_2_14
+    tags:
+     - level1
+     - harden
+     - rule_2.2.14
+     - rhel7
+
+#####
+  - name: " 2.2.15 | HARDEN | Ensure net-snmp is not installed"
+    block:
+    - name: " 2.2.15 | HARDEN | Ensure net-snmp is not installed - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_15: "{{ sf['snmpd.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.15 | HARDEN | Ensure net-snmp is not running"
+      systemd:
+        name: "snmpd.service"
+        state: stopped
+        masked: yes
+      register: result_2_2_15
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.15':{'result':result_2_2_15|default({}),'audits':before_2_2_15|default({})}}) }}"
+    when: rhel7cis_rule_2_2_15
+    tags:
+     - level1
+     - harden
+     - rule_2.2.15
+     - rhel7
+
+#####
+  - name: " 2.2.16 | HARDEN | Ensure mail transfer agent is configured for local-only mode "
+    block:
+    - name: " 2.2.16 | HARDEN | Ensure mail transfer agent is configured for local-only mode "
+      slurp:
+        src: /etc/postfix/main.cf
+      ignore_errors: yes
+      register: before_file
+    - name: " 2.2.16 | HARDEN | Ensure mail transfer agent is configured for local-only mode - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_service: "{{ sf['postfix.service']|default({}) }}"
+      ignore_errors: yes
+    - name: "2.2.16 | HARDEN | Ensure mail transfer agent is configured for local-only mode - modify"
+      lineinfile:
+        path: /etc/postfix/main.cf
+        state: present
+        regexp: '^inet_interfaces ='
+        line: 'inet_interfaces = loopback-only '
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+    - systemd:
+        state: restarted
+        name: postfix
+      register: result_restart
+      ignore_errors: yes
+    - name: "2.2.16 - Setup result variable"
+      set_fact:
+        result_2_2_16: "{{ result_2_2_16|default([]) + [item] }}"
+      loop:
+      - "{{ result_conf }}"
+      - "{{ result_restart }}"
+    - name: "2.2.16 - Setup audit variable"
+      set_fact:
+        before_2_2_16: "{{ before_2_2_16|default([]) + [item] }}"
+      loop:
+      - "{{ before_file|default([]) }}"
+      - "{{ before_service|default([]) }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.16':{'result':result_2_2_16|default({}),'audits':before_2_2_16|default({})}}) }}"
+    when: rhel7cis_rule_2_2_16
+    tags:
+     - level1
+     - harden
+     - rule_2.2.16
+     - rhel7
+
+#####
+  - name: " 2.2.17 | HARDEN | Ensure rsync is not installed or the rsyncd service is masked"
+    block:
+    - name: " 2.2.17 | HARDEN | Ensure rsync is not installed or the rsyncd service is masked - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_17: "{{ sf['rsyncd.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.17 | HARDEN | Ensure rsync is not installed or the rsyncd service is masked"
+      systemd:
+        name: "rsyncd"
+        state: stopped
+        masked: yes
+      register: result_2_2_17
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.17':{'result':result_2_2_17|default({}),'audits':before_2_2_17|default({})}}) }}"
+    when: rhel7cis_rule_2_2_17
+    tags:
+     - level1
+     - harden
+     - rule_2.2.17
+     - rhel7
+
+#####
+  - name: " 2.2.18 | HARDEN | Ensure NIS server is not installed or not running"
+    block:
+    - name: " 2.2.18 | HARDEN | Ensure NIS server is not installed or not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_18: "{{ sf['ypserv.service']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.18 | HARDEN | Ensure NIS server is not running"
+      systemd:
+        name: "ypserv.service"
+        state: stopped
+        masked: yes
+      register: result_2_2_18
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.18':{'result':result_2_2_18|default({}),'audits':before_2_2_18|default({})}}) }}"
+    when: rhel7cis_rule_2_2_18
+    tags:
+     - level1
+     - harden
+     - rule_2.2.18
+     - rhel7
+
+#####
+  - name: " 2.2.19 | HARDEN |  Ensure telnet-server is not installed or running "
+    block:
+    - name: " 2.2.19 | HARDEN |  Ensure telnet-server is not installed or not running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_2_19: "{{ sf['telnet.socket']|default({'state': 'none', 'status': 'none'}) }}"
+      ignore_errors: yes
+    - name: " 2.2.19 | HARDEN | Ensure telnet-server server is not running"
+      systemd:
+        name: "telnet.socket"
+        state: stopped
+        masked: yes
+      register: result_2_2_19
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.19':{'result':result_2_2_19|default({}),'audits':before_2_2_19|default({})}}) }}"
+    when: rhel7cis_rule_2_2_19
+    tags:
+     - level1
+     - harden
+     - rule_2.2.19
+     - rhel7
+
+#####
+  - name: " 2.3.1 | HARDEN |  Ensure NIS Client is not installed "
+    block:
+    - name: " 2.3.1 | HARDEN |  Ensure NIS Client is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_3_1: "{{ pf['ypbind']|default([]) }}"
+      ignore_errors: yes
+    - name: " 2.3.1 | HARDEN |  Ensure NIS Client is not installed "
+      package:
+        name: ypbind
+        state: absent
+      register: result_2_3_1
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.1':{'result':result_2_3_1|default({}),'audits':before_2_3_1|default({})}}) }}"
+    when: rhel7cis_rule_2_3_1
+    tags:
+     - level1
+     - harden
+     - rule_2.3.1
+     - rhel7
+
+#####
+  - name: " 2.3.2 | HARDEN |  Ensure rsh client is not installed "
+    block:
+    - name: " 2.3.2 | HARDEN |  Ensure rsh client is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_3_2: "{{ pf['rsh']|default([]) }}"
+      ignore_errors: yes
+    - name: " 2.3.2 | HARDEN |  Ensure rsh client is not installed "
+      package:
+        name: rsh
+        state: absent
+      register: result_2_3_2
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.2':{'result':result_2_3_2|default({}),'audits':before_2_3_2|default({})}}) }}"
+    when: rhel7cis_rule_2_3_2
+    tags:
+     - level1
+     - harden
+     - rule_2.3.2
+     - rhel7
+#####
+  - name: " 2.3.3 | HARDEN |  Ensure talk client is not installed "
+    block:
+    - name: " 2.3.3 | HARDEN |  Ensure talk client is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_3_3: "{{ pf['talk']|default([]) }}"
+      ignore_errors: yes
+    - name: " 2.3.3 | HARDEN |  Ensure talk client is not installed "
+      package:
+        name: talk
+        state: absent
+      register: result_2_3_3
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.3':{'result':result_2_3_3|default({}),'audits':before_2_3_3|default({})}}) }}"
+    when: rhel7cis_rule_2_3_3
+    tags:
+     - level1
+     - harden
+     - rule_2.3.3
+     - rhel7
+
+#####
+  - name: " 2.3.4 | HARDEN |  Ensure telnet client is not installed "
+    block:
+    - name: " 2.3.4 | HARDEN |  Ensure telnet client is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_3_4: "{{ pf['telnet']|default([]) }}"
+      ignore_errors: yes
+    - name: " 2.3.4 | HARDEN |  Ensure telnet client is not installed "
+      package:
+        name: telnet
+        state: absent
+      register: result_2_3_4
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.4':{'result':result_2_3_4|default({}),'audits':before_2_3_4|default({})}}) }}"
+    when: rhel7cis_rule_2_3_4
+    tags:
+     - level1
+     - harden
+     - rule_2.3.4
+     - rhel7
+
+#####
+  - name: " 2.3.5 | HARDEN |  Ensure LDAP client is not installed "
+    block:
+    - name: " 2.3.5 | HARDEN |  Ensure LDAP client is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_2_3_5: "{{ pf['openldap-clients']|default([]) }}"
+      ignore_errors: yes
+    - name: " 2.3.5 | HARDEN |  Ensure LDAP client is not installed "
+      package:
+        name: openldap-clients
+        state: absent
+      register: result_2_3_5
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.5':{'result':result_2_3_5|default({}),'audits':before_2_3_5|default({})}}) }}"
+    when: rhel7cis_rule_2_3_5
+    tags:
+     - level1
+     - harden
+     - rule_2.3.5
+     - rhel7
+
+
+#  - name: " 2.4 | SCAN |  Ensure nonessential services are removed or masked "
+#    block:
+#    - name: " 2.4 | SCAN |  Ensure nonessential services are removed or masked "
+#      shell:   lsof -i -P -n | grep -v "(ESTABLISHED)"
+#      register: rhel7cis_rule_2_4_rc
+#      ignore_errors: yes
+
+
+#    - name: " 2.4 | MANUAL_CHECK | Ensure nonessential services are removed or masked "
+#      block:
+#      - name: " 2.4 | MANUAL_CHECK | Ensure nonessential services are removed or masked "
+#        debug:
+#          var: rhel7cis_rule_2_4_rc.stdout_lines
+#          msg:
+#          - "Please review if the following services listed are required on the system: {{ rhel7cis_rule_2_4_rc.stdout_lines | list }}. "
+#          - "Services listening on the system pose a potential risk as an attack vector. These services should be reviewed, and if not required, the service should be stopped, and the package containing the service should be removed. If required packages have a dependency, the service should be stopped and masked to reduce the attack surface of the system."
+#          - "Once verified, please set rhel7cis_rule_2_4 to true in default/main.yml ."
+#        register: rhel7cis_rule_2_4_nonessential_services_list
+#
+#      when: rhel7cis_rule_2_4_rc.rc == 0
+#
+#    when: rhel7cis_rule_2_4
+#    tags:
+#     - level1
+#     - harden
+#     - rule_2.4
+#     - rhel7

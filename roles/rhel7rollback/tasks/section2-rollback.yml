@@ -1,0 +1,782 @@
+---
+#
+# Copyright 2020
+# This section contains 28 rules
+#
+#####
+  - name: " 2.1.1 | ROLLBACK | Ensure xinetd is not installed "
+    block:
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['2.1.1'].audits[0].name is defined
+    - set_fact:
+        before_state: "absent"
+      ignore_errors: yes
+      when: all_results['2.1.1'].audits[0].name is not defined
+    - name: " 2.1.1 | ROLLBACK | Ensure xinetd is not installed "
+      package:
+        name: xinetd
+        state: "{{ before_state }}"
+      ignore_errors: yes
+    when: rhel7cis_rule_2_1_1
+    tags:
+     - level1
+     - rollback
+     - rule_2.1.1
+     - rhel7
+
+#####
+  - name: " 2.2.1.1 | ROLLBACK | Ensure time synchronization is in use "
+    block:
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['2.2.1.1'].audits[0].name is defined
+    - set_fact:
+        before_state: "absent"
+      ignore_errors: yes
+      when: all_results['2.2.1.1'].audits[0].name is not defined
+    - name: " 2.2.1.1 | ROLLBACK | Ensure time synchronization is in use "
+      package:
+        name: ntp
+        state: "{{ before_state }}"
+      ignore_errors: yes
+      when: synchronize_service_name == "ntp"
+    - package:
+        name: chrony
+        state: "{{ before_state }}"
+      ignore_errors: yes
+      when: synchronize_service_name == "chrony"
+    when:
+      - rhel7cis_rule_2_2_1_1
+      - ( all_results['2.2.1.1'].audits is defined )
+#      - all_results['2.2.1.1'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.1.1
+     - rhel7
+
+#####
+  - name: " 2.2.1.2 | ROLLBACK | Ensure chrony is configured "
+    block:
+    - name: " 2.2.1.2 | ROLLBACK | Ensure chrony is configured "
+      file:
+        path:  /etc/chrony.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['2.2.1.2'].audits[0].msg is defined and all_results['2.2.1.2'].audits[0].msg.find('file not found') != -1
+    - file:
+        path: /etc/sysconfig/chronyd
+        state: absent
+      ignore_errors: yes
+      when: all_results['2.2.1.2'].audits[1].msg is defined and all_results['2.2.1.2'].audits[1].msg.find('file not found') != -1
+    - name: 2.2.1.2 | ROLLBACK | Ensure chrony is configured
+      block:
+      - set_fact:
+          data: "{{ all_results['2.2.1.2'].audits[0].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/chrony.conf
+        ignore_errors: yes
+      when: all_results['2.2.1.2'].audits[0].content is defined
+    - name: 2.2.1.2 | ROLLBACK | Ensure chrony is configured
+      block:
+      - set_fact:
+          data: "{{ all_results['2.2.1.2'].audits[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/sysconfig/chronyd
+        ignore_errors: yes
+      when: all_results['2.2.1.2'].audits[1].content is defined
+    when:
+      - rhel7cis_rule_2_2_1_2
+      - synchronize_service_name == "chrony"
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.1.2
+     - rhel7
+
+#####
+  - name: " 2.2.1.3 | ROLLBACK | Ensure ntp is configured "
+    block:
+    - name: " 2.2.1.3 | ROLLBACK | Ensure ntp is configured "
+      file:
+        path: /etc/ntp.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['2.2.1.3'].audits[0].msg is defined and all_results['2.2.1.3'].audits[0].msg.find('file not found') != -1
+    - file:
+        path: /etc/sysconfig/ntpd
+        state: absent
+      ignore_errors: yes
+      when: all_results['2.2.1.3'].audits[1].msg is defined and all_results['2.2.1.3'].audits[1].msg.find('file not found') != -1
+    - name: 2.2.1.3 | ROLLBACK | Ensure ntp is configured
+      block:
+      - set_fact:
+          data: "{{ all_results['2.2.1.3'].audits[0].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/ntp.conf
+        ignore_errors: yes
+      when: all_results['2.2.1.3'].audits[0].content is defined
+    - block:
+      - set_fact:
+          data: "{{ all_results['2.2.1.3'].audits[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/sysconfig/ntpd
+        ignore_errors: yes
+      when: all_results['2.2.1.3'].audits[1].content is defined
+    when:
+      - rhel7cis_rule_2_2_1_3
+      - synchronize_service_name == "ntp"
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.1.3
+     - rhel7
+
+#####
+  - name: " 2.2.2 | ROLLBACK | Ensure X11 Server components are not installed"
+    block:
+    - name: " 2.2.2 | ROLLBACK | Ensure X11 Server components are not installed"
+      block:
+      - set_fact:
+          before_state: "present"
+        ignore_errors: yes
+        when: all_results['2.2.2'].audits[0].name is defined
+      - set_fact:
+          before_state: "absent"
+        ignore_errors: yes
+        when: all_results['2.2.2'].audits[0].name is not defined
+    - name: " 2.2.2 | ROLLBACK | Ensure X11 Server components are not installed"
+      package:
+        name: xorg-x11-server*
+        state: "{{ before_state }}"
+        conf_file: '/etc/yum.conf'
+      ignore_errors: yes
+    when: rhel7cis_rule_2_2_2 and rhel7cis_rule_1_10_gdm_required == false
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.2
+     - rhel7
+
+#####
+  - name: " 2.2.3 | ROLLBACK |  Ensure Avahi Server is not installed"
+    block:
+    - set_fact:
+        before_state3: "present"
+      ignore_errors: yes
+      when: all_results['2.2.3'].audits[2].name is defined or all_results['2.2.3'].audits[2][0].name is defined
+    - set_fact:
+        before_state3: "absent"
+      ignore_errors: yes
+      when: all_results['2.2.3'].audits[2].results is defined or all_results['2.2.3'].audits[2][0].name is not defined
+    - set_fact:
+        before_state4: "present"
+      ignore_errors: yes
+      when: all_results['2.2.3'].audits[3].name is defined or all_results['2.2.3'].audits[3][0].name is defined
+    - set_fact:
+        before_state4: "absent"
+      ignore_errors: yes
+      when: all_results['2.2.3'].audits[3].results is defined or all_results['2.2.3'].audits[3][0].name is not defined
+    - name: " 2.2.3 | ROLLBACK |  Ensure Avahi Server is not installed"
+      package:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+        conf_file: '/etc/yum.conf'
+      with_items:
+      - { name: 'avahi-autoipd', state: "{{ before_state3 }}" }
+      - { name: 'avahi', state: "{{ before_state4 }}" }
+      ignore_errors: yes
+    - set_fact:
+        before_status1: "{{'yes' if all_results['2.2.3'].audits[0].status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state1: "{{'started' if all_results['2.2.3'].audits[0].state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_status2: "{{'yes' if all_results['2.2.3'].audits[1].status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state2: "{{'started' if all_results['2.2.3'].audits[1].state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.3 | ROLLBACK |  Ensure Avahi Server service is not running"
+      systemd:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+      with_items:
+      - { name: 'avahi-daemon.socket', state: "{{ before_state1 }}" }
+      - { name: 'avahi-daemon.service', state: "{{ before_state2 }}" }
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_3
+      - ( all_results['2.2.3'].audits is defined )
+      - all_results['2.2.3'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.3
+     - rhel7
+
+#####
+  - name: " 2.2.4 | ROLLBACK |  Ensure CUPS is not installed "
+    block:
+    - set_fact:
+        before_state: "absent"
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['2.2.4'].audits[0].name is defined
+    - name: " 2.2.4 | ROLLBACK |  Ensure CUPS is not installed "
+      package:
+        name: cups
+        state: "{{ before_state }}"
+        conf_file: '/etc/yum.conf'
+      register: result
+      ignore_errors: yes
+
+    when: rhel7cis_rule_2_2_4
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.4
+     - rhel7
+
+#####
+  - name: " 2.2.5 | ROLLBACK | Ensure DHCP Server is not installed "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.5'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.5'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.5 | ROLLBACK | Ensure DHCP Server is not installed "
+      systemd:
+        name: "dhcpd"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_5
+      - ( all_results['2.2.5'].audits is defined )
+      - all_results['2.2.5'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.5
+     - rhel7
+
+#####
+  - name: " 2.2.6 | ROLLBACK | Ensure LDAP server is not installed "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.6'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.6'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.6 | ROLLBACK | Ensure LDAP server is not installed "
+      systemd:
+        name: "slapd"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_6
+      - ( all_results['2.2.6'].audits is defined )
+      - all_results['2.2.6'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.6
+     - rhel7
+
+#####
+  - name: " 2.2.7 | ROLLBACK | Ensure nfs-utils is not installed or the nfs-server service is masked"
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.7'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.7'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.7 | ROLLBACK | Ensure nfs-utils is not installed or the nfs-server service is masked"
+      systemd:
+        name: "nfs-server"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_7
+      - ( all_results['2.2.7'].audits is defined )
+      - all_results['2.2.7'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.7
+     - rhel7
+
+#####
+  - name: " 2.2.8 | ROLLBACK |  Ensure rpcbind is not installed or the rpcbind services are masked "
+    block:
+    - set_fact:
+         before_status: "{{ before_status|default([]) + ['yes' if item == 'enabled' else 'no'] }}"
+      ignore_errors: yes
+      with_items: "{{ all_results['2.2.8'] | json_query('audits[*].status')}}"
+    - set_fact:
+         before_state: "{{ before_state|default([]) + ['started' if item == 'running' else 'stopped'] }}"
+      ignore_errors: yes
+      with_items: "{{ all_results['2.2.8'] | json_query('audits[*].state')}}"
+    - debug: var=all_results['2.2.8']
+    - name: " 2.2.8 | ROLLBACK |  Ensure rpcbind is not installed or the rpcbind services are masked "
+      systemd:
+        name: "{{ item.s_name }}"
+        state: "{{ item.s_state }}"
+        enabled: "{{ item.s_enable }}"
+        masked: no
+      with_items:
+        - {s_name: rpcbind.service, s_state: "{{before_state[0]}}", s_enable: "{{before_status[0]}}"}
+      ignore_errors: yes
+      when: (all_results['2.2.8'].audits[0].state == "running") and (all_results['2.2.8'].audits[0].state is defined)
+    - name: " 2.2.8 | ROLLBACK |  Ensure rpcbind is not installed or the rpcbind socket services are masked "
+      systemd:
+        name: "{{ item.s_name }}"
+        state: "{{ item.s_state }}"
+        enabled: "{{ item.s_enable }}"
+        masked: no
+      with_items:
+        - {s_name: rpcbind.socket, s_state: "{{before_state[1]}}", s_enable: "{{before_status[1]}}"}
+      ignore_errors: yes
+      when: (all_results['2.2.8'].audits[1].state == "running") and (all_results['2.2.8'].audits[1].state is defined)
+    when:
+      - rhel7cis_rule_2_2_8
+      - ( all_results['2.2.8'].audits is defined )
+      - all_results['2.2.8'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.8
+     - rhel7
+
+#####
+  - name: " 2.2.9 | ROLLBACK | Ensure DNS server is not installed "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.9'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.9'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.9 | ROLLBACK | Ensure DNS server is not installed "
+      systemd:
+        name: "named"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_9
+      - ( all_results['2.2.9'].audits is defined )
+      - all_results['2.2.9'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.9
+     - rhel7
+
+#####
+  - name: " 2.2.10 | ROLLBACK | Ensure FTP Server is not installed  "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.10'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.10'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.10 | ROLLBACK | Ensure FTP Server is not installed  "
+      systemd:
+        name: "vsftpd"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_10
+      - ( all_results['2.2.10'].audits is defined )
+      - all_results['2.2.10'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.10
+     - rhel7
+
+#####
+  - name: " 2.2.11 | ROLLBACK | Ensure HTTP Server is not installed  "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.11'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.11'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.11 | ROLLBACK | Ensure HTTP Server is not installed  "
+      systemd:
+        name: "httpd"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_11
+      - ( all_results['2.2.11'].audits is defined )
+      - all_results['2.2.11'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.11
+     - rhel7
+
+#####
+  - name: " 2.2.12 | ROLLBACK | Ensure IMAP and POP3 server is not installed  "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.12'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.12'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.12 | ROLLBACK | Ensure IMAP and POP3 server is not installed  "
+      systemd:
+        name: "dovecot"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_12
+      - ( all_results['2.2.12'].audits is defined )
+      - all_results['2.2.12'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.12
+     - rhel7
+
+#####
+  - name: " 2.2.13 | ROLLBACK | Ensure Samba is not installed  "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.13'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.13'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.13 | ROLLBACK | Ensure Samba is not installed  "
+      systemd:
+        name: "smb"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_13
+      - ( all_results['2.2.13'].audits is defined )
+      - all_results['2.2.13'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.13
+     - rhel7
+
+#####
+  - name: " 2.2.14 | ROLLBACK | Ensure HTTP Proxy Server is not installed "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.14'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.14'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.14 | ROLLBACK | Ensure HTTP Proxy Server is not installed "
+      systemd:
+        name: "squid"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_14
+      - ( all_results['2.2.14'].audits is defined )
+      - all_results['2.2.14'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.14
+     - rhel7
+
+#####
+  - name: " 2.2.15 | ROLLBACK | Ensure net-snmp is not installed"
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.15'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.15'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.15 | ROLLBACK | Ensure net-snmp is not installed"
+      systemd:
+        name: "snmpd"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_15
+      - ( all_results['2.2.15'].audits is defined )
+      - all_results['2.2.15'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.15
+     - rhel7
+
+#####
+  - name: " 2.2.16 | HARDEN | Ensure mail transfer agent is configured for local-only mode "
+    block:
+    - name: " 2.2.16 | HARDEN | Ensure mail transfer agent is configured for local-only mode "
+      file:
+        path: /etc/postfix/main.cf
+        state: absent
+      ignore_errors: yes
+      when: all_results['2.2.16'].audits[0].msg is defined and all_results['2.2.16'].audits[0].msg.find('file not found') != -1
+    - name: "2.2.16 | HARDEN | Ensure mail transfer agent is configured for local-only mode - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['2.2.16'].audits[0].content | b64decode }}"
+        ignore_errors: yes
+        when: all_results['2.2.16'].audits[0].content is defined
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/postfix/main.cf
+        ignore_errors: yes
+      when: all_results['2.2.16'].audits[0].content is defined
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.16'].audits[1].status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.16'].audits[1].state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - systemd:
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        name: postfix
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_16
+      - ( all_results['2.2.16'].audits is defined )
+      - all_results['2.2.16'].audits|length > 0
+    tags:
+     - level1
+     - harden
+     - rule_2.2.16
+     - rhel7
+
+#####
+  - name: " 2.2.17 | ROLLBACK | Ensure rsync is not installed or the rsyncd service is masked"
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.17'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.17'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.17 | ROLLBACK | Ensure rsync is not installed or the rsyncd service is masked"
+      systemd:
+        name: "rsyncd"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+     - rhel7cis_rule_2_2_17
+     - ( all_results['2.2.17'].audits is defined )
+     - all_results['2.2.17'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.17
+     - rhel7
+
+#####
+  - name: " 2.2.18 | ROLLBACK | Ensure NIS server is not installed "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.18'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.18'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.18 | ROLLBACK | Ensure NIS server is not installed "
+      systemd:
+        name: "ypserv"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_18
+      - ( all_results['2.2.18'].audits is defined )
+      - all_results['2.2.18'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.18
+     - rhel7
+
+#####
+  - name: " 2.2.19 | ROLLBACK |  Ensure telnet-server is not installed  "
+    block:
+    - set_fact:
+        before_status: "{{'yes' if all_results['2.2.19'].audits.status == 'enabled' else 'no'}}"
+      ignore_errors: yes
+    - set_fact:
+        before_state: "{{'started' if all_results['2.2.19'].audits.state == 'running' else 'stopped'}}"
+      ignore_errors: yes
+    - name: " 2.2.19 | ROLLBACK |  Ensure telnet-server is not installed  "
+      systemd:
+        name: "telnet.socket"
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+        masked: no
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_2_2_19
+      - ( all_results['2.2.19'].audits is defined )
+      - all_results['2.2.19'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_2.2.19
+     - rhel7
+
+#####
+  - name: " 2.3.1 | ROLLBACK |  Ensure NIS Client is not installed "
+    block:
+    - set_fact:
+        before_state: "absent"
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['2.3.1'].audits[0].name is defined
+    - name: " 2.3.1 | ROLLBACK |  Ensure NIS Client is not installed "
+      package:
+        name: ypbind
+        state: "{{ before_state }}"
+        conf_file: '/etc/yum.conf'
+      ignore_errors: yes
+    when: rhel7cis_rule_2_3_1
+    tags:
+     - level1
+     - rollback
+     - rule_2.3.1
+     - rhel7
+
+#####
+  - name: " 2.3.2 | ROLLBACK |  Ensure rsh client is not installed "
+    block:
+    - set_fact:
+        before_state: "absent"
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['2.3.2'].audits[0].name is defined
+    - name: " 2.3.2 | ROLLBACK |  Ensure rsh client is not installed "
+      package:
+        name: rsh
+        state: "{{ before_state }}"
+        conf_file: '/etc/yum.conf'
+      ignore_errors: yes
+    when: rhel7cis_rule_2_3_2
+    tags:
+     - level1
+     - rollback
+     - rule_2.3.2
+     - rhel7
+
+#####
+  - name: " 2.3.3 | ROLLBACK |  Ensure talk client is not installed "
+    block:
+    - set_fact:
+        before_state: "absent"
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['2.3.3'].audits[0].name is defined
+    - name: " 2.3.3 | ROLLBACK |  Ensure talk client is not installed "
+      package:
+        name: talk
+        state: "{{ before_state }}"
+      ignore_errors: yes
+    when: rhel7cis_rule_2_3_3
+    tags:
+     - level1
+     - rollback
+     - rule_2.3.3
+     - rhel7
+
+#####
+  - name: " 2.3.4 | ROLLBACK |  Ensure telnet client is not installed "
+    block:
+    - set_fact:
+        before_state: "absent"
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['2.3.4'].audits[0].name is defined
+    - name: " 2.3.4 | ROLLBACK |  Ensure telnet client is not installed "
+      package:
+        name: telnet
+        state: "{{ before_state }}"
+      ignore_errors: yes
+
+    when: rhel7cis_rule_2_3_4
+    tags:
+     - level1
+     - rollback
+     - rule_2.3.4
+     - rhel7
+
+#####
+  - name: " 2.3.5 | ROLLBACK |  Ensure LDAP client is not installed "
+    block:
+    - set_fact:
+        before_state: "absent"
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['2.3.5'].audits[0].name is defined
+    - name: " 2.3.5 | ROLLBACK |  Ensure LDAP client is not installed "
+      package:
+        name: openldap-clients
+        state: "{{ before_state }}"
+      ignore_errors: yes
+
+    when: rhel7cis_rule_2_3_5
+    tags:
+     - level1
+     - rollback
+     - rule_2.3.5
+     - rhel7

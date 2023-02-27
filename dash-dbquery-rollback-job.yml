@@ -1,0 +1,70 @@
+# dash-dbquery-rollback-job.yml
+---
+#- hosts: all
+#  gather_facts: False
+#  
+#  tasks:
+  - include_vars: secret.yml 
+    no_log: true
+  
+  - name: Get date for filename
+    set_fact: date="{{ ansible_date_time.time }} {{ ansible_date_time.date }}"
+    run_once: true
+    
+  - name: ''
+    set_fact: 
+      ip: "{{ansible_host}}"
+    no_log: true  
+    
+  - name: Update Ansible-Scanning-Job Success to Security Hardening Dashboard
+    shell: mysql  -u"{{ username1 }}" -p"{{ password1 }}" -e "insert into transactions (start_date,end_date,job_id,job_name,apps_name,ip_address,hostname,os_type,os_version,job_activity,activity_info) VALUES(' ', '{{ date }}', '{{tower_job_id}}', '{{tower_job_template_name}}', '{{ item }}', '{{ ip }}', '{{ansible_hostname}}', '{{ansible_distribution}}', '{{ansible_distribution_version}}', 'ROLLBACK', 'Rollback Activity Success')" montowerdb
+    become: yes
+    become_method: sudo
+    delegate_to: 10.49.128.52    
+    changed_when: false
+    failed_when: false    
+    no_log: true
+    with_items: "{{ group_names }}"
+  - name: " "
+    shell: sudo rm -f /tmp/job*
+    run_once: true
+    delegate_to: 10.49.128.52
+    changed_when: false
+    failed_when: false    
+    no_log: true
+    ignore_errors: yes
+
+  - block:   
+    - name: "Get Failed Job Info"
+      shell: cd /tmp && curl -fsl -O -k -J -L -u {{username2}}:{{password2}} https://isabel.telkomsel.co.id/api/v2/jobs/{{tower_job_id}}/stdout?format=txt_download
+      delegate_to: 10.49.128.52
+      become_user: metrocom
+      run_once: true
+      changed_when: false
+      failed_when: false
+      no_log: True
+      ignore_errors: true
+    - name: " "    
+#      shell: sudo sed -e 's/[^a-z A-Z 0-9]/./g' /tmp/job_{{tower_job_id}}.txt  | grep UNREACHABLE; sudo sed -e 's/[^a-z A-Z 0-9]/./g' /tmp/job_{{tower_job_id}}.txt  | grep FAILED
+      shell: sudo sed -e 's/[^a-z A-Z 0-9]/./g' /tmp/job_{{tower_job_id}}.txt  | grep UNREACHABLE
+      delegate_to: 10.49.128.52
+      become_user: metrocom
+      run_once: true
+      register: output1
+      changed_when: false
+      failed_when: false
+      no_log: True
+      ignore_errors: true
+      
+    - name: 
+      set_fact: faildata="{{output1.stdout}}"
+#      run_once: true
+      no_log: true
+    - name: " "
+      shell: sudo mysql -u{{username1}} -p{{password1}} -D montowerdb -e 'insert ignore into failed_job (date,job_id,job_name,job_output,failure_info) VALUES("{{ lookup('pipe','date +%Y-%m-%d_%H-%M-%S') }}", "{{tower_job_id}}", "{{tower_job_template_name}}", "https://isabel.telkomsel.co.id/api/v2/jobs/{{tower_job_id}}/stdout/?format=txt", "{{faildata}}")'
+      delegate_to: 10.49.128.52
+      run_once: true
+      changed_when: false
+      failed_when: false      
+      no_log: True
+      ignore_errors: true

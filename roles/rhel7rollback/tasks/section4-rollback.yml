@@ -1,0 +1,1115 @@
+---
+#
+# Copyright 2020
+# This section contains 33 rules
+#
+#####
+  - name: " 4.0 | ROLLBACK | Identify system_bit"
+    block:
+    - shell:   uname -m
+      register: uname_output
+      ignore_errors: yes
+    - set_fact:
+        system_bit: 64
+      when: uname_output.stdout == "x86_64"
+    - set_fact:
+        system_bit: 32
+      when: uname_output.stdout == "i686" or uname_output.stdout == "i386"
+    tags:
+     - level2
+     - rollback
+     - rhel7
+     - rule_4.1.3
+     - rule_4.1.5
+     - rule_4.1.9
+     - rule_4.1.10
+     - rule_4.1.12
+     - rule_4.1.13
+     - rule_4.1.16
+
+#####
+# Install and uninstall rpms is exclusion recommended
+#   - name: " 4.1.1.1 | HARDEN | Ensure auditd is installed"
+#
+#####
+  - name: " 4.1.1.2 | ROLLBACK |  Ensure auditd service is enabled and running"
+    block:
+    - set_fact:
+        before_status: "yes"
+      ignore_errors: yes
+      when: all_results['4.1.1.2'].audits.status == "enabled"
+    - set_fact:
+        before_status: "no"
+      ignore_errors: yes
+      when: all_results['4.1.1.2'].audits.status != "enabled"
+    - set_fact:
+        before_state: "started"
+      ignore_errors: yes
+      when: all_results['4.1.1.2'].audits.state == "running"
+    - set_fact:
+        before_state: "stopped"
+      ignore_errors: yes
+      when: all_results['4.1.1.2'].audits.state is not defined or all_results['4.1.1.2'].audits.state != "running"
+    - name: " 4.1.1.2 | ROLLBACK |  Ensure auditd service is enabled and running"
+      systemd:
+        name: auditd
+        state: "{{ before_state }}"
+        enabled: "{{ before_status }}"
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_4_1_1_2
+      - ( all_results['4.1.1.2'].audits is defined )
+      - all_results['4.1.1.2'].audits|length > 0
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.1.2
+     - rhel7
+
+#####
+  - name: " 4.1.1.3 | ROLLBACK | Ensure auditing for processes that start prior to auditd is enabled "
+    block:
+    - name: " 4.1.1.3 | ROLLBACK | Ensure auditing for processes that start prior to auditd is enabled"
+      file:
+        path: /etc/default/grub
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.1.3'].audits.msg is defined and all_results['4.1.1.3'].audits.msg.find('file not found') != -1
+    - name: " 4.1.1.3 | ROLLBACK | Ensure auditing for processes that start prior to auditd is enabled - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.1.3'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/default/grub
+        ignore_errors: yes
+      - shell:  grub2-mkconfig -o /boot/grub2/grub.cfg
+        ignore_errors: yes
+      when: all_results['4.1.1.3'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_4_1_2_4: false
+      ignore_errors: yes
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_1_3
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.1.3
+     - rhel7
+
+#####
+  - name: " 4.1.2.1 | ROLLBACK | Ensure audit log storage size is configured"
+    block:
+    - name: " 4.1.2.1 | ROLLBACK | Ensure audit log storage size is configured"
+      file:
+        path: /etc/audit/auditd.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.2.1'].audits.msg is defined and all_results['4.1.2.1'].audits.msg.find('file not found') != -1
+    - name: " 4.1.2.1 | ROLLBACK | Ensure audit log storage size is configured - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.2.1'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/auditd.conf
+        ignore_errors: yes
+      when: all_results['4.1.2.1'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_4_1_2_2: false
+        rhel7cis_rule_4_1_2_3: false
+        rhel7cis_rule_4_1_11: false
+      ignore_errors: yes
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_2_1
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.2.1
+     - rhel7
+
+#####
+  - name: " 4.1.2.2 | ROLLBACK | Ensure audit logs are not automatically deleted"
+    block:
+    - name: " 4.1.2.2 | ROLLBACK | Ensure audit logs are not automatically deleted"
+      file:
+        path: /etc/audit/auditd.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.2.2'].audits.msg is defined and all_results['4.1.2.2'].audits.msg.find('file not found') != -1
+    - name: " 4.1.2.2 | ROLLBACK | Ensure audit logs are not automatically deleted - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.2.2'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/auditd.conf
+        ignore_errors: yes
+      when: all_results['4.1.2.2'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_4_1_2_3: false
+        rhel7cis_rule_4_1_11: false
+      ignore_errors: yes
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_2_2
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.2.2
+     - rhel7
+
+#####
+  - name: " 4.1.2.3 | ROLLBACK | Ensure system is disabled when audit logs are full"
+    block:
+    - name: " 4.1.2.3 | ROLLBACK | Ensure system is disabled when audit logs are full"
+      file:
+        path: /etc/audit/auditd.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.2.3'].audits.msg is defined and all_results['4.1.2.3'].audits.msg.find('file not found') != -1
+    - name: " 4.1.2.3 | ROLLBACK | Ensure system is disabled when audit logs are full - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.2.2'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/auditd.conf
+        ignore_errors: yes
+      when: all_results['4.1.2.3'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_4_1_11: false
+      ignore_errors: yes
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_2_3
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.2.3
+     - rhel7
+
+#####
+  - name: " 4.1.2.4 | ROLLBACK |  Ensure audit_backlog_limit is sufficient "
+    block:
+    - name: " 4.1.2.4  | ROLLBACK |  Ensure audit_backlog_limit is sufficient"
+      file:
+        path: /etc/default/grub
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.2.4'].audits.msg is defined and all_results['4.1.2.4'].audits.msg.find('file not found') != -1
+    - name: " 4.1.2.4 | ROLLBACK | Ensure audit_backlog_limit is sufficient - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.2.4'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/default/grub
+        ignore_errors: yes
+      - shell:  grub2-mkconfig -o /boot/grub2/grub.cfg
+        ignore_errors: yes
+      when: all_results['4.1.2.4'].audits.content is defined
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_2_4
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.2.4
+     - rhel7
+
+#####
+  - name: " 4.1.3  | ROLLBACK |  Ensure events that modify date and time information are collected "
+    block:
+    - name: " 4.1.3  | ROLLBACK |  Ensure events that modify date and time information are collected"
+      file:
+        path: /etc/audit/rules.d/time_change.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.3'].audits.msg is defined and all_results['4.1.3'].audits.msg.find('file not found') != -1
+    - name: " 4.1.3  | ROLLBACK |  Ensure events that modify date and time information are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.3'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/time_change.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/time_change.rules
+        ignore_errors: yes
+      when: all_results['4.1.3'].audits.content is defined
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_3
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.3
+     - rhel7
+
+  - name: " 4.1.3  | ROLLBACK |  Ensure events that modify date and time information are collected "
+    block:
+    - name: " 4.1.3  | ROLLBACK |  Ensure events that modify date and time information are collected"
+      file:
+        path: /etc/audit/rules.d/time_change.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.3'].audits.msg is defined and all_results['4.1.3'].audits.msg.find('file not found') != -1
+    - name: " 4.1.3  | ROLLBACK |  Ensure events that modify date and time information are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.3'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/time_change.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/time_change.rules
+        ignore_errors: yes
+      when: all_results['4.1.3'].audits.content is defined
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_3
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.3
+     - rhel7
+
+#####
+  - name: " 4.1.4  | ROLLBACK | Ensure events that modify user/group information are collected  "
+    block:
+    - name: " 4.1.4  | ROLLBACK | Ensure events that modify user/group information are collected "
+      file:
+        path: /etc/audit/rules.d/identity.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.4'].audits.msg is defined and all_results['4.1.4'].audits.msg.find('file not found') != -1
+    - name: " 4.1.4  | ROLLBACK | Ensure events that modify user/group information are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.4'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/identity.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/identity.rules
+        ignore_errors: yes
+      when: all_results['4.1.4'].audits.content is defined
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_4
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.4
+     - rhel7
+
+#####
+  - name: " 4.1.5  | ROLLBACK | Ensure events that modify the system's network environment are collected "
+    block:
+    - name: " 4.1.5  | ROLLBACK | Ensure events that modify the system's network environment are collected "
+      file:
+        path: /etc/audit/rules.d/system_local.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.5'].audits.msg is defined and all_results['4.1.5'].audits.msg.find('file not found') != -1
+    - name: " 4.1.5  | ROLLBACK | Ensure events that modify the system's network environment are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.5'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/system_local.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/system_local.rules
+        ignore_errors: yes
+      when: all_results['4.1.5'].audits.content is defined
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_5
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.5
+     - rhel7
+
+  - name: " 4.1.5  | ROLLBACK | Ensure events that modify the system's network environment are collected  "
+    block:
+    - name: " 4.1.5  | ROLLBACK | Ensure events that modify the system's network environment are collected "
+      file:
+        path: /etc/audit/rules.d/system_local.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.5'].audits.msg is defined and all_results['4.1.5'].audits.msg.find('file not found') != -1
+    - name: " 4.1.5  | ROLLBACK | Ensure events that modify the system's network environment are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.5'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/system_local.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/system_local.rules
+        ignore_errors: yes
+      when: all_results['4.1.5'].audits.content is defined
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_5
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.5
+     - rhel7
+
+#####
+  - name: " 4.1.6  | ROLLBACK | Ensure events that modify the system's Mandatory Access Controls are collected "
+    block:
+    - name: " 4.1.6  | ROLLBACK | Ensure events that modify the system's Mandatory Access Controls are collected "
+      file:
+        path: /etc/audit/rules.d/MAC_policy.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.6'].audits.msg is defined and all_results['4.1.6'].audits.msg.find('file not found') != -1
+    - name: " 4.1.6  | ROLLBACK | Ensure events that modify the system's Mandatory Access Controls are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.6'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/MAC_policy.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/MAC_policy.rules
+        ignore_errors: yes
+      when: all_results['4.1.6'].audits.content is defined
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_6
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.6
+     - rhel7
+
+#####
+  - name: " 4.1.7  | ROLLBACK | Ensure login and logout events are collected "
+    block:
+    - name: " 4.1.7  | ROLLBACK | Ensure login and logout events are collected "
+      file:
+        path: /etc/audit/rules.d/logins.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.7'].audits.msg is defined and all_results['4.1.7'].audits.msg.find('file not found') != -1
+    - name: " 4.1.7  | ROLLBACK | Ensure login and logout events are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.7'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/logins.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/logins.rules
+        ignore_errors: yes
+      when: all_results['4.1.7'].audits.content is defined and ( pam_faillock == true or pam_tally2 == true)
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_7
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.7
+     - rhel7
+
+#####
+  - name: " 4.1.8  | ROLLBACK | Ensure session initiation information is collected "
+    block:
+    - name: " 4.1.8  | ROLLBACK | Ensure session initiation information is collected "
+      file:
+        path: /etc/audit/rules.d/session.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.8'].audits.msg is defined and all_results['4.1.8'].audits.msg.find('file not found') != -1
+    - name: " 4.1.8  | ROLLBACK | Ensure session initiation information is collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.8'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/session.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/session.rules
+        ignore_errors: yes
+      when: all_results['4.1.8'].audits.content is defined
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_8
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.8
+     - rhel7
+
+#####
+  - name: " 4.1.9  | ROLLBACK | Ensure discretionary access control permission modification events are collected"
+    block:
+    - name: " 4.1.9  | ROLLBACK | Ensure discretionary access control permission modification events are collected"
+      file:
+        path: /etc/audit/rules.d/perm_mod.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.9'].audits.msg is defined and all_results['4.1.9'].audits.msg.find('file not found') != -1
+    - name: "4.1.9  | ROLLBACK | Ensure discretionary access control permission modification events are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.9'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/perm_mod.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/perm_mod.rules
+        ignore_errors: yes
+      when: all_results['4.1.9'].audits.content is defined
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_9
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.9
+     - rhel7
+
+  - name: " 4.1.9  | ROLLBACK | Ensure discretionary access control permission modification events are collected"
+    block:
+    - name: " 4.1.9  | ROLLBACK | Ensure discretionary access control permission modification events are collected"
+      file:
+        path: /etc/audit/rules.d/perm_mod.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.9'].audits.msg is defined and all_results['4.1.9'].audits.msg.find('file not found') != -1
+    - name: "4.1.9  | ROLLBACK | Ensure discretionary access control permission modification events are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.9'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/perm_mod.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/perm_mod.rules
+        ignore_errors: yes
+      when: all_results['4.1.9'].audits.content is defined
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_9
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.9
+     - rhel7
+
+#####
+  - name: " 4.1.10  | ROLLBACK |  Ensure unsuccessful unauthorized file access attempts are collected"
+    block:
+    - name: " 4.1.10  | ROLLBACK |  Ensure unsuccessful unauthorized file access attempts are collected"
+      file:
+        path: /etc/audit/rules.d/access.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.10'].audits.msg is defined and all_results['4.1.10'].audits.msg.find('file not found') != -1
+    - name: "4.1.10  | ROLLBACK |  Ensure unsuccessful unauthorized file access attempts are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.10'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/access.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/access.rules
+        ignore_errors: yes
+      when: all_results['4.1.10'].audits.content is defined
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_10
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.10
+     - rhel7
+
+  - name: " 4.1.10  | ROLLBACK | Ensure unsuccessful unauthorized file access attempts are collected"
+    block:
+    - name: " 4.1.10  | ROLLBACK |  Ensure unsuccessful unauthorized file access attempts are collected"
+      file:
+        path: /etc/audit/rules.d/access.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.10'].audits.msg is defined and all_results['4.1.10'].audits.msg.find('file not found') != -1
+    - name: "4.1.10  | ROLLBACK |  Ensure unsuccessful unauthorized file access attempts are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.10'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/access.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/access.rules
+        ignore_errors: yes
+      when: all_results['4.1.10'].audits.content is defined
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_10
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.10
+     - rhel7
+
+#####
+  - name: " 4.1.11 | ROLLBACK |   Ensure use of privileged commands is collected "
+    block:
+    - name: " 4.1.11 | ROLLBACK |   Ensure use of privileged commands is collected"
+      file:
+        path: /etc/audit/rules.d/privileged.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.11'].audits.msg is defined and all_results['4.1.11'].audits.msg.find('file not found') != -1
+    - name: "4.1.11 | ROLLBACK |   Ensure use of privileged commands is collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.11'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/privileged.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/privileged.rules
+        ignore_errors: yes
+      when: all_results['4.1.11'].audits.content is defined
+    when: rhel7cis_rule_4_1_1_2 == true and rhel7cis_rule_4_1_11
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.11
+     - rhel7
+
+#####
+  - name: " 4.1.12  | ROLLBACK |  Ensure successful file system mounts are collected "
+    block:
+    - name: " 4.1.12  | ROLLBACK |  Ensure successful file system mounts are collected "
+      file:
+        path: /etc/audit/rules.d/mounts.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.12'].audits.msg is defined and all_results['4.1.12'].audits.msg.find('file not found') != -1
+    - name: "4.1.12  | ROLLBACK |  Ensure successful file system mounts are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.12'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/mounts.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/mounts.rules
+        ignore_errors: yes
+      when: all_results['4.1.12'].audits.content is defined
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_12
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.12
+     - rhel7
+
+  - name: " 4.1.12  | ROLLBACK |  Ensure successful file system mounts are collected "
+    block:
+    - name: " 4.1.12  | ROLLBACK |  Ensure successful file system mounts are collected "
+      file:
+        path: /etc/audit/rules.d/mounts.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.12'].audits.msg is defined and all_results['4.1.12'].audits.msg.find('file not found') != -1
+    - name: "4.1.12  | ROLLBACK |  Ensure successful file system mounts are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.12'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/mounts.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/mounts.rules
+        ignore_errors: yes
+      when: all_results['4.1.12'].audits.content is defined
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 == true and rhel7cis_rule_4_1_12
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.12
+     - rhel7
+
+#####
+  - name: " 4.1.13  | ROLLBACK | Ensure file deletion events by users are collected "
+    block:
+    - name: " 4.1.13  | ROLLBACK | Ensure file deletion events by users are collected "
+      file:
+        path: /etc/audit/rules.d/deletion.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.13'].audits.msg is defined and all_results['4.1.13'].audits.msg.find('file not found') != -1
+    - name: "4.1.13  | ROLLBACK | Ensure file deletion events by users are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.13'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/deletion.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/deletion.rules
+        ignore_errors: yes
+      when: all_results['4.1.13'].audits.content is defined
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_13
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.13
+     - rhel7
+
+  - name: " 4.1.13  | ROLLBACK | Ensure file deletion events by users are collected "
+    block:
+    - name: " 4.1.13  | ROLLBACK | Ensure file deletion events by users are collected "
+      file:
+        path: /etc/audit/rules.d/deletion.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.13'].audits.msg is defined and all_results['4.1.13'].audits.msg.find('file not found') != -1
+    - name: "4.1.13  | ROLLBACK | Ensure file deletion events by users are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.13'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/deletion.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/deletion.rules
+        ignore_errors: yes
+      when: all_results['4.1.13'].audits.content is defined
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_13
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.13
+     - rhel7
+
+#####
+  - name: " 4.1.14  | ROLLBACK |  Ensure changes to system administration scope (sudoers) is collected "
+    block:
+    - name: " 4.1.14  | ROLLBACK | Ensure changes to system administration scope (sudoers) is collected"
+      file:
+        path: /etc/audit/rules.d/scope.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.14'].audits.msg is defined and all_results['4.1.14'].audits.msg.find('file not found') != -1
+    - name: "4.1.14  | ROLLBACK | Ensure changes to system administration scope (sudoers) is collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.14'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/scope.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/scope.rules
+        ignore_errors: yes
+      when: all_results['4.1.14'].audits.content is defined
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_14
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.14
+     - rhel7
+
+#####
+  - name: " 4.1.15  | ROLLBACK |  Ensure system administrator actions (sudolog) are collected "
+    block:
+    - name: " 4.1.15  | ROLLBACK |  Ensure system administrator actions (sudolog) are collected"
+      file:
+        path: /etc/audit/rules.d/actions.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.15'].audits.msg is defined and all_results['4.1.15'].audits.msg.find('file not found') != -1
+    - name: "4.1.15  | ROLLBACK |  Ensure system administrator actions (sudolog) are collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.15'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/actions.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/actions.rules
+        ignore_errors: yes
+      when: all_results['4.1.15'].audits.content is defined
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_15
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.15
+     - rhel7
+
+#####
+  - name: " 4.1.16  | ROLLBACK | Ensure kernel module loading and unloading is collected  "
+    block:
+    - name: " 4.1.16  | ROLLBACK | Ensure kernel module loading and unloading is collected  "
+      file:
+        path: /etc/audit/rules.d/modules.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.16'].audits.msg is defined and all_results['4.1.16'].audits.msg.find('file not found') != -1
+    - name: "4.1.16  | ROLLBACK | Ensure kernel module loading and unloading is collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.16'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/modules.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/modules.rules
+        ignore_errors: yes
+      when: all_results['4.1.16'].audits.content is defined
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_16
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.16
+     - rhel7
+
+  - name: " 4.1.16  | ROLLBACK |  Ensure kernel module loading and unloading is collected  "
+    block:
+    - name: " 4.1.16  | ROLLBACK |  Ensure kernel module loading and unloading is collected  "
+      file:
+        path: /etc/audit/rules.d/modules.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.16'].audits.msg is defined and all_results['4.1.16'].audits.msg.find('file not found') != -1
+    - name: "4.1.16  | ROLLBACK | Ensure kernel module loading and unloading is collected - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.16'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/modules.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/modules.rules
+        ignore_errors: yes
+      when: all_results['4.1.16'].audits.content is defined
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_16
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.16
+     - rhel7
+
+#####
+  - name: " 4.1.17  | ROLLBACK |  Ensure the audit configuration is immutable"
+    block:
+    - name: " 4.1.17  | ROLLBACK | Ensure the audit configuration is immutable"
+      file:
+        path: /etc/audit/rules.d/99-finalize.rules
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.1.17'].audits.msg is defined and all_results['4.1.17'].audits.msg.find('file not found') != -1
+    - name: "4.1.17  | ROLLBACK | Ensure the audit configuration is immutable - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.1.17'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/audit/rules.d/99-finalize.rules
+        ignore_errors: yes
+      - shell: auditctl -R /etc/audit/rules.d/99-finalize.rules
+        ignore_errors: yes
+      when: all_results['4.1.17'].audits.content is defined
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_17
+    tags:
+     - level2
+     - rollback
+     - rule_4.1.17
+     - rhel7
+
+#####
+# Install and uninstall rpms is exclusion recommended
+#   - name: " 4.2.1.1 | HARDEN | Ensure rsyslog is installed "
+#
+  - name: " 4.2.1.2 | ROLLBACK |  Ensure rsyslog Service is enabled and running "
+    block:
+     - set_fact:
+         before_status: "yes"
+       ignore_errors: yes
+       when: all_results['4.2.1.2'].audits.status == "enabled"
+     - set_fact:
+         before_status: "no"
+       ignore_errors: yes
+       when: all_results['4.2.1.2'].audits.status != "enabled"
+     - set_fact:
+         before_state: "started"
+       ignore_errors: yes
+       when: all_results['4.2.1.2'].audits.state == "running"
+     - set_fact:
+         before_state: "stopped"
+       ignore_errors: yes
+       when: all_results['4.2.1.2'].audits.state is not defined or all_results['4.2.1.2'].audits.state != "running"
+     - name: " 4.2.1.2 | ROLLBACK |  Ensure rsyslog Service is enabled and running "
+       systemd:
+         name: rsyslog
+         state: "{{ before_state }}"
+         enabled: "{{ before_status }}"
+       ignore_errors: yes
+    when:
+      - rhel7cis_rule_4_2_1_2
+      - ( all_results['4.2.1.2'].audits is defined )
+      - all_results['4.2.1.2'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_4.2.1.2
+     - rhel7
+
+#####
+  - name: " 4.2.1.3 | ROLLBACK | Ensure rsyslog default file permissions configured "
+    block:
+    - name: " 4.2.1.3 | ROLLBACK | Ensure rsyslog default file permissions configured - before "
+      file:
+        path:  /etc/rsyslog.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.2.1.3'].audits[0].msg is defined and all_results['4.2.1.3'].audits[0].msg.find('file not found') != -1
+    - name: "4.2.1.3 | ROLLBACK | Ensure rsyslog default file permissions configured - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.2.1.3'].audits[0].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/rsyslog.conf
+        ignore_errors: yes
+      when: all_results['4.2.1.3'].audits[0].content is defined
+    - name: " Restore /etc/rsyslog.d/listen.conf as well"
+      block:
+      - set_fact:
+          data_1: "{{ all_results['4.2.1.3'].audits[1].results[0].content | b64decode }}"
+          file_1: "{{ all_results['4.2.1.3'].audits[1].results[0].source }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data_1 }}"
+          dest: "{{ file_1 }}"
+        ignore_errors: yes
+      when: all_results['4.2.1.3'].audits[1].results[0].content is defined
+    - set_fact:
+        rhel7cis_rule_4_2_1_5: false
+        rhel7cis_rule_4_2_1_6: false
+      ignore_errors: yes
+    when: rhel7cis_rule_4_2_1_3
+    tags:
+     - level1
+     - rollback
+     - rule_4.2.1.3
+     - rhel7
+
+#######
+  - name: " 4.2.1.5 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host  "
+    block:
+    - name: "4.2.1.5 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host - before"
+      file:
+        path:  /etc/rsyslog.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.2.1.5'].audits.msg is defined and all_results['4.2.1.5'].audits.msg.find('file not found') != -1
+    - name: "4.2.1.5 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.2.1.5'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/rsyslog.conf
+        ignore_errors: yes
+      when: all_results['4.2.1.5'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_4_2_1_6: false
+      ignore_errors: yes
+    when: rhel7cis_rule_4_2_1_5
+    tags:
+     - level1
+     - rollback
+     - rule_4.2.1.5
+     - rhel7
+
+#####
+  - name: " 4.2.1.6 | ROLLBACK | Ensure remote rsyslog messages are only accepted on designated log hosts.   "
+    block:
+    - name: " 4.2.1.6 | ROLLBACK | Ensure remote rsyslog messages are only accepted on designated log hosts. "
+      file:
+        path: /etc/rsyslog.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.2.1.6'].audits.msg is defined and all_results['4.2.1.6'].audits.msg.find('file not found') != -1
+    - name: "4.2.1.6 | ROLLBACK | Ensure remote rsyslog messages are only accepted on designated log hosts. - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.2.1.6'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/rsyslog.conf
+        ignore_errors: yes
+      - systemd:
+          state: restarted
+          name: rsyslog
+      when: all_results['4.2.1.6'].audits.content is defined
+    when: rhel7cis_rule_4_2_1_6 and designated_log_host == true
+    tags:
+     - level1
+     - rollback
+     - rule_4.2.1.6
+     - rhel7
+
+  - name: " 4.2.1.6 | ROLLBACK | Ensure remote rsyslog messages are only accepted on designated log hosts.   "
+    block:
+    - name: " 4.2.1.6 | ROLLBACK | Ensure remote rsyslog messages are only accepted on designated log hosts. "
+      file:
+        path: /etc/rsyslog.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.2.1.6'].audits.msg is defined and all_results['4.2.1.6'].audits.msg.find('file not found') != -1
+    - name: "4.2.1.6 | ROLLBACK | Ensure remote rsyslog messages are only accepted on designated log hosts. - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.2.1.6'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/rsyslog.conf
+        ignore_errors: yes
+      - systemd:
+          state: restarted
+          name: rsyslog
+      when: all_results['4.2.1.6'].audits.content is defined
+    when: rhel7cis_rule_4_2_1_6 and designated_log_host == false
+    tags:
+     - level1
+     - rollback
+     - rule_4.2.1.6
+     - rhel7
+
+#####
+  - name: " 4.2.2.1 | ROLLBACK | Ensure rsyslog is configured to send logs to a remote log host  "
+    block:
+    - name: " 4.2.2.1 | ROLLBACK | Ensure rsyslog is configured to send logs to a remote log host - before "
+      file:
+        path: /etc/systemd/journald.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.2.2.1'].audits.msg is defined and all_results['4.2.2.1'].audits.msg.find('file not found') != -1
+    - name: " 4.2.2.1 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.2.2.1'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/systemd/journald.conf
+        ignore_errors: yes
+      when: all_results['4.2.2.1'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_4_2_2_2: false
+        rhel7cis_rule_4_2_2_3: false
+      ignore_errors: yes
+    when: rhel7cis_rule_4_2_2_1
+    tags:
+     - level1
+     - rollback
+     - rule_4.2.2.1
+     - rhel7
+
+
+
+#####
+  - name: " 4.2.2.2 | ROLLBACK | Ensure journald is configured to compress large log files   "
+    block:
+    - name: " 4.2.2.2 | ROLLBACK | Ensure journald is configured to compress large log files - before"
+      file:
+        path: /etc/systemd/journald.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.2.2.2'].audits.msg is defined and all_results['4.2.2.2'].audits.msg.find('file not found') != -1
+    - name: " 4.2.2.2 | ROLLBACK | Ensure journald is configured to compress large log files - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.2.2.2'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/systemd/journald.conf
+        ignore_errors: yes
+      when: all_results['4.2.2.2'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_4_2_2_3: false
+      ignore_errors: yes
+    when: rhel7cis_rule_4_2_2_2
+    tags:
+     - level1
+     - rollback
+     - rule_4.2.2.2
+     - rhel7
+
+#####
+  - name: " 4.2.2.3 | ROLLBACK |  Ensure journald is configured to write logfiles to persistent disk   "
+    block:
+    - name: " 4.2.2.3 | ROLLBACK |  Ensure journald is configured to write logfiles to persistent disk - before "
+      file:
+        path: /etc/systemd/journald.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['4.2.2.3'].audits.msg is defined and all_results['4.2.2.3'].audits.msg.find('file not found') != -1
+    - name: " 4.2.2.3 | ROLLBACK |  Ensure journald is configured to write logfiles to persistent disk - modify"
+      block:
+      - set_fact:
+          data: "{{ all_results['4.2.2.3'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/systemd/journald.conf
+        ignore_errors: yes
+      when: all_results['4.2.2.3'].audits.content is defined
+    when: rhel7cis_rule_4_2_2_3
+    tags:
+     - level1
+     - rollback
+     - rule_4.2.2.3
+     - rhel7
+
+#####
+  - name: " 4.2.3 | ROLLBACK | Ensure permissions on all logfiles are configured "
+    block:
+    - name: " 4.2.3 | ROLLBACK | Ensure permissions on all logfiles are configured - before"
+      file:
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+      ignore_errors: yes
+      diff: yes
+      with_items: "{{ all_results['4.2.3'].result[0] | json_query('results[*].diff.before') }}"
+    when: rhel7cis_rule_4_2_3
+    tags:
+     - level1
+     - rollback
+     - rule_4.2.3
+     - rhel6
+######
+#  - name: " 4.2.4 | ROLLBACK | Ensure logrotate is configured (Manual)"
+#    block:
+#      - name: " 4.2.4 | ROLLBACK | Ensure logrotate is configured "
+#        debug:
+#         msg:
+#         - "Review /etc/logrotate.conf and /etc/logrotate.d/* and verify logs are rotated according to site policy."
+#         - "Once verified, please set rhel7cis_rule_4_2_4 to true in default/main.yml ."
+#        register: rhel7cis_rule_4_2_4_logrotate_review_msg
+#      - set_fact:
+#          rhel7cis_rule_4_2_4_result: false
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'4.2.4':rhel7cis_rule_4_2_4_result|default(true)}) }}"
+#    when: rhel7cis_rule_4_2_4
+#    tags:
+#     - level1
+#     - harden
+#     - rule_4.2.4
+#     - rhel7
+#
+#####

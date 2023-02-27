@@ -1,0 +1,987 @@
+---
+#
+# Copyright 2020
+# This section contains 33 rules
+# Has Hash-out all the rules apart From Mandatory Checklist
+#
+#####
+  - name: " 4.0 | SCAN | Identify system_bit"
+    shell:   uname -m
+    register: uname_output
+    ignore_errors: yes
+#  - set_fact:
+#      system_bit: 64
+#    when: uname_output.stdout == "x86_64"
+#  - set_fact:
+#      system_bit: 32
+#    when: uname_output.stdout == "i686" or uname_output.stdout == "i386"
+    tags:
+     - level2
+     - scan
+     - rhel7
+     - rule_4.1.3
+     - rule_4.1.5
+     - rule_4.1.9
+     - rule_4.1.10
+     - rule_4.1.12
+     - rule_4.1.13
+     - rule_4.1.16
+
+#####
+  - name: " 4.1.1.1 | SCAN | Ensure auditd is installed"
+    block:
+    - name: " 4.1.1.1 | SCAN | Ensure auditd is installed"
+      shell:   rpm -q audit audit-libs
+      register: rhel7cis_rule_4_1_1_1_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_4_1_1_1_result: false
+      when: rhel7cis_rule_4_1_1_1_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.1.1':rhel7cis_rule_4_1_1_1_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_1_1
+    tags:
+     - level2
+     - scan
+     - rule_4.1.1.1
+     - rhel7
+
+#####
+  - name: " 4.1.1.2 | SCAN |  Ensure auditd service is enabled and running"
+    block:
+      - name: " 4.1.1.2 | SCAN |  Ensure auditd service is enabled and running"
+        shell: systemctl is-enabled auditd
+        register: rhel7cis_rule_4_1_1_2_a_rc
+        ignore_errors: yes
+      - shell: " systemctl status auditd | grep 'Active: active (running) '"
+        register: rhel7cis_rule_4_1_1_2_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_1_2_result: false
+        when: rhel7cis_rule_4_1_1_2_a_rc.stdout != "enabled" or rhel7cis_rule_4_1_1_2_b_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.1.2':rhel7cis_rule_4_1_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_1_2
+    tags:
+     - level2
+     - scan
+     - rule_4.1.1.2
+     - rhel7
+
+#####
+  - name: " 4.1.1.3 | SCAN | Ensure auditing for processes that start prior to auditd is enabled "
+    block:
+      - name: " 4.1.1.3 | SCAN | Ensure auditing for processes that start prior to auditd is enabled"
+        shell:  grep "^\s*linux" /boot/grub2/grub.cfg | grep "audit=1"
+        register: rhel7cis_rule_4_1_1_3_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_1_3_result: false
+        when: rhel7cis_rule_4_1_1_3_rc.stdout == ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.1.3':rhel7cis_rule_4_1_1_3_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_1_3
+    tags:
+     - level2
+     - scan
+     - rule_4.1.1.3
+     - rhel7
+
+#####
+  - name: " 4.1.2.1 | SCAN | Ensure audit log storage size is configured"
+    block:
+      - name: " 4.1.2.1 | SCAN | Ensure audit log storage size is configured"
+        shell:  |
+          grep -E "max_log_file\s" /etc/audit/auditd.conf |awk '{print $3}'| sed "s: ::g"
+        register: rhel7cis_rule_4_1_2_1_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_2_1_result: false
+        when: rhel7cis_rule_4_1_2_1_rc.stdout != "{{ log_storage_size }}"
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.2.1':rhel7cis_rule_4_1_2_1_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_2_1
+    tags:
+     - level2
+     - scan
+     - rule_4.1.2.1
+     - rhel7
+
+#####
+  - name: " 4.1.2.2 | SCAN | Ensure audit logs are not automatically deleted"
+    block:
+      - name: " 4.1.2.2 | SCAN | Ensure audit logs are not automatically deleted"
+        shell: |
+         grep -E "max_log_file_action\s" /etc/audit/auditd.conf |awk '{print $3}'| sed "s: ::g"
+        register: rhel7cis_rule_4_1_2_2_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_2_2_result: false
+        when: rhel7cis_rule_4_1_2_2_rc.stdout != "keep_logs"
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.2.2':rhel7cis_rule_4_1_2_2_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_2_2
+    tags:
+     - level2
+     - scan
+     - rule_4.1.2.2
+     - rhel7
+
+
+#####
+# There is some changes as Exclusion Recommended by TSEL
+# space_left_action = email and admin_space_left_action = halt as CIS Checklist
+  - name: " 4.1.2.3 | SCAN | Ensure system is disabled when audit logs are full"
+    block:
+      - name: " 4.1.2.3 | SCAN | Ensure system is disabled when audit logs are full"
+        shell: |
+            grep -E "^space_left_action\s" /etc/audit/auditd.conf |awk '{print $3}'| sed "s: ::g"
+        register: rhel7cis_rule_4_1_2_3_a_rc
+        ignore_errors: yes
+      - name: " 4.1.2.3 | SCAN | Ensure system is disabled when audit logs are full"
+        shell: |
+          grep -E "action_mail_acct\s" /etc/audit/auditd.conf |awk '{print $3}'| sed "s: ::g"
+        register: rhel7cis_rule_4_1_2_3_b_rc
+        ignore_errors: yes
+      - name: " 4.1.2.3 | SCAN | Ensure system is disabled when audit logs are full"
+        shell: |
+          grep -E "admin_space_left_action\s" /etc/audit/auditd.conf |awk '{print $3}'| sed "s: ::g"
+        register: rhel7cis_rule_4_1_2_3_c_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_2_3_result: false
+        when: rhel7cis_rule_4_1_2_3_a_rc.stdout != "syslog" or rhel7cis_rule_4_1_2_3_b_rc.stdout != "root" or rhel7cis_rule_4_1_2_3_c_rc.stdout != "suspend"
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.2.3':rhel7cis_rule_4_1_2_3_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_2_3
+    tags:
+     - level2
+     - scan
+     - rule_4.1.2.3
+     - rhel7
+
+#####
+  - name: " 4.1.2.4 | SCAN |  Ensure audit_backlog_limit is sufficient "
+    block:
+      - name: " 4.1.2.4  | SCAN |  Ensure audit_backlog_limit is sufficient"
+        shell:  |
+          [[ -f /boot/grub2/grub.cfg  ]] && grep "audit_backlog_limit={{ audit_backlog_limit }}" /boot/grub2/grub.cfg
+          exit $?
+        register: rhel7cis_rule_4_1_2_4_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_2_4_result: false
+        when: rhel7cis_rule_4_1_2_4_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.2.4':rhel7cis_rule_4_1_2_4_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_2_4
+    tags:
+     - level2
+     - scan
+     - rule_4.1.2.4
+     - rhel7
+
+#####
+  - name: " 4.1.3  | SCAN |  Ensure events that modify date and time information are collected "
+    block:
+      - name: " 4.1.3  | SCAN_32 |  Ensure events that modify date and time information are collected"
+        shell: |
+          grep time-change /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change'  | wc -l | sed "s: ::g"
+          grep time-change /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S clock_settime -k time-change'  | wc -l | sed "s: ::g"
+          grep time-change /etc/audit/rules.d/*.rules | grep -i '\-w /etc/localtime -p wa -k time-change'  | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_3_a_rc
+        ignore_errors: yes
+      - shell: |
+          auditctl -R /etc/audit/rules.d/audit.rules > /dev/null 2>&1
+          auditctl -R /etc/audit/rules.d/time_change.rules
+          auditctl -l |  grep -i '\-a always,exit -F arch=b32 -S stime,settimeofday,adjtimex -F key=time-change' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-a always,exit -F arch=b32 -S clock_settime -F key=time-change'  | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/localtime -p wa -k time-change'  | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_3_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_3_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_3_a_rc.stdout) or
+          ('0' in rhel7cis_rule_4_1_3_b_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.3':rhel7cis_rule_4_1_3_result|default(true)}) }}"
+    when: uname_output.stdout != "x86_64" and rhel7cis_rule_4_1_3
+    tags:
+     - level2
+     - scan
+     - rule_4.1.3
+     - rhel7
+
+  - name: " 4.1.3  | SCAN |  Ensure events that modify date and time information are collected "
+    block:
+      - name: " 4.1.3  | SCAN_64 |  Ensure events that modify date and time information are collected"
+        shell: |
+          grep time-change /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change' | wc -l | sed "s: ::g"
+          grep time-change /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change' | wc -l | sed "s: ::g"
+          grep time-change /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S clock_settime -k time-change' | wc -l | sed "s: ::g"
+          grep time-change /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S clock_settime -k time-change' | wc -l | sed "s: ::g"
+          grep time-change /etc/audit/rules.d/*.rules | grep -i '\-w /etc/localtime -p wa -k time-change' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_3_c_rc
+        ignore_errors: yes
+      - shell: |
+          auditctl -R /etc/audit/rules.d/audit.rules > /dev/null 2>&1
+          auditctl -R /etc/audit/rules.d/time_change.rules
+          auditctl -l |  grep -i '\-a always,exit -F arch=b64 -S adjtimex,settimeofday -F key=time-change' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-a always,exit -F arch=b32 -S stime,settimeofday,adjtimex -F key=time-change' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-a always,exit -F arch=b64 -S clock_settime -F key=time-change' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-a always,exit -F arch=b32 -S clock_settime -F key=time-change' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/localtime -p wa -k time-change' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_3_d_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_3_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_3_c_rc.stdout) or
+          ('0' in rhel7cis_rule_4_1_3_d_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.3':rhel7cis_rule_4_1_3_result|default(true)}) }}"
+    when: uname_output.stdout == "x86_64" and rhel7cis_rule_4_1_3
+    tags:
+     - level2
+     - scan
+     - rule_4.1.3
+     - rhel7
+
+
+######
+  - name: " 4.1.4  | SCAN | Ensure events that modify user/group information are collected  "
+    block:
+      - name: " 4.1.4  | SCAN | Ensure events that modify user/group information are collected "
+        shell: |
+          grep identity /etc/audit/rules.d/*.rules | grep -i '\-w /etc/group -p wa -k identity' | wc -l | sed "s: ::g"
+          grep identity /etc/audit/rules.d/*.rules | grep -i '\-w /etc/passwd -p wa -k identity' | wc -l | sed "s: ::g"
+          grep identity /etc/audit/rules.d/*.rules | grep -i '\-w /etc/gshadow -p wa -k identity' | wc -l | sed "s: ::g"
+          grep identity /etc/audit/rules.d/*.rules | grep -i '\-w /etc/shadow -p wa -k identity' | wc -l | sed "s: ::g"
+          grep identity /etc/audit/rules.d/*.rules | grep -i '\-w /etc/security/opasswd -p wa -k identity' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_4_a_rc
+        ignore_errors: yes
+      - shell:  |
+          auditctl -R /etc/audit/rules.d/audit.rules > /dev/null 2>&1
+          auditctl -R /etc/audit/rules.d/identity.rules
+          auditctl -l |  grep -i '\-w /etc/group -p wa -k identity' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/passwd -p wa -k identity' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/gshadow -p wa -k identity' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/shadow -p wa -k identity' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/security/opasswd -p wa -k identity' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_4_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_4_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_4_a_rc.stdout) or
+          ('0' in rhel7cis_rule_4_1_4_b_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.4':rhel7cis_rule_4_1_4_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_4
+    tags:
+     - level2
+     - scan
+     - rule_4.1.4
+     - rhel7
+
+#####
+  - name: " 4.1.5  | SCAN | Ensure events that modify the system's network environment are collected  "
+    block:
+      - name: " 4.1.5  | SCAN | Ensure events that modify the system's network environment are collected "
+        shell: |
+          grep system-locale /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale' | wc -l | sed "s: ::g"
+          grep system-locale /etc/audit/rules.d/*.rules | grep -i '\-w /etc/issue -p wa -k system-locale' | wc -l | sed "s: ::g"
+          grep system-locale /etc/audit/rules.d/*.rules | grep -i '\-w /etc/issue.net -p wa -k system-locale' | wc -l | sed "s: ::g"
+          grep system-locale /etc/audit/rules.d/*.rules | grep -i '\-w /etc/hosts -p wa -k system-locale' | wc -l | sed "s: ::g"
+          grep system-local /etc/audit/rules.d/*.rules | grep -i '\-w /etc/sysconfig/network -p wa -k system-locale' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_5_a_rc
+        ignore_errors: yes
+      - shell:  |
+          auditctl -R /etc/audit/rules.d/audit.rules > /dev/null 2>&1
+          auditctl -R /etc/audit/rules.d/system_local.rules
+          auditctl -l |  grep -i '\-a always,exit -F arch=b32 -S sethostname,setdomainname -F key=system-locale' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/issue -p wa -k system-locale' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/issue.net -p wa -k system-locale' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/hosts -p wa -k system-locale' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/sysconfig/network -p wa -k system-locale' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_5_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_5_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_5_a_rc.stdout) or
+          ('0' in rhel7cis_rule_4_1_5_b_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.5':rhel7cis_rule_4_1_5_result|default(true)}) }}"
+    when: uname_output.stdout != "x86_64" and rhel7cis_rule_4_1_5
+    tags:
+     - level2
+     - scan
+     - rule_4.1.5
+     - rhel7
+
+  - name: " 4.1.5  | SCAN | Ensure events that modify the system's network environment are collected  "
+    block:
+      - name: " 4.1.5  | SCAN | Ensure events that modify the system's network environment are collected "
+        shell: |
+          grep system-locale /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale' | wc -l | sed "s: ::g"
+          grep system-locale /etc/audit/rules.d/*.rules | grep -i '\-w /etc/issue -p wa -k system-locale' | wc -l | sed "s: ::g"
+          grep system-locale /etc/audit/rules.d/*.rules | grep -i '\-w /etc/issue.net -p wa -k system-locale' | wc -l | sed "s: ::g"
+          grep system-local /etc/audit/rules.d/*.rules | grep -i '\-w /etc/hosts -p wa -k system-locale' | wc -l | sed "s: ::g"
+          grep system-local /etc/audit/rules.d/*.rules | grep -i '\-w /etc/sysconfig/network -p wa -k system-locale' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_5_c_rc
+        ignore_errors: yes
+      - shell: |
+          auditctl -R /etc/audit/rules.d/audit.rules > /dev/null 2>&1
+          auditctl -R /etc/audit/rules.d/system_local.rules
+          auditctl -l |  grep -i '\-a always,exit -F arch=b32 -S sethostname,setdomainname -F key=system-locale' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/issue -p wa -k system-locale' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/issue.net -p wa -k system-locale' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/hosts -p wa -k system-locale' | wc -l | sed "s: ::g"
+          auditctl -l |  grep -i '\-w /etc/sysconfig/network -p wa -k system-locale' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_5_d_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_5_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_5_c_rc.stdout) or
+          ('0' in rhel7cis_rule_4_1_5_d_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.5':rhel7cis_rule_4_1_5_result|default(true)}) }}"
+    when: uname_output.stdout == "x86_64" and rhel7cis_rule_4_1_5
+    tags:
+     - level2
+     - scan
+     - rule_4.1.5
+     - rhel7
+
+#####
+  - name: " 4.1.6  | SCAN | Ensure events that modify the system's Mandatory Access Controls are collected "
+    block:
+      - name: " 4.1.6  | SCAN | Ensure events that modify the system's Mandatory Access Controls are collected "
+        shell:  |
+          grep MAC-policy /etc/audit/rules.d/*.rules | grep -i '\-w /etc/selinux/ -p wa -k MAC-policy' | wc -l | sed "s: ::g"
+          grep  MAC-policy /etc/audit/rules.d/*.rules | grep -i '\-w /usr/share/selinux/ -p wa -k MAC-policy' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_6_a_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_4_1_6_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_6_a_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.6':rhel7cis_rule_4_1_6_result|default(true)}) }}"
+    when:  rhel7cis_rule_4_1_6
+    tags:
+     - level2
+     - scan
+     - rule_4.1.6
+     - rhel7
+
+#####
+  - name: " 4.1.7  | SCAN | Ensure login and logout events are collected "
+    block:
+      - name: " 4.1.7  | SCAN | Ensure login and logout events are collected "
+        shell:  |
+           grep logins /etc/audit/rules.d/*.rules | grep -i '\-w /var/log/faillog -p wa -k logins' | wc -l | sed "s: ::g"
+           grep logins /etc/audit/rules.d/*.rules | grep -i '\-w /var/log/lastlog -p wa -k logins' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_7_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_7_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_7_a_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.7':rhel7cis_rule_4_1_7_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_7
+    tags:
+     - level2
+     - scan
+     - rule_4.1.7
+     - rhel7
+
+  - name: " 4.1.7  | SCAN_faillock | Ensure login and logout events are collected "
+    block:
+      - name: " 4.1.7  | SCAN_faillock | Ensure login and logout events are collected "
+        shell:   grep logins /etc/audit/rules.d/*.rules | grep -i '\-w /var/run/faillock/ -p wa -k logins'
+        register: rhel7cis_rule_4_1_7_l_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_7_result: false
+        when: rhel7cis_rule_4_1_7_l_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.7':rhel7cis_rule_4_1_7_result|default(true)}) }}"
+    when: pam_faillock == true and rhel7cis_rule_4_1_7
+    tags:
+     - level2
+     - scan
+     - rule_4.1.7
+     - rhel7
+
+  - name: " 4.1.7  | SCAN_tally2 | Ensure login and logout events are collected "
+    block:
+      - name: " 4.1.7  | SCAN_tally2 | Ensure login and logout events are collected "
+        shell:   grep logins /etc/audit/rules.d/*.rules | grep -i '\-w /var/log/tallylog -p wa -k logins'
+        register: rhel7cis_rule_4_1_7_m_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_7_result: false
+        when: rhel7cis_rule_4_1_7_m_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.7':rhel7cis_rule_4_1_7_result|default(true)}) }}"
+    when: pam_tally2 == true and rhel7cis_rule_4_1_7
+    tags:
+     - level2
+     - scan
+     - rule_4.1.7
+     - rhel7
+
+#####
+  - name: " 4.1.8  | SCAN | Ensure session initiation information is collected "
+    block:
+      - name: " 4.1.8  | SCAN | Ensure session initiation information is collected "
+        shell: |
+          grep -E '(session|logins)' /etc/audit/rules.d/*.rules | grep -i '\-w /var/run/utmp -p wa -k session' | wc -l | sed "s: ::g"
+          grep -E '(session|logins)' /etc/audit/rules.d/*.rules | grep -i '\-w /var/log/wtmp -p wa -k logins' | wc -l | sed "s: ::g"
+          grep -E '(session|logins)' /etc/audit/rules.d/*.rules | grep -i '\-w /var/log/btmp -p wa -k logins' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_8_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_8_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_8_a_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.8':rhel7cis_rule_4_1_8_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_8
+    tags:
+     - level2
+     - scan
+     - rule_4.1.8
+     - rhel7
+
+#####
+  - name: " 4.1.9  | SCAN | Ensure discretionary access control permission modification events are collected"
+    block:
+      - name: " 4.1.9  | SCAN_32 | Ensure discretionary access control permission modification events are collected"
+        shell: |
+          grep perm_mod /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' | wc -l | sed "s: ::g"
+          grep perm_mod /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' | wc -l | sed "s: ::g"
+          grep perm_mod /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_9_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_9_result: false
+        when:  >
+          ('0' in rhel7cis_rule_4_1_9_a_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.9':rhel7cis_rule_4_1_9_result|default(true)}) }}"
+    when: uname_output.stdout != "x86_64" and rhel7cis_rule_4_1_9
+    tags:
+     - level2
+     - scan
+     - rule_4.1.9
+     - rhel7
+
+  - name: " 4.1.9  | SCAN | Ensure discretionary access control permission modification events are collected"
+    block:
+      - name: " 4.1.9  | SCAN_64 | Ensure discretionary access control permission modification events are collected"
+        shell:  |
+          grep perm_mod /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' | wc -l | sed "s: ::g"
+          grep perm_mod /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' | wc -l | sed "s: ::g"
+          grep perm_mod /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' | wc -l | sed "s: ::g"
+          grep perm_mod /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' | wc -l | sed "s: ::g"
+          grep perm_mod /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' | wc -l | sed "s: ::g"
+          grep perm_mod /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_9_c_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_9_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_9_c_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.9':rhel7cis_rule_4_1_9_result|default(true)}) }}"
+    when: uname_output.stdout == "x86_64" and rhel7cis_rule_4_1_9
+    tags:
+     - level2
+     - scan
+     - rule_4.1.9
+     - rhel7
+
+#####
+  - name: " 4.1.10  | SCAN |  Ensure unsuccessful unauthorized file access attempts are collected"
+    block:
+      - name: " 4.1.10  | SCAN_32 |  Ensure unsuccessful unauthorized file access attempts are collected"
+        shell: |
+           grep access /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' | wc -l | sed "s: ::g"
+           grep access /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_10_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_10_result: false
+        when:  >
+          ('0' in rhel7cis_rule_4_1_10_a_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.10':rhel7cis_rule_4_1_10_result|default(true)}) }}"
+    when:  uname_output.stdout != "x86_64" and rhel7cis_rule_4_1_10
+    tags:
+     - level2
+     - scan
+     - rule_4.1.10
+     - rhel7
+
+  - name: " 4.1.10  | SCAN | Ensure unsuccessful unauthorized file access attempts are collected"
+    block:
+      - name: " 4.1.10  | SCAN_64 |  Ensure unsuccessful unauthorized file access attempts are collected"
+        shell: |
+          grep access /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' | wc -l | sed "s: ::g"
+          grep access /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' | wc -l | sed "s: ::g"
+          grep access /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' | wc -l | sed "s: ::g"
+          grep access /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_10_c_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_10_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_10_c_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.10':rhel7cis_rule_4_1_10_result|default(true)}) }}"
+    when: uname_output.stdout == "x86_64" and rhel7cis_rule_4_1_10
+    tags:
+     - level2
+     - scan
+     - rule_4.1.10
+     - rhel7
+
+#####
+  - name: " 4.1.11 | SCAN |   Ensure use of privileged commands is collected "
+    block:
+      - name: " 4.1.11  | SCAN |   Ensure use of privileged commands is collected"
+        shell:   awk '/^\s*UID_MIN/{print $2}' /etc/login.defs
+        register: rhel7cis_rule_4_1_11_a_rc
+        ignore_errors: yes
+      - shell: |
+          df --local -P | grep -v tmpfs | awk 'NR!=1{print $6}' | xargs -I '/' find '{}' -xdev \( -perm -4000 -o -perm -2000 \) -type f  2> /dev/null | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged" }' | while read rule
+          do
+            cat /etc/audit/audit.rules | grep "\\${rule}"  || exit 1
+          done
+        register: rhel7cis_rule_4_1_11_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_11_result: false
+        when: rhel7cis_rule_4_1_11_a_rc.stdout != "1000" or rhel7cis_rule_4_1_11_b_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.11':rhel7cis_rule_4_1_11_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_11
+    tags:
+     - level2
+     - scan
+     - rule_4.1.11
+     - rhel7
+
+#####
+  - name: " 4.1.12  | SCAN |  Ensure successful file system mounts are collected "
+    block:
+      - name: " 4.1.12  | SCAN_32 |  Ensure successful file system mounts are collected "
+        shell:   grep mounts /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts'
+        register: rhel7cis_rule_4_1_12_a_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_4_1_12_result: false
+        when:  rhel7cis_rule_4_1_12_a_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.12':rhel7cis_rule_4_1_12_result|default(true)}) }}"
+    when: uname_output.stdout != "x86_64" and rhel7cis_rule_4_1_12
+    tags:
+     - level2
+     - scan
+     - rule_4.1.12
+     - rhel7
+
+  - name: " 4.1.12  | SCAN |  Ensure successful file system mounts are collected "
+    block:
+      - name: " 4.1.12  | SCAN_64 |  Ensure successful file system mounts are collected "
+        shell: |
+           grep mounts /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' | wc -l | sed "s: ::g"
+           grep mounts /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_12_c_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_12_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_12_c_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.12':rhel7cis_rule_4_1_12_result|default(true)}) }}"
+    when: uname_output.stdout == "x86_64" and rhel7cis_rule_4_1_12
+    tags:
+     - level2
+     - scan
+     - rule_4.1.12
+     - rhel7
+
+#####
+  - name: " 4.1.13  | SCAN | Ensure file deletion events by users are collected "
+    block:
+      - name: " 4.1.13  | SCAN_32 | Ensure file deletion events by users are collected "
+        shell:   grep delete /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete'
+        register: rhel7cis_rule_4_1_13_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_13_result: false
+        when: rhel7cis_rule_4_1_13_a_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.13':rhel7cis_rule_4_1_13_result|default(true)}) }}"
+    when: uname_output.stdout != "x86_64" and rhel7cis_rule_4_1_13
+    tags:
+     - level2
+     - scan
+     - rule_4.1.13
+     - rhel7
+
+  - name: " 4.1.13  | SCAN | Ensure file deletion events by users are collected "
+    block:
+      - name: " 4.1.13  | SCAN_64 | Ensure file deletion events by users are collected "
+        shell: |
+          grep delete /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete' | wc -l | sed "s: ::g"
+          grep delete /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_13_c_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_13_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_13_c_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.13':rhel7cis_rule_4_1_13_result|default(true)}) }}"
+    when: uname_output.stdout == "x86_64" and rhel7cis_rule_4_1_13
+    tags:
+     - level2
+     - scan
+     - rule_4.1.13
+     - rhel7
+
+#####
+  - name: " 4.1.14  | SCAN |  Ensure changes to system administration scope (sudoers) is collected "
+    block:
+      - name: " 4.1.14  | SCAN | Ensure changes to system administration scope (sudoers) is collected"
+        shell: |
+          grep scope /etc/audit/rules.d/*.rules | grep -i '\-w /etc/sudoers' |wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_14_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_14_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_14_a_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.14':rhel7cis_rule_4_1_14_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_14
+    tags:
+     - level2
+     - scan
+     - rule_4.1.14
+     - rhel7
+
+#####
+  - name: " 4.1.15  | SCAN |  Ensure system administrator actions (sudolog) are collected "
+    block:
+      - name: " 4.1.15  | SCAN |  Ensure system administrator actions (sudolog) are collected"
+        shell:   grep actions /etc/audit/rules.d/*.rules| grep -i '\-w /var/log/sudo.log -p wa'
+        register: rhel7cis_rule_4_1_15_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_15_result: false
+        when: rhel7cis_rule_4_1_15_a_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.15':rhel7cis_rule_4_1_15_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_15
+    tags:
+     - level2
+     - scan
+     - rule_4.1.15
+     - rhel7
+
+  #####
+  - name: " 4.1.16  | SCAN | Ensure kernel module loading and unloading is collected  "
+    block:
+      - name: " 4.1.16  | SCAN_32 | Ensure kernel module loading and unloading is collected  "
+        shell: |
+          grep modules /etc/audit/rules.d/*.rules | grep -i '\-w /sbin/insmod -p x -k modules' | wc -l | sed "s: ::g"
+          grep modules /etc/audit/rules.d/*.rules | grep -i '\-w /sbin/rmmod -p x -k modules' | wc -l | sed "s: ::g"
+          grep modules /etc/audit/rules.d/*.rules | grep -i '\-w /sbin/modprobe -p x -k modules' | wc -l | sed "s: ::g"
+          grep modules /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b32 -S init_module -S delete_module -k modules' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_16_a_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_16_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_16_a_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.16':rhel7cis_rule_4_1_16_result|default(true)}) }}"
+    when:  uname_output.stdout != "x86_64" and rhel7cis_rule_4_1_16
+    tags:
+     - level2
+     - scan
+     - rule_4.1.16
+     - rhel7
+
+  - name: " 4.1.16  | SCAN |  Ensure kernel module loading and unloading is collected  "
+    block:
+      - name: " 4.1.16  | SCAN_64 |  Ensure kernel module loading and unloading is collected  "
+        shell:  |
+          grep modules /etc/audit/rules.d/*.rules | grep -i '\-w /sbin/insmod -p x -k modules' | wc -l | sed "s: ::g"
+          grep modules /etc/audit/rules.d/*.rules | grep -i '\-w /sbin/rmmod -p x -k modules' | wc -l | sed "s: ::g"
+          grep modules /etc/audit/rules.d/*.rules | grep -i '\-w /sbin/modprobe -p x -k modules' | wc -l | sed "s: ::g"
+          grep modules /etc/audit/rules.d/*.rules | grep -i '\-a always,exit -F arch=b64 -S init_module -S delete_module -k modules' | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_1_16_c_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_1_16_result: false
+        when: >
+          ('0' in rhel7cis_rule_4_1_16_c_rc.stdout)
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.16':rhel7cis_rule_4_1_16_result|default(true)}) }}"
+    when: uname_output.stdout == "x86_64" and rhel7cis_rule_4_1_16
+    tags:
+     - level2
+     - scan
+     - rule_4.1.16
+     - rhel7
+
+#####
+  - name: " 4.1.17  | SCAN |  Ensure the audit configuration is immutable"
+    block:
+      - name: " 4.1.17  | SCAN | Ensure the audit configuration is immutable"
+        shell: grep "^\s*[^#]" /etc/audit/rules.d/99-finalize.rules | tail -1
+        register: rhel7cis_rule_4_1_17_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_4_1_17_result: false
+        when: rhel7cis_rule_4_1_17_rc.stdout != "-e 2"
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.17':rhel7cis_rule_4_1_17_result|default(true)}) }}"
+    when: rhel7cis_rule_4_1_17
+    tags:
+     - level2
+     - scan
+     - rule_4.1.17
+     - rhel7
+
+#####
+  - name: " 4.2.1.1 | SCAN | Ensure rsyslog is installed "
+    block:
+      - name: " 4.2.1.1 | SCAN | Ensure rsyslog is installed "
+        shell:   rpm -q rsyslog
+        register: rhel7cis_rule_4_2_1_1_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_2_1_1_result: false
+        when: rhel7cis_rule_4_2_1_1_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.2.1.1':rhel7cis_rule_4_2_1_1_result|default(true)}) }}"
+    when: rhel7cis_rule_4_2_1_1
+    tags:
+     - level1
+     - scan
+     - rule_4.2.1.1
+     - rhel7
+
+#####
+  - name: " 4.2.1.2 | SCAN |  Ensure rsyslog Service is enabled and running "
+    block:
+      - name: " 4.2.1.2 | SCAN |  Ensure rsyslog Service is enabled and running "
+        shell:   systemctl is-enabled rsyslog
+        register: rhel7cis_rule_4_2_1_2_a_rc
+        ignore_errors: yes
+      - shell:    systemctl is-active rsyslog
+        register: rhel7cis_rule_4_2_1_2_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_2_1_2_result: false
+        when: rhel7cis_rule_4_2_1_2_a_rc.stdout != "enabled" or rhel7cis_rule_4_2_1_2_b_rc.stdout != "active"
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.2.1.2':rhel7cis_rule_4_2_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_4_2_1_2
+    tags:
+     - level1
+     - scan
+     - rule_4.2.1.2
+     - rhel7
+#####
+  - name: " 4.2.1.3 | SCAN | Ensure rsyslog default file permissions configured "
+    block:
+      - name: " 4.2.1.3 | SCAN | Ensure rsyslog default file permissions configured "
+        shell:    grep ^\$FileCreateMode /etc/rsyslog.conf /etc/rsyslog.d/*.conf | grep -Ei '\$FileCreateMode\s0640'
+        register: rhel7cis_rule_4_2_1_3_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_2_1_3_result: false
+        when: rhel7cis_rule_4_2_1_3_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.2.1.3':rhel7cis_rule_4_2_1_3_result|default(true)}) }}"
+    when: rhel7cis_rule_4_2_1_3
+    tags:
+     - level1
+     - scan
+     - rule_4.2.1.3
+     - rhel7
+
+#####
+  - name: " 4.2.1.4 | SCAN | Ensure logging is configured (Review Only)"
+    block:
+      - name: " 4.2.1.4 | SCAN | Ensure logging is configured (Review Only)"
+        shell:    ls -l /var/log/
+        register: rhel7cis_rule_4_2_1_4_rc
+        ignore_errors: yes
+      - debug:
+          var: rhel7cis_rule_4_2_1_4_rc.stdout_lines
+#         msg:
+#         - "Please verify that the log files are logging information: {{ rhel7cis_rule_4_2_1_4_rc.stdout_lines | list }}. "
+#         - "Please review the contents of the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files to ensure appropriate logging is set."
+#         - "Once verified, please set rhel7cis_rule_4_2_1_4 to true in default/main.yml ."
+        register: rhel7cis_rule_4_2_1_4_logfiles_list
+
+    when: rhel7cis_rule_4_2_1_4
+    tags:
+     - level1
+     - scan
+     - rule_4.2.1.4
+     - rhel7
+
+#####
+#  - name: " 4.2.1.5 | SCAN | Ensure rsyslog is configured to send logs to a remote log host  "
+#    block:
+#      - name: " 4.2.1.5 | SCAN | Ensure rsyslog is configured to send logs to a remote log host "
+#        shell:    grep "^*.*[^I][^I]*@" /etc/rsyslog.conf /etc/rsyslog.d/*.conf | grep -Ei '*.*\s@@{{ central_loghost }}'
+#        register: rhel7cis_rule_4_2_1_5_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_4_2_1_5_result: false
+#        when: rhel7cis_rule_4_2_1_5_rc.rc != 0
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'4.2.1.5':rhel7cis_rule_4_2_1_5_result|default(true)}) }}"
+#    when: rhel7cis_rule_4_2_1_5
+#    tags:
+#     - level1
+#     - scan
+#     - rule_4.2.1.5
+#     - rhel7
+#
+#####
+#  - name: " 4.2.1.6 | SCAN | Ensure remote rsyslog messages are only accepted on designated log hosts.   "
+#    block:
+#      - name: " 4.2.1.6 | SCAN | Ensure remote rsyslog messages are only accepted on designated log hosts (that are not designated as log hosts)."
+#        shell:   grep -Ei '\$ModLoad\simtcp' /etc/rsyslog.conf /etc/rsyslog.d/*.conf | grep -Ei '\#\$ModLoad\simtcp'
+#        register: rhel7cis_rule_4_2_1_6_a_rc
+#        ignore_errors: yes
+#      - shell:    grep -Ei '\$InputTCPServerRun' /etc/rsyslog.conf /etc/rsyslog.d/*.conf | grep -Ei '\#\$InputTCPServerRun\s514'
+#        register: rhel7cis_rule_4_2_1_6_b_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_4_2_1_6_result: false
+#        when: rhel7cis_rule_4_2_1_6_a_rc.rc != 0 or rhel7cis_rule_4_2_1_6_b_rc.rc != 0
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'4.2.1.6':rhel7cis_rule_4_2_1_6_result|default(true)}) }}"
+#    when: rhel7cis_rule_4_2_1_6
+#    tags:
+#     - level1
+#     - scan
+#     - rule_4.2.1.6
+#     - rhel7
+#
+#####
+  - name: " 4.2.2.1 | SCAN | Ensure rsyslog is configured to send logs to a remote log host  "
+    block:
+      - name: " 4.2.2.1 | SCAN | Ensure rsyslog is configured to send logs to a remote log host "
+        shell:  grep -v ^# /etc/systemd/journald.conf | grep -i 'ForwardToSyslog=yes'
+        register: rhel7cis_rule_4_2_2_1_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_2_2_1_result: false
+        when: rhel7cis_rule_4_2_2_1_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.2.2.1':rhel7cis_rule_4_2_2_1_result|default(true)}) }}"
+    when: rhel7cis_rule_4_2_2_1
+    tags:
+     - level1
+     - scan
+     - rule_4.2.2.1
+     - rhel7
+
+#####
+  - name: " 4.2.2.2 | SCAN | Ensure journald is configured to compress large log files   "
+    block:
+      - name: " 4.2.2.2 | SCAN | Ensure journald is configured to compress large log files  "
+        shell:   grep -v ^# /etc/systemd/journald.conf | grep -i 'Compress=yes'
+        register: rhel7cis_rule_4_2_2_2_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_2_2_2_result: false
+        when: rhel7cis_rule_4_2_2_2_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.2.2.2':rhel7cis_rule_4_2_2_2_result|default(true)}) }}"
+    when: rhel7cis_rule_4_2_2_2
+    tags:
+     - level1
+     - scan
+     - rule_4.2.2.2
+     - rhel7
+
+#####
+  - name: " 4.2.2.3 | SCAN |  Ensure journald is configured to write logfiles to persistent disk   "
+    block:
+      - name: " 4.2.2.3 | SCAN |  Ensure journald is configured to write logfiles to persistent disk  "
+        shell:  grep -v ^# /etc/systemd/journald.conf | grep -i 'Storage=persistent'
+        register: rhel7cis_rule_4_2_2_3_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_2_2_3_result: false
+        when: rhel7cis_rule_4_2_2_3_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.2.2.3':rhel7cis_rule_4_2_2_3_result|default(true)}) }}"
+    when: rhel7cis_rule_4_2_2_3
+    tags:
+     - level1
+     - scan
+     - rule_4.2.2.3
+     - rhel7
+
+#####
+  - name: " 4.2.3 | SCAN | Ensure permissions on all logfiles are configured "
+    block:
+      - name: " 4.2.3 | SCAN | Ensure permissions on all logfiles are configured "
+        shell:  |
+           find /var/log -type f -perm /g+wx,o+rwx -exec ls -l {} \; 2> /dev/null | wc -l | sed "s: ::g"
+        register: rhel7cis_rule_4_2_3_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_4_2_3_result: false
+        when: rhel7cis_rule_4_2_3_rc.stdout != "0"
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.2.3':rhel7cis_rule_4_2_3_result|default(true)}) }}"
+    when: rhel7cis_rule_4_2_3
+    tags:
+     - level1
+     - scan
+     - rule_4.2.3
+     - rhel7
+
+#####
+  - name: " 4.2.4 | SCAN | Ensure logrotate is configured"
+    block:
+      - name: " 4.2.4 | SCAN | Ensure logrotate is configured "
+        debug:
+         msg:
+         - "Review /etc/logrotate.conf and /etc/logrotate.d/* and verify logs are rotated according to site policy."
+         - "Once verified, please set rhel7cis_rule_4_2_4 to true in default/main.yml ."
+        register: rhel7cis_rule_4_2_4_logrotate_review_msg
+
+    when: rhel7cis_rule_4_2_4
+    tags:
+     - level1
+     - scan
+     - rule_4.2.4
+     - rhel7
+#####
+#####

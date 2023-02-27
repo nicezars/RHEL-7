@@ -1,0 +1,32 @@
+---
+#
+# Copyright 2020
+# Description: this playbook is dedicated for Telkomsel Indonesia  
+# Playbooks contains below 6 Sections
+#
+#  Section 1: Initial setup hardening scans
+#  Section 2: OS services
+#  Section 3: Network Configuration and Firewalls
+#  Section 4: Logging and Auditing
+#  Section 5: System Access, Authentication and Authoriazation
+#  Section 6: System Maintenance 
+
+   - import_tasks: section1-scan.yml
+     when: section01 | bool
+     tags: section01
+   - import_tasks: section2-scan.yml
+     when: section02 | bool
+     tags: section02
+   - import_tasks: section3-scan.yml
+     when: section03 | bool
+     tags: section03
+   - import_tasks: section4-scan.yml
+     when: section04 | bool
+     tags: section04
+   - import_tasks: section5-scan.yml
+     when: section05 | bool
+     tags: section05
+   - import_tasks: section6-scan.yml
+     when: section06 | bool
+     tags: section06
+

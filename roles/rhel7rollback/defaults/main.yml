@@ -1,0 +1,351 @@
+#Project Name
+Project_Name: "Telkomsel"
+
+### Variables
+
+# This is for user creating - login.defs
+#password_max_days: 90
+#password_min_days: 7
+#password_min_len:  8
+#password_warn_age: 7
+
+# pwquality.conf
+#minlen: 14
+dcredit: "-1"
+ucredit: "-1"
+ocredit: "-1"
+lcredit: "-1"
+
+#####
+
+#NTP Server
+ntp_servers: !!str 0.rhel.pool.ntp.org|1.rhel.pool.ntp.org
+
+#Login Banner Text
+login_banner_text: !!str You are accessing a Private Information System that is provided for authorized use only
+
+#Warning Messages
+warning_text: !!str Authorized uses only. All activity may be monitored and reported.
+
+#/etc/fstab or systemd used for mount
+etc_fstab_used: true
+systemd_used: false
+
+#UEFI used
+rhel7cis_rule_1_1_1_4_uefi: false
+
+#Set selinux mode to enforcing or permissive
+selinux_mode: !!str enforcing
+
+#Cron daemon requirement
+crond_required: true
+
+#at daemon requirement
+at_required: true
+
+#Set account expiration following inactivity
+var_account_disable_post_pw_expiration: "30"
+
+#Grub2 password
+#grub2_password: redhat
+
+#Empty group name for su command 5.6
+groupname_for_su: !!str sugroup
+
+#Ensure SSH access is limited to the following users and groups 5.2.4
+allow_users: !!str root
+allow_groups: !!str root
+deny_users: !!str user1
+deny_groups: !!str group1
+
+#SSH LogLevel (VERBOSE or INFO) 5.2.5
+log_level: !!str VERBOSE
+
+#SSH idle timeout interval 5.2.16
+clientaliveinterval: "300"
+clientalivecountmax: "3"
+
+#Host designated as log host 4.2.1.6
+designated_log_host: true
+
+#GNOME Display Manager requirement
+rhel7cis_rule_1_10_gdm_required: true
+
+#Wired networks available
+rhel7cis_rule_3_1_2_wired: true
+
+#Disable IPv6
+rhel7cis_rule_3_1_1_ipv6_disable: false
+#Disable IPv6 through one of the following option
+ipv6_disable_through_grub2: true
+ipv6_disable_through_sysctl: true
+
+#Host itself act as a router 3.2.2
+rhel7cis_is_router: false
+
+#Default Zone set according to company policy
+default_zone: !!str public
+
+#Audit Log Storage size according to company policy
+log_storage_size: "8"
+audit_backlog_limit: "2048"
+
+#Choose if either pam_faillock.so module or pam_tally2.so module is used
+#If neither, set both variables to false
+pam_faillock: true
+pam_tally2: false
+
+#Choose if either pam_pwhistory.so module OR pam_unix.so module is used
+pam_pwhistory: true
+pam_unix: true
+
+#Central Log Host
+central_loghost: loghost.example.com
+
+# Time Synchronization
+# To be configured to synchronize their time using a service such as NTP or chrony
+# synchronize_service_name: chrony
+synchronize_service_name: ntp
+
+### CIS Sections and Rules
+section01: true
+section02: true
+section03: true
+section04: true
+section05: true
+section06: true
+
+
+### CIS Section 1
+rhel7cis_rule_1_1_1_1: false
+rhel7cis_rule_1_1_1_2: false
+rhel7cis_rule_1_1_1_3: false
+rhel7cis_rule_1_1_1_4: false
+rhel7cis_rule_1_1_1_4_uefi: false
+rhel7cis_rule_1_1_2: false
+rhel7cis_rule_1_1_3: true
+rhel7cis_rule_1_1_4: true
+rhel7cis_rule_1_1_5: true
+rhel7cis_rule_1_1_6: false
+rhel7cis_rule_1_1_7: true
+rhel7cis_rule_1_1_8: true
+rhel7cis_rule_1_1_9: true
+rhel7cis_rule_1_1_10: false
+rhel7cis_rule_1_1_11: false
+rhel7cis_rule_1_1_12: true
+rhel7cis_rule_1_1_13: true
+rhel7cis_rule_1_1_14: true
+rhel7cis_rule_1_1_15: false
+rhel7cis_rule_1_1_16: false
+rhel7cis_rule_1_1_17: false
+rhel7cis_rule_1_1_18: true
+rhel7cis_rule_1_1_19: false
+rhel7cis_rule_1_1_20: false
+rhel7cis_rule_1_1_21: false
+rhel7cis_rule_1_1_22: false
+rhel7cis_rule_1_1_23: false
+rhel7cis_rule_1_1_24: false
+rhel7cis_rule_1_2_1: false
+rhel7cis_rule_1_2_2: false
+rhel7cis_rule_1_2_3: false
+rhel7cis_rule_1_2_4: false
+rhel7cis_rule_1_2_5: false
+rhel7cis_rule_1_3_1: false
+rhel7cis_rule_1_3_2: false
+rhel7cis_rule_1_3_3: false
+rhel7cis_rule_1_4_1: false
+rhel7cis_rule_1_4_2: false
+rhel7cis_rule_1_5_1: false
+rhel7cis_rule_1_5_2: false
+rhel7cis_rule_1_5_3: false
+rhel7cis_rule_1_6_1: false
+rhel7cis_rule_1_6_2: false
+rhel7cis_rule_1_6_3: true
+rhel7cis_rule_1_6_4: false
+rhel7cis_rule_1_7_1_1: false
+rhel7cis_rule_1_7_1_2: false
+rhel7cis_rule_1_7_1_3: false
+rhel7cis_rule_1_7_1_4: false
+rhel7cis_rule_1_7_1_5: false
+rhel7cis_rule_1_7_1_6: false
+rhel7cis_rule_1_7_1_7: false
+rhel7cis_rule_1_7_1_8: false
+rhel7cis_rule_1_8_1_1: true
+rhel7cis_rule_1_8_1_2: true
+rhel7cis_rule_1_8_1_3: true
+rhel7cis_rule_1_8_1_4: true
+rhel7cis_rule_1_8_1_5: true
+rhel7cis_rule_1_8_1_6: true
+rhel7cis_rule_1_9: false
+rhel7cis_rule_1_10: false
+
+### CIS Section 2
+rhel7cis_rule_2_1_1: false
+rhel7cis_rule_2_2_1_1: false
+rhel7cis_rule_2_2_1_2: false
+rhel7cis_rule_2_2_1_3: false
+rhel7cis_rule_2_2_2: false
+rhel7cis_rule_2_2_3: false
+rhel7cis_rule_2_2_4: false
+rhel7cis_rule_2_2_5: true
+rhel7cis_rule_2_2_6: true
+rhel7cis_rule_2_2_7: false
+rhel7cis_rule_2_2_8: false
+rhel7cis_rule_2_2_9: true
+rhel7cis_rule_2_2_10: true
+rhel7cis_rule_2_2_11: false
+rhel7cis_rule_2_2_12: true
+rhel7cis_rule_2_2_13: true
+rhel7cis_rule_2_2_14: true
+rhel7cis_rule_2_2_15: true
+rhel7cis_rule_2_2_16: true
+rhel7cis_rule_2_2_17: true
+rhel7cis_rule_2_2_18: true
+rhel7cis_rule_2_2_19: true
+rhel7cis_rule_2_3_1: false
+rhel7cis_rule_2_3_2: false
+rhel7cis_rule_2_3_3: false
+rhel7cis_rule_2_3_4: false
+rhel7cis_rule_2_3_5: false
+rhel7cis_rule_2_4: false
+
+### CIS Section 3
+rhel7cis_rule_3_1_1: false
+rhel7cis_rule_3_1_2: false
+rhel7cis_rule_3_2_1: true
+rhel7cis_rule_3_2_2: true
+rhel7cis_rule_3_3_1: true
+rhel7cis_rule_3_3_2: true
+rhel7cis_rule_3_3_3: true
+rhel7cis_rule_3_3_4: true
+rhel7cis_rule_3_3_5: true
+rhel7cis_rule_3_3_6: true
+rhel7cis_rule_3_3_7: false
+rhel7cis_rule_3_3_8: true
+rhel7cis_rule_3_3_9: true
+rhel7cis_rule_3_4_1: false
+rhel7cis_rule_3_4_2: false
+rhel7cis_rule_3_5_1_1: false
+rhel7cis_rule_3_5_1_2: false
+rhel7cis_rule_3_5_1_3: false
+rhel7cis_rule_3_5_1_4: false
+rhel7cis_rule_3_5_1_5: false
+rhel7cis_rule_3_5_1_6: false
+rhel7cis_rule_3_5_1_7: false
+
+### CIS Section 4
+rhel7cis_rule_4_1_1_1: true
+rhel7cis_rule_4_1_1_2: true
+rhel7cis_rule_4_1_1_3: true
+rhel7cis_rule_4_1_2_1: true
+rhel7cis_rule_4_1_2_2: true
+rhel7cis_rule_4_1_2_3: true
+rhel7cis_rule_4_1_2_4: true
+rhel7cis_rule_4_1_3: true
+rhel7cis_rule_4_1_4: true
+rhel7cis_rule_4_1_5: true
+rhel7cis_rule_4_1_6: false
+rhel7cis_rule_4_1_7: true
+rhel7cis_rule_4_1_8: false
+rhel7cis_rule_4_1_9: false
+rhel7cis_rule_4_1_10: false
+rhel7cis_rule_4_1_11: false
+rhel7cis_rule_4_1_12: false
+rhel7cis_rule_4_1_13: true
+rhel7cis_rule_4_1_14: true
+rhel7cis_rule_4_1_15: false
+rhel7cis_rule_4_1_16: false
+rhel7cis_rule_4_1_17: false
+rhel7cis_rule_4_2_1_1: true
+rhel7cis_rule_4_2_1_2: true
+rhel7cis_rule_4_2_1_3: true
+rhel7cis_rule_4_2_1_4: false
+rhel7cis_rule_4_2_1_5: false
+rhel7cis_rule_4_2_1_6: false
+rhel7cis_rule_4_2_2_1: true
+rhel7cis_rule_4_2_2_2: true
+rhel7cis_rule_4_2_2_3: true
+rhel7cis_rule_4_2_3: false
+rhel7cis_rule_4_2_4: false
+
+### CIS Section 5
+rhel7cis_rule_5_1_1: true
+rhel7cis_rule_5_1_2: true
+rhel7cis_rule_5_1_3: true
+rhel7cis_rule_5_1_4: true
+rhel7cis_rule_5_1_5: true
+rhel7cis_rule_5_1_6: true
+rhel7cis_rule_5_1_7: true
+rhel7cis_rule_5_1_8: true
+rhel7cis_rule_5_1_9: true
+rhel7cis_rule_5_2_1: true
+rhel7cis_rule_5_2_2: false
+rhel7cis_rule_5_2_3: false
+rhel7cis_rule_5_2_4: false
+rhel7cis_rule_5_2_5: true
+rhel7cis_rule_5_2_6: true
+rhel7cis_rule_5_2_7: true
+rhel7cis_rule_5_2_8: true
+rhel7cis_rule_5_2_9: true
+rhel7cis_rule_5_2_10: false
+rhel7cis_rule_5_2_11: true
+rhel7cis_rule_5_2_12: true
+rhel7cis_rule_5_2_13: false
+rhel7cis_rule_5_2_14: false
+rhel7cis_rule_5_2_15: false
+rhel7cis_rule_5_2_16: true
+rhel7cis_rule_5_2_17: true
+rhel7cis_rule_5_2_18: true
+rhel7cis_rule_5_2_19: false
+rhel7cis_rule_5_2_20: true
+rhel7cis_rule_5_2_21: true
+rhel7cis_rule_5_2_22: true
+rhel7cis_rule_5_3_1: false
+rhel7cis_rule_5_3_2: false
+rhel7cis_rule_5_3_3: false
+rhel7cis_rule_5_3_4: false
+rhel7cis_rule_5_4_1_1: false
+rhel7cis_rule_5_4_1_2: false
+rhel7cis_rule_5_4_1_3: false
+rhel7cis_rule_5_4_1_4: false
+rhel7cis_rule_5_4_1_5: false
+rhel7cis_rule_5_4_2: false
+rhel7cis_rule_5_4_3: false
+rhel7cis_rule_5_4_4: false
+rhel7cis_rule_5_4_5: false
+rhel7cis_rule_5_5: false
+rhel7cis_rule_5_6: false
+
+### CIS Section 6
+rhel7cis_rule_6_1_1: false
+rhel7cis_rule_6_1_2: true
+rhel7cis_rule_6_1_3: true
+rhel7cis_rule_6_1_4: true
+rhel7cis_rule_6_1_5: true
+rhel7cis_rule_6_1_6: true
+rhel7cis_rule_6_1_7: true
+rhel7cis_rule_6_1_8: true
+rhel7cis_rule_6_1_9: true
+rhel7cis_rule_6_1_10: false
+rhel7cis_rule_6_1_11: false
+rhel7cis_rule_6_1_12: false
+rhel7cis_rule_6_1_13: false
+rhel7cis_rule_6_1_14: false
+rhel7cis_rule_6_2_1: false
+rhel7cis_rule_6_2_2: false
+rhel7cis_rule_6_2_3: false
+rhel7cis_rule_6_2_4: false
+rhel7cis_rule_6_2_5: false
+rhel7cis_rule_6_2_6: false
+rhel7cis_rule_6_2_7: false
+rhel7cis_rule_6_2_8: false
+rhel7cis_rule_6_2_9: true
+rhel7cis_rule_6_2_10: true
+rhel7cis_rule_6_2_11: true
+rhel7cis_rule_6_2_12: true
+rhel7cis_rule_6_2_13: false
+rhel7cis_rule_6_2_14: false
+rhel7cis_rule_6_2_15: false
+rhel7cis_rule_6_2_16: false
+rhel7cis_rule_6_2_17: false
+rhel7cis_rule_6_2_18: false

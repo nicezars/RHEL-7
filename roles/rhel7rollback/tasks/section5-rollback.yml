@@ -1,0 +1,1649 @@
+---
+#
+# Copyright 2020
+# This section contains 46 rules
+#
+#####
+  - name: " 5.1.1 | ROLLBACK |  Ensure cron daemon is enabled and running"
+    block:
+     - set_fact:
+         before_status: "yes"
+       ignore_errors: yes
+       when: all_results['5.1.1'].audits.status == "enabled"
+     - set_fact:
+         before_status: "no"
+       ignore_errors: yes
+       when: all_results['5.1.1'].audits.status != "enabled"
+     - set_fact:
+         before_state: "started"
+       ignore_errors: yes
+       when: all_results['5.1.1'].audits.state == "running"
+     - set_fact:
+         before_state: "stopped"
+       ignore_errors: yes
+       when: all_results['5.1.1'].audits.state is not defined or all_results['5.1.1'].audits.state != "running"
+     - name: " 5.1.1 | ROLLBACK |  Ensure cron daemon is enabled and running"
+       systemd:
+         name: crond
+         state: "{{ before_state }}"
+         enabled: "{{ before_status }}"
+       ignore_errors: yes
+    when:
+      - rhel7cis_rule_5_1_1
+      - crond_required == true
+      - ( all_results['5.1.1'].audits is defined )
+      - all_results['5.1.1'].audits|length > 0
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.1
+     - rhel7
+
+  - name: " 5.1.1 | ROLLBACK |  Ensure cron daemon is removed"
+    block:
+    - set_fact:
+        before_state: "absent"
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['5.1.1'].audits.name is defined
+    - name: " 5.1.1 | ROLLBACK |  Ensure cron daemon is removed"
+      yum:
+        name: cronie
+        state: "{{ before_state }}"
+        conf_file: '/etc/yum.conf'
+      ignore_errors: yes
+    when: rhel7cis_rule_5_1_1 and crond_required == false
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.1
+     - rhel7
+
+#####
+  - name: " 5.1.2 | ROLLBACK | Ensure permissions on /etc/crontab are configured"
+    block:
+    - name: " 5.1.2 | ROLLBACK |  Ensure permissions on /etc/crontab are configured"
+      file:
+        path: /etc/crontab
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.2'].audits.stat.exists == false
+    - block:
+      - name: " 5.1.2 | ROLLBACK |  Ensure permissions on /etc/crontab are configured  "
+        set_fact:
+          before_mode: "{{ all_results['5.1.2'].audits.stat.mode }}"
+          before_user: "{{ all_results['5.1.2'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['5.1.2'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/crontab
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['5.1.2'].audits.stat.exists == true
+    when: crond_required == true and rhel7cis_rule_5_1_2
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.2
+     - rhel7
+
+#####
+  - name: " 5.1.3 | ROLLBACK |  Ensure permissions on /etc/cron.hourly are configured "
+    block:
+    - name: " 5.1.3 | ROLLBACK |  Ensure permissions on /etc/cron.hourly are configured "
+      file:
+        path: /etc/cron.hourly
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.3'].audits.stat.exists == false
+    - block:
+      - name: " 5.1.3 | ROLLBACK |  Ensure permissions on /etc/cron.hourly are configured  "
+        set_fact:
+          before_mode: "{{ all_results['5.1.3'].audits.stat.mode }}"
+          before_user: "{{ all_results['5.1.3'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['5.1.3'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/cron.hourly
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['5.1.2'].audits.stat.exists == true
+    when: crond_required == true and rhel7cis_rule_5_1_3
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.3
+     - rhel7
+
+#####
+  - name: " 5.1.4 | ROLLBACK | Ensure permissions on /etc/cron.daily are configured "
+    block:
+    - name: " 5.1.4 | ROLLBACK | Ensure permissions on /etc/cron.daily are configured "
+      file:
+        path: /etc/cron.daily
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.4'].audits.stat.exists == false
+    - block:
+      - name: " 5.1.4 | ROLLBACK |  Ensure permissions on /etc/cron.daily are configured  "
+        set_fact:
+          before_mode: "{{ all_results['5.1.4'].audits.stat.mode }}"
+          before_user: "{{ all_results['5.1.4'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['5.1.4'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/cron.daily
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['5.1.4'].audits.stat.exists == true
+    when: crond_required == true and rhel7cis_rule_5_1_4
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.4
+     - rhel7
+
+#####
+  - name: " 5.1.5 | ROLLBACK |  Ensure permissions on /etc/cron.weekly are configured  "
+    block:
+    - name: " 5.1.5 | ROLLBACK |  Ensure permissions on /etc/cron.weekly are configured  "
+      file:
+        path: /etc/cron.weekly
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.5'].audits.stat.exists == false
+    - block:
+      - name: " 5.1.5 | ROLLBACK |  Ensure permissions on /etc/cron.weekly are configured  "
+        set_fact:
+          before_mode: "{{ all_results['5.1.5'].audits.stat.mode }}"
+          before_user: "{{ all_results['5.1.5'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['5.1.5'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/cron.weekly
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['5.1.5'].audits.stat.exists == true
+    when: crond_required == true and rhel7cis_rule_5_1_5
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.5
+     - rhel7
+
+#####
+  - name: " 5.1.6 | ROLLBACK | Ensure permissions on /etc/cron.monthly are configured  "
+    block:
+    - name: " 5.1.6 | ROLLBACK |  Ensure permissions on /etc/cron.monthly are configured "
+      file:
+        path: /etc/cron.monthly
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.6'].audits.stat.exists == false
+    - block:
+      - name: " 5.1.6 | ROLLBACK |  Ensure permissions on /etc/cron.monthly are configured  "
+        set_fact:
+          before_mode: "{{ all_results['5.1.6'].audits.stat.mode }}"
+          before_user: "{{ all_results['5.1.6'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['5.1.6'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/cron.monthly
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['5.1.6'].audits.stat.exists == true
+    when: crond_required == true and rhel7cis_rule_5_1_6
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.6
+     - rhel7
+
+#####
+  - name: " 5.1.7 | ROLLBACK | Ensure permissions on /etc/cron.d are configured "
+    block:
+    - name: " 5.1.7 | ROLLBACK | Ensure permissions on /etc/cron.d are configured "
+      file:
+        path: /etc/cron.d
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.7'].audits.stat.exists == false
+    - block:
+      - name: " 5.1.7 | ROLLBACK |  Ensure permissions on /etc/cron.d are configured  "
+        set_fact:
+          before_mode: "{{ all_results['5.1.7'].audits.stat.mode }}"
+          before_user: "{{ all_results['5.1.7'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['5.1.7'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/cron.d
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+      when: all_results['5.1.7'].audits.stat.exists == true
+    when: crond_required == true and rhel7cis_rule_5_1_7
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.7
+     - rhel7
+
+#####
+  - name: " 5.1.8 | ROLLBACK |  Ensure cron is restricted to authorized users "
+    block:
+    - name: " 5.1.8 | ROLLBACK |  Ensure cron is restricted to authorized users "
+      file:
+        path: /etc/cron.deny
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.8'].audits[0].msg is defined and all_results['5.1.8'].audits[0].msg.find('file not found') != -1
+    - file:
+        path: /etc/cron.deny
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.8'].audits[1].stat.exists == false
+    - name: " 5.1.8 | ROLLBACK |  Ensure permissions on /etc/cron.deny is removed"
+      block:
+      - set_fact:
+          data: "{{ all_results['5.1.8'].audits[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/cron.deny
+        ignore_errors: yes
+      when: all_results['5.1.8'].audits[1].content is defined
+    - name: " 5.1.8 | ROLLBACK |  Ensure cron is restricted to authorized users "
+      file:
+        path: /etc/cron.allow
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.8'].audits[2].stat.exists == false
+    - block:
+      - name: " 5.1.8 | ROLLBACK |  Ensure permissions on /etc/cron.allow are configured - add cron.allow "
+        set_fact:
+          before_mode: "{{ all_results['5.1.8'].audits[2].stat.mode }}"
+          before_user: "{{ all_results['5.1.8'].audits[2].stat.pw_name }}"
+          before_group: "{{ all_results['5.1.8'].audits[2].stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/cron.allow
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+      when: all_results['5.1.8'].audits[2].stat.exists == true
+    when: crond_required == true and rhel7cis_rule_5_1_8
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.8
+     - rhel7
+
+#####
+  - name: " 5.1.9 | ROLLBACK |  Ensure at is restricted to authorized users "
+    block:
+    - name: " 5.1.9 | ROLLBACK |  Ensure at is restricted to authorized users "
+      file:
+        path: /etc/at.deny
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.9'].audits[0].msg is defined and all_results['5.1.9'].audits[0].msg.find('file not found') != -1
+    - file:
+        path: /etc/at.deny
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.9'].audits[1].stat.exists == false
+    - name: " 5.1.9 | ROLLBACK |  Ensure permissions on /etc/cron.deny is removed"
+      block:
+      - set_fact:
+          data: "{{ all_results['5.1.9'].audits[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/at.deny
+        ignore_errors: yes
+      when: all_results['5.1.9'].audits[1].content is defined
+    - name: " 5.1.9 | ROLLBACK |  Ensure cron is restricted to authorized users "
+      file:
+        path: /etc/at.allow
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.1.9'].audits[2].stat.exists == false
+    - block:
+      - name: " 5.1.9 | ROLLBACK |  Ensure permissions on /etc/cron.allow are configured - add cron.allow "
+        set_fact:
+          before_mode: "{{ all_results['5.1.9'].audits[2].stat.mode }}"
+          before_user: "{{ all_results['5.1.9'].audits[2].stat.pw_name }}"
+          before_group: "{{ all_results['5.1.9'].audits[2].stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/at.allow
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+      when: all_results['5.1.9'].audits[2].stat.exists == true
+      ignore_errors: yes
+      diff: yes
+    when: at_required == true and rhel7cis_rule_5_1_9
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.9
+     - rhel7
+
+  - name: " 5.1.9 | ROLLBACK |  Ensure at daemon is removed"
+    block:
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['5.1.9'].audits[0].name is defined
+    - set_fact:
+        before_state: "absent"
+      ignore_errors: yes
+      when: all_results['5.1.9'].audits[0].name is not defined
+    - name: " 5.1.9 | ROLLBACK |  Ensure at daemon is removed"
+      yum:
+        name: at
+        state: "{{ before_state }}"
+        conf_file: '/etc/yum.conf'
+      ignore_errors: yes
+    when: rhel7cis_rule_5_1_9 and at_required == false
+    tags:
+     - level1
+     - rollback
+     - rule_5.1.9
+     - rhel7
+
+#####
+  - name: " 5.2.1 | ROLLBACK | Ensure permissions on /etc/ssh/sshd_config are configured "
+    block:
+    - name: " 5.2.1 | ROLLBACK | Ensure permissions on /etc/ssh/sshd_config are configured "
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.1'].audits.stat.exists == false
+    - block:
+      - name: " 5.2.1 | ROLLBACK | Ensure permissions on /etc/ssh/sshd_config are configured  "
+        set_fact:
+          before_mode: "{{ all_results['5.2.1'].audits.stat.mode }}"
+          before_user: "{{ all_results['5.2.1'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['5.2.1'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/ssh/sshd_config
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['5.2.1'].audits.stat.exists == true
+    when: rhel7cis_rule_5_2_1
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.1
+     - rhel7
+
+#####
+  - name: " 5.2.2 | ROLLBACK | Ensure permissions on SSH private host key files are configured "
+    block:
+    - name: " 5.2.2 | ROLLBACK | Ensure permissions on SSH private host key files are configured"
+      file:
+        path: "{{ item }}"
+        state: absent
+      ignore_errors: yes
+      with_fileglob:
+        - "/etc/ssh/ssh_host_*_key"
+      when: all_results['5.2.2'].audits.results[0].stat.exists == false
+    - name: " 5.2.2 | ROLLBACK | Ensure permissions on bootloader config are configured"
+      block:
+      - set_fact:
+          before_mode: "{{ all_results['5.2.2'].audits.results[0].stat.mode }}"
+          before_user: "{{ all_results['5.2.2'].audits.results[0].stat.pw_name }}"
+          before_group: "{{ all_results['5.2.2'].audits.results[0].stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: "{{ item }}"
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+        with_fileglob:
+          - "/etc/ssh/ssh_host_*_key"
+      when: all_results['5.2.2'].audits.results[0].stat.exists == true
+    when: rhel7cis_rule_5_2_2
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.2
+     - rhel7
+
+#####
+  - name: " 5.2.3 | ROLLBACK | Ensure permissions on SSH public host key files are configured "
+    block:
+    - name: " 5.2.3 | ROLLBACK | Ensure permissions on SSH public host key files are configured - before "
+      file:
+        path: "{{ item }}"
+        state: absent
+      ignore_errors: yes
+      with_fileglob:
+        - "/etc/ssh/ssh_host_*_key.pub"
+      when: all_results['5.2.3'].audits.results[0].stat.exists == false
+    - name: "  5.2.3 | ROLLBACK | Ensure permissions on SSH public host key files are configured - modify"
+      block:
+      - set_fact:
+          before_mode: "{{ all_results['5.2.3'].audits.results[0].stat.mode }}"
+          before_user: "{{ all_results['5.2.3'].audits.results[0].stat.pw_name }}"
+          before_group: "{{ all_results['5.2.3'].audits.results[0].stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: "{{ item }}"
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        register: result
+        ignore_errors: yes
+        diff: yes
+        with_fileglob:
+          - "/etc/ssh/ssh_host_*_key.pub"
+    when: rhel7cis_rule_5_2_3
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.3
+     - rhel7
+
+#####
+  - name: " 5.2.4 | ROLLBACK | Ensure SSH access is limited "
+    block:
+    - name: " 5.2.4 | ROLLBACK | Ensure SSH access is limited - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.4'].audits.msg is defined and all_results['5.2.4'].audits.msg.find('file not found') != -1
+    - block:
+      - set_fact:
+          data: "{{ all_results['5.2.4'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/ssh/sshd_config
+        ignore_errors: yes
+      when: all_results['5.2.4'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_5: false
+        rhel7cis_rule_5_2_6: false
+        rhel7cis_rule_5_2_7: false
+        rhel7cis_rule_5_2_8: false
+        rhel7cis_rule_5_2_9: false
+        rhel7cis_rule_5_2_10: false
+        rhel7cis_rule_5_2_11: false
+        rhel7cis_rule_5_2_12: false
+        rhel7cis_rule_5_2_13: false
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_4
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.4
+     - rhel7
+
+#####
+  - name: " 5.2.5 | ROLLBACK | Ensure SSH LogLevel is appropriate "
+    block:
+    - name: " 5.2.5 | ROLLBACK | Ensure SSH LogLevel is appropriate - before "
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.5'].audits.msg is defined and all_results['5.2.5'].audits.msg.find('file not found') != -1
+    - name: " 5.2.5 | ROLLBACK | Ensure SSH LogLevel is appropriate - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.5'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.5'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_6: false
+        rhel7cis_rule_5_2_7: false
+        rhel7cis_rule_5_2_8: false
+        rhel7cis_rule_5_2_9: false
+        rhel7cis_rule_5_2_10: false
+        rhel7cis_rule_5_2_11: false
+        rhel7cis_rule_5_2_12: false
+        rhel7cis_rule_5_2_13: false
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_5
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.5
+     - rhel7
+
+#####
+  - name: " 5.2.6 | ROLLBACK |  Ensure SSH X11 forwarding is disabled "
+    block:
+    - name: " 5.2.6 | ROLLBACK |  Ensure SSH X11 forwarding is disabled - before "
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.6'].audits.msg is defined and all_results['5.2.6'].audits.msg.find('file not found') != -1
+    - name: " 5.2.6 | ROLLBACK |  Ensure SSH X11 forwarding is disabled - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.6'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_5_2_7: false
+        rhel7cis_rule_5_2_8: false
+        rhel7cis_rule_5_2_9: false
+        rhel7cis_rule_5_2_10: false
+        rhel7cis_rule_5_2_11: false
+        rhel7cis_rule_5_2_12: false
+        rhel7cis_rule_5_2_13: false
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_6
+    tags:
+     - level2
+     - rollback
+     - rule_5.2.6
+     - rhel7
+
+#####
+  - name: " 5.2.7 | ROLLBACK |   Ensure SSH MaxAuthTries is set to 4 or less "
+    block:
+    - name: " 5.2.7 | ROLLBACK |   Ensure SSH MaxAuthTries is set to 4 or less - before "
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.7'].audits.msg is defined and all_results['5.2.7'].audits.msg.find('file not found') != -1
+    - name: " 5.2.7 | ROLLBACK |   Ensure SSH MaxAuthTries is set to 4 or less - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.7'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.7'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_8: false
+        rhel7cis_rule_5_2_9: false
+        rhel7cis_rule_5_2_10: false
+        rhel7cis_rule_5_2_11: false
+        rhel7cis_rule_5_2_12: false
+        rhel7cis_rule_5_2_13: false
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_7
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.7
+     - rhel7
+
+#####
+  - name: " 5.2.8 | ROLLBACK |   Ensure SSH IgnoreRhosts is enabled "
+    block:
+    - name: " 5.2.8 | ROLLBACK |   Ensure SSH IgnoreRhosts is enabled - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.8'].audits.msg is defined and all_results['5.2.8'].audits.msg.find('file not found') != -1
+    - name: " 5.2.8 | ROLLBACK |   Ensure SSH IgnoreRhosts is enabled - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.8'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.8'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_9: false
+        rhel7cis_rule_5_2_10: false
+        rhel7cis_rule_5_2_11: false
+        rhel7cis_rule_5_2_12: false
+        rhel7cis_rule_5_2_13: false
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_8
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.8
+     - rhel7
+
+#####
+  - name: " 5.2.9 | ROLLBACK | Ensure SSH HostbasedAuthentication is disabled "
+    block:
+    - name: " 5.2.9 | ROLLBACK | Ensure SSH HostbasedAuthentication is disabled - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.9'].audits.msg is defined and all_results['5.2.9'].audits.msg.find('file not found') != -1
+    - name: " 5.2.9 | ROLLBACK | Ensure SSH HostbasedAuthentication is disabled - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.9'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.9'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_10: false
+        rhel7cis_rule_5_2_11: false
+        rhel7cis_rule_5_2_12: false
+        rhel7cis_rule_5_2_13: false
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_9
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.9
+     - rhel7
+
+#####
+  - name: " 5.2.10 | ROLLBACK | Ensure SSH root login is disabled "
+    block:
+    - name: " 5.2.10 | ROLLBACK | Ensure SSH root login is disabled - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.10'].audits.msg is defined and all_results['5.2.10'].audits.msg.find('file not found') != -1
+    - name: " 5.2.10 | ROLLBACK | Ensure SSH root login is disabled - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.10'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.10'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_11: false
+        rhel7cis_rule_5_2_12: false
+        rhel7cis_rule_5_2_13: false
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_10
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.10
+     - rhel7
+
+#####
+  - name: " 5.2.11 | ROLLBACK | Ensure SSH PermitEmptyPasswords is disabled  "
+    block:
+    - name: " 5.2.11 | ROLLBACK | Ensure SSH PermitEmptyPasswords is disabled - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.11'].audits.msg is defined and all_results['5.2.11'].audits.msg.find('file not found') != -1
+    - name: " 5.2.11 | ROLLBACK | Ensure SSH PermitEmptyPasswords is disabled - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.11'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.11'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_12: false
+        rhel7cis_rule_5_2_13: false
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_11
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.11
+     - rhel7
+
+#####
+  - name: " 5.2.12 | ROLLBACK |  Ensure SSH PermitUserEnvironment is disabled  "
+    block:
+    - name: " 5.2.12 | ROLLBACK |  Ensure SSH PermitUserEnvironment is disabled - before "
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.12'].audits.msg is defined and all_results['5.2.12'].audits.msg.find('file not found') != -1
+    - name: " 5.2.12 | ROLLBACK |  Ensure SSH PermitUserEnvironment is disabled - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.12'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.12'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_13: false
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_12
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.12
+     - rhel7
+
+#####
+  - name: " 5.2.13 | ROLLBACK |  Ensure only strong Ciphers are used  "
+    block:
+    - name: " 5.2.13 | ROLLBACK |  Ensure only strong Ciphers are used - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.13'].audits.msg is defined and all_results['5.2.13'].audits.msg.find('file not found') != -1
+    - name: " 5.2.13 | ROLLBACK |  Ensure only strong Ciphers are used - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.13'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.13'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_14: false
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_13
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.13
+     - rhel7
+
+#####
+  - name: " 5.2.14 | ROLLBACK |  Ensure only strong MAC algorithms are used "
+    block:
+    - name: " 5.2.14 | ROLLBACK | Ensure only strong MAC algorithms are used - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.14'].audits.msg is defined and all_results['5.2.14'].audits.msg.find('file not found') != -1
+    - name: " 5.2.14 | ROLLBACK | Ensure only strong MAC algorithms are used - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.14'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.14'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_15: false
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_14
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.14
+     - rhel7
+
+#####
+  - name: " 5.2.15 | ROLLBACK |  Ensure only strong Key Exchange algorithms are used "
+    block:
+    - name: " 5.2.15 | ROLLBACK | Ensure only strong Key Exchange algorithms are used - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.15'].audits.msg is defined and all_results['5.2.15'].audits.msg.find('file not found') != -1
+    - name: " 5.2.15 | ROLLBACK | Ensure only strong Key Exchange algorithms are used - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.15'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.15'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_16: false
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_15
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.15
+     - rhel7
+
+#####
+  - name: " 5.2.16 | ROLLBACK | Ensure SSH Idle Timeout Interval is configured "
+    block:
+    - name: " 5.2.16 | ROLLBACK | Ensure SSH Idle Timeout Interval is configured - before "
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.16'].audits.msg is defined and all_results['5.2.16'].audits.msg.find('file not found') != -1
+    - name: " 5.2.16 | ROLLBACK | Ensure SSH Idle Timeout Interval is configured - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.16'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.16'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_17: false
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_16
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.16
+     - rhel7
+
+#####
+  - name: " 5.2.17 | ROLLBACK | Ensure SSH LoginGraceTime is set to one minute or less "
+    block:
+    - name: " 5.2.17 | ROLLBACK | Ensure SSH LoginGraceTime is set to one minute or less - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.17'].audits.msg is defined and all_results['5.2.17'].audits.msg.find('file not found') != -1
+    - name: " 5.2.17 | ROLLBACK | Ensure SSH LoginGraceTime is set to one minute or less - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.17'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.17'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_18: false
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_17
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.17
+     - rhel7
+
+#####
+  - name: " 5.2.18 | ROLLBACK | Ensure SSH warning banner is configured "
+    block:
+    - name: " 5.2.18 | ROLLBACK | Ensure SSH warning banner is configured - before "
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.18'].audits.msg is defined and all_results['5.2.18'].audits.msg.find('file not found') != -1
+    - name: "5.2.18 | ROLLBACK | Ensure SSH warning banner is configured - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.18'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.18'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_19: false
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_18
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.18
+     - rhel7
+
+#####
+  - name: " 5.2.19 | ROLLBACK |  Ensure SSH PAM is enabled "
+    block:
+    - name: " 5.2.19 | ROLLBACK |  Ensure SSH PAM is enabled - before "
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.19'].audits.msg is defined and all_results['5.2.19'].audits.msg.find('file not found') != -1
+    - name: "5.2.19 | ROLLBACK |  Ensure SSH PAM is enabled - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.19'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.19'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_20: false
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_19
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.19
+     - rhel7
+#####
+  - name: " 5.2.20 | ROLLBACK |  Ensure SSH AllowTcpForwarding is disabled  "
+    block:
+    - name: " 5.2.20 | ROLLBACK | Ensure SSH AllowTcpForwarding is disabled - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.20'].audits.msg is defined and all_results['5.2.20'].audits.msg.find('file not found') != -1
+    - name: "5.2.20 | ROLLBACK | Ensure SSH AllowTcpForwarding is disabled - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.20'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.20'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_21: false
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_20
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.20
+     - rhel7
+#####
+  - name: " 5.2.21 | ROLLBACK |  Ensure SSH MaxStartups is configured  "
+    block:
+    - name: " 5.2.21 | ROLLBACK |  Ensure SSH MaxStartups is configured - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.21'].audits.msg is defined and all_results['5.2.21'].audits.msg.find('file not found') != -1
+    - name: "5.2.21 | ROLLBACK |  Ensure SSH MaxStartups is configured - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.21'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.21'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_5_2_22: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_2_21
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.21
+     - rhel7
+
+#####
+  - name: " 5.2.22 | ROLLBACK | Ensure SSH MaxSessions is limited  "
+    block:
+    - name: " 5.2.22 | ROLLBACK | Ensure SSH MaxSessions is limited - before"
+      file:
+        path: /etc/ssh/sshd_config
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.2.22'].audits.msg is defined and all_results['5.2.22'].audits.msg.find('file not found') != -1
+    - name: "5.2.22 | ROLLBACK | Ensure SSH MaxSessions is limited - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.2.22'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/ssh/sshd_config
+          ignore_errors: yes
+      when: all_results['5.2.22'].audits.content is defined
+    when: rhel7cis_rule_5_2_22
+    tags:
+     - level1
+     - rollback
+     - rule_5.2.22
+     - rhel7
+
+#####
+  - name: " 5.3.1 | ROLLBACK | Ensure password creation requirements are configured  "
+    block:
+    - name: " 5.3.1 | ROLLBACK |  Ensure password creation requirements are configured "
+      file:
+        path: /etc/security/pwquality.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['5.3.1'].audits[0].msg is defined and all_results['5.3.1'].audits[0].msg.find('file not found') != -1
+    - file:
+        path: "{{ item }}"
+        state: absent
+      ignore_errors: yes
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+      when:
+        - ( all_results['5.3.1'].audits[1].results[0].msg is defined and all_results['5.3.1'].audits[1].results[0].msg.find('file not found') != -1 )
+        - ( all_results['5.3.1'].audits[1].results[1].msg is defined and all_results['5.3.1'].audits[1].results[1].msg.find('file not found') != -1 )
+    - name: " 5.3.1 | ROLLBACK |  Ensure password creation requirements are configured - modify"
+      block:
+        - set_fact:
+            data: "{{ all_results['5.3.1'].audits[0].content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/security/pwquality.conf
+          ignore_errors: yes
+      when: all_results['5.3.1'].audits[0].content is defined
+    - block:
+      - set_fact:
+          data1: "{{  all_results['5.3.1'].audits[1].results[0].content | b64decode }}"
+          data2: "{{  all_results['5.3.1'].audits[1].results[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ item.data }}"
+          dest: "{{ item.file }}"
+        with_items:
+          - { data: "{{ data1 }}", file: /etc/pam.d/password-auth }
+          - { data: "{{ data2 }}", file: /etc/pam.d/system-auth }
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_3_2: false
+          rhel7cis_rule_5_3_3: false
+          rhel7cis_rule_5_3_4: false
+        ignore_errors: yes
+      when:
+        - ( all_results['5.3.1'].audits[1].results[0].content is defined )
+        - ( all_results['5.3.1'].audits[1].results[1].content is defined )
+    when: rhel7cis_rule_5_3_1
+    tags:
+     - level1
+     - rollback
+     - rule_5.3.1
+     - rhel7
+
+#####
+  - name: " 5.3.2 | ROLLBACK | Ensure lockout for failed password attempts is configured "
+    block:
+    - name: " 5.3.2  | ROLLBACK | Ensure lockout for failed password attempts is configured"
+      file:
+          path: "{{ item }}"
+          state: absent
+      ignore_errors: yes
+      with_items:
+        - /etc/pam.d/password-auth
+        - /etc/pam.d/system-auth
+      when:
+        - ( all_results['5.3.2'].audits.results[0].msg is defined and all_results['5.3.2'].audits.results[0].msg.find('file not found') != -1 )
+        - ( all_results['5.3.2'].audits.results[1].msg is defined and all_results['5.3.2'].audits.results[1].msg.find('file not found') != -1 )
+    - block:
+      - set_fact:
+          data1: "{{ all_results['5.3.2'].audits.results[0].content | b64decode }}"
+          data2: "{{ all_results['5.3.2'].audits.results[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ item.data }}"
+          dest: "{{ item.file }}"
+        with_items:
+          - { data: "{{ data1 }}", file: /etc/pam.d/password-auth }
+          - { data: "{{ data2 }}", file: /etc/pam.d/system-auth }
+        ignore_errors: yes
+      when:
+        - ( all_results['5.3.2'].audits.results[0].content is defined )
+        - ( all_results['5.3.2'].audits.results[1].content is defined )
+    - set_fact:
+        rhel7cis_rule_5_3_3: false
+        rhel7cis_rule_5_3_4: false
+      ignore_errors: yes
+    when: pam_faillock == true and rhel7cis_rule_5_3_2
+    tags:
+     - level1
+     - rollback
+     - rule_5.3.2
+     - rhel7
+
+  - name: " 5.3.2  | ROLLBACK | Ensure lockout for failed password attempts is configured"
+    block:
+    - name: " 5.3.2  | ROLLBACK | Ensure lockout for failed password attempts is configured "
+      file:
+          path: "{{ item }}"
+          state: absent
+      ignore_errors: yes
+      with_items:
+        - /etc/pam.d/password-auth
+        - /etc/pam.d/system-auth
+      when:
+        - ( all_results['5.3.2'].audits.results[0].msg is defined and all_results['5.3.2'].audits.results[0].msg.find('file not found') != -1 )
+        - ( all_results['5.3.2'].audits.results[1].msg is defined and all_results['5.3.2'].audits.results[1].msg.find('file not found') != -1 )
+    - block:
+      - set_fact:
+          data1: "{{ all_results['5.3.2'].audits.results[0].content | b64decode }}"
+          data2: "{{ all_results['5.3.2'].audits.results[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ item.data }}"
+          dest: "{{ item.file }}"
+        with_items:
+          - { data: "{{ data1 }}", file: /etc/pam.d/password-auth }
+          - { data: "{{ data2 }}", file: /etc/pam.d/system-auth }
+        ignore_errors: yes
+      when:
+        - ( all_results['5.3.2'].audits.results[0].content is defined )
+        - ( all_results['5.3.2'].audits.results[1].content is defined )
+    - set_fact:
+        rhel7cis_rule_5_3_3: false
+        rhel7cis_rule_5_3_4: false
+      ignore_errors: yes
+    when: pam_tally2 == true and rhel7cis_rule_5_3_2
+    tags:
+     - level1
+     - rollback
+     - rule_5.3.2
+     - rhel7
+
+#####
+  - name: " 5.3.3 | ROLLBACK |  Ensure password hashing algorithm is SHA-512  "
+    block:
+    - name: " 5.3.3 | ROLLBACK |  Ensure password hashing algorithm is SHA-512 "
+      file:
+          path: "{{ item }}"
+          state: absent
+      ignore_errors: yes
+      with_items:
+        - /etc/pam.d/password-auth
+        - /etc/pam.d/system-auth
+      when:
+        - ( all_results['5.3.3'].audits.results[0].msg is defined and all_results['5.3.3'].audits.results[0].msg.find('file not found') != -1 )
+        - ( all_results['5.3.3'].audits.results[1].msg is defined and all_results['5.3.3'].audits.results[1].msg.find('file not found') != -1 )
+    - block:
+      - set_fact:
+          data1: "{{ all_results['5.3.3'].audits.results[0].content | b64decode }}"
+          data2: "{{ all_results['5.3.3'].audits.results[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ item.data }}"
+          dest: "{{ item.file }}"
+        with_items:
+          - { data: "{{ data1 }}", file: /etc/pam.d/password-auth }
+          - { data: "{{ data2 }}", file: /etc/pam.d/system-auth }
+        ignore_errors: yes
+      when:
+        - ( all_results['5.3.3'].audits.results[0].content is defined )
+        - ( all_results['5.3.3'].audits.results[1].content is defined )
+    - set_fact:
+        rhel7cis_rule_5_3_4: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_3_3
+    tags:
+     - level1
+     - rollback
+     - rule_5.3.3
+     - rhel7
+#####
+  - name: " 5.3.4  | ROLLBACK | Ensure password reuse is limited"
+    block:
+    - name: " 5.3.4  | ROLLBACK | Ensure password reuse is limited "
+      file:
+          path: "{{ item }}"
+          state: absent
+      ignore_errors: yes
+      with_items:
+        - /etc/pam.d/password-auth
+        - /etc/pam.d/system-auth
+      when:
+        - ( all_results['5.3.4'].audits.results[0].msg is defined and all_results['5.3.4'].audits.results[0].msg.find('file not found') != -1 )
+        - ( all_results['5.3.4'].audits.results[1].msg is defined and all_results['5.3.4'].audits.results[1].msg.find('file not found') != -1 )
+    - block:
+      - set_fact:
+          data1: "{{ all_results['5.3.4'].audits.results[0].content | b64decode }}"
+          data2: "{{ all_results['5.3.4'].audits.results[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ item.data }}"
+          dest: "{{ item.file }}"
+        with_items:
+          - { data: "{{ data1 }}", file: /etc/pam.d/password-auth }
+          - { data: "{{ data2 }}", file: /etc/pam.d/system-auth }
+        ignore_errors: yes
+      when:
+        - ( all_results['5.3.4'].audits.results[0].content is defined )
+        - ( all_results['5.3.4'].audits.results[1].content is defined )
+    when: pam_pwhistory == true and rhel7cis_rule_5_3_4
+    tags:
+     - level1
+     - rollback
+     - rule_5.3.4
+     - rhel7
+
+  - name: " 5.3.4  | ROLLBACK | Ensure password reuse is limited"
+    block:
+    - name: " 5.3.4  | ROLLBACK | Ensure password reuse is limited "
+      file:
+          path: "{{ item }}"
+          state: absent
+      ignore_errors: yes
+      with_items:
+        - /etc/pam.d/password-auth
+        - /etc/pam.d/system-auth
+      when:
+        - ( all_results['5.3.4'].audits.results[0].msg is defined and all_results['5.3.4'].audits.results[0].msg.find('file not found') != -1 )
+        - ( all_results['5.3.4'].audits.results[1].msg is defined and all_results['5.3.4'].audits.results[1].msg.find('file not found') != -1 )
+    - block:
+      - set_fact:
+          data1: "{{ all_results['5.3.4'].audits.results[0].content | b64decode }}"
+          data2: "{{ all_results['5.3.4'].audits.results[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ item.data }}"
+          dest: "{{ item.file }}"
+        with_items:
+          - { data: "{{ data1 }}", file: /etc/pam.d/password-auth }
+          - { data: "{{ data2 }}", file: /etc/pam.d/system-auth }
+        ignore_errors: yes
+      when:
+        - ( all_results['5.3.4'].audits.results[0].content is defined )
+        - ( all_results['5.3.4'].audits.results[1].content is defined )
+    when: pam_unix == true and rhel7cis_rule_5_3_4
+    tags:
+     - level1
+     - rollback
+     - rule_5.3.4
+     - rhel7
+
+
+#####
+  - name: " 5.4.1.1 | ROLLBACK | Ensure password expiration is 365 days or less"
+    block:
+      - name: " 5.4.1.1 | ROLLBACK | Ensure password expiration is 365 days or less - before"
+        file:
+          path: /etc/login.defs
+          state: absent
+        ignore_errors: yes
+        when: all_results['5.4.1.1'].audits[0].msg is defined and all_results['5.4.1.1'].audits[0].msg.find('file not found') != -1
+      - name: " 5.4.1.1 | ROLLBACK | Ensure password expiration is 365 days or less - modify"
+        block:
+        - set_fact:
+            data: "{{ all_results['5.4.1.1'].audits[0].content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/login.defs
+          ignore_errors: yes
+        when: all_results['5.4.1.1'].audits[0].content is defined
+      - set_fact:
+          rhel7cis_rule_5_4_1_2: false
+          rhel7cis_rule_5_4_1_3: false
+        ignore_errors: yes
+    when: rhel7cis_rule_5_4_1_1
+    tags:
+     - level1
+     - rollback
+     - rule_5.4.1.1
+     - rhel7
+
+#####
+  - name: " 5.4.1.2 | ROLLBACK |  Ensure minimum days between password changes is configured"
+    block:
+      - name: " 5.4.1.2 | ROLLBACK |  Ensure minimum days between password changes is configured - before"
+        file:
+          path: /etc/login.defs
+          state: absent
+        ignore_errors: yes
+        when: all_results['5.4.1.2'].audits[0].msg is defined and all_results['5.4.1.2'].audits[0].msg.find('file not found') != -1
+      - name: " 5.4.1.2 | ROLLBACK |  Ensure minimum days between password changes is configured - modify"
+        block:
+        - set_fact:
+            data: "{{ all_results['5.4.1.2'].audits[0].content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/login.defs
+          ignore_errors: yes
+        when: all_results['5.4.1.2'].audits[0].content is defined
+      - set_fact:
+          rhel7cis_rule_5_4_1_3: false
+        ignore_errors: yes
+    when: rhel7cis_rule_5_4_1_2
+    tags:
+     - level1
+     - rollback
+     - rule_5.4.1.2
+     - rhel7
+
+#####
+  - name: " 5.4.1.3 | ROLLBACK |   Ensure password expiration warning days is 7 or more"
+    block:
+      - name: " 5.4.1.3 | ROLLBACK |   Ensure password expiration warning days is 7 or more - before"
+        file:
+          path: /etc/login.defs
+          state: absent
+        ignore_errors: yes
+        when: all_results['5.4.1.3'].audits[0].msg is defined and all_results['5.4.1.3'].audits[0].msg.find('file not found') != -1
+      - name: " 5.4.1.3 | ROLLBACK | Ensure password expiration warning days is 7 or more - modify"
+        block:
+        - set_fact:
+            data: "{{ all_results['5.4.1.3'].audits[0].content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/login.defs
+          ignore_errors: yes
+        when: all_results['5.4.1.3'].audits[0].content is defined
+    when: rhel7cis_rule_5_4_1_3
+    tags:
+     - level1
+     - rollback
+     - rule_5.4.1.3
+     - rhel7
+
+#####
+  - name: " 5.4.1.4 | ROLLBACK |  Ensure inactive password lock is 30 days or less "
+    block:
+      - name: " 5.4.1.4 | ROLLBACK |   Ensure inactive password lock is 30 days or less - before"
+        file:
+          path: /etc/default/useradd
+          state: absent
+        ignore_errors: yes
+        when: all_results['5.4.1.4'].audits[0].msg is defined and all_results['5.4.1.4'].audits[0].msg.find('file not found') != -1
+      - name: " 5.4.1.4 | ROLLBACK |   Ensure inactive password lock is 30 days or less  "
+        block:
+        - set_fact:
+            data: "{{ all_results['5.4.1.4'].audits[0].content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/default/useradd
+          ignore_errors: yes
+        when: all_results['5.4.1.4'].audits[0].content is defined
+    when: rhel7cis_rule_5_4_1_4
+    tags:
+     - level1
+     - rollback
+     - rule_5.4.1.4
+     - rhel7
+
+#   - name: " 5.4.1.5 | HARDEN | Ensure all users last password change date is in the past    "
+#  - name: " 5.4.2 | HARDEN | Ensure system accounts are secured "
+#
+#####
+  - name: " 5.4.3 | ROLLBACK |  Ensure default group for the root account is GID 0"
+    block:
+      - name: " 5.4.3 | ROLLBACK |  Ensure default group for the root account is GID 0 - modify"
+        user:
+          name: root
+          group: root
+        register: result
+        ignore_errors: yes
+    when: rhel7cis_rule_5_4_3
+    tags:
+     - level1
+     - rollback
+     - rule_5.4.3
+     - rhel7
+
+#####
+  - name: " 5.4.4 | ROLLBACK | Ensure default user shell timeout is configured"
+    block:
+    - name: " 5.4.4 | ROLLBACK | Ensure default user shell timeout is configured"
+      file:
+        path: "{{ item }}"
+        state: absent
+      ignore_errors: yes
+      with_items:
+        - /etc/bashrc
+        - /etc/profile
+      when:
+        - ( all_results['5.4.4'].audits[0].results[0].msg is defined and all_results['5.4.4'].audits[0].results[0].msg.find('file not found') != -1 )
+        - ( all_results['5.4.4'].audits[0].results[1].msg is defined and all_results['5.4.4'].audits[0].results[1].msg.find('file not found') != -1 )
+    - name: "Unset user timeout in /etc/profile  & /etc/bashrc"
+      block:
+      - set_fact:
+          data_1: "{{ all_results['5.4.4'].audits[0].results[0].content | b64decode }}"
+          data_2: "{{ all_results['5.4.4'].audits[0].results[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ item.data }}"
+          dest: "{{ item.file }}"
+        with_items:
+          - { data: "{{ data_1 }}", file: /etc/bashrc }
+          - { data: "{{ data_2 }}", file: /etc/profile }
+        ignore_errors: yes
+      when:
+        - ( all_results['5.4.4'].audits[0].results[0].content is defined )
+        - ( all_results['5.4.4'].audits[0].results[1].content is defined )
+    - set_fact:
+        rhel7cis_rule_5_4_5: false
+      ignore_errors: yes
+    when: rhel7cis_rule_5_4_4
+    tags:
+     - level1
+     - rollback
+     - rule_5.4.4
+     - rhel7
+
+#####
+  - name: " 5.4.5 | ROLLBACK |  Ensure default user umask is configured "
+    block:
+    - name: " 5.4.5 | ROLLBACK |  Ensure default user umask is configured  "
+      file:
+          path: "{{ item }}"
+          state: absent
+      ignore_errors: yes
+      with_items:
+        - /etc/bashrc
+        - /etc/profile
+      when:
+        - ( all_results['5.4.5'].audits[0].results[0].msg is defined and all_results['5.4.5'].audits[0].results[0].msg.find('file not found') != -1 )
+        - ( all_results['5.4.5'].audits[0].results[1].msg is defined and all_results['5.4.5'].audits[0].results[1].msg.find('file not found') != -1 )
+    - block:
+      - set_fact:
+          data1: "{{ all_results['5.4.5'].audits[0].results[0].content | b64decode }}"
+          data2: "{{ all_results['5.4.5'].audits[0].results[1].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ item.data }}"
+          dest: "{{ item.file }}"
+        with_items:
+          - { data: "{{ data1 }}", file: /etc/bashrc }
+          - { data: "{{ data2 }}", file: /etc/profile }
+        ignore_errors: yes
+      when:
+        - ( all_results['5.4.4'].audits[0].results[0].content is defined )
+        - ( all_results['5.4.4'].audits[0].results[1].content is defined )
+    when: rhel7cis_rule_5_4_5
+    tags:
+     - level1
+     - rollback
+     - rule_5.4.5
+     - rhel7
+
+#####
+  - name: " 5.6 | ROLLBACK | Ensure access to the su command is restricted  "
+    block:
+      - name: " 5.6 | ROLLBACK | Ensure access to the su command is restricted - before "
+        file:
+          path: /etc/pam.d/su
+          state: absent
+        ignore_errors: yes
+        when: all_results['5.6'].audits.msg is defined and all_results['5.6'].audits.msg.find('file not found') != -1
+      - name: " 5.6 | ROLLBACK | Ensure access to the su command is restricted - create group"
+        block:
+        - set_fact:
+            data: "{{ all_results['5.6'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/pam.d/su
+          ignore_errors: yes
+        when: all_results['5.6'].audits.content is defined
+    when: rhel7cis_rule_5_6
+    tags:
+     - level1
+     - rollback
+     - rule_5.6
+     - rhel7
+#####

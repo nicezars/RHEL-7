@@ -1,0 +1,29 @@
+---
+#
+# Copyright 2020
+# description: this playbook is dedicated for Telkomsel Indonesia
+#
+- hosts: all
+  become: yes
+  any_errors_fatal: false
+  gather_facts: true
+
+  tasks:
+    - set_fact:
+        all_results: "{{ lookup('file', '/var/report/facts.d/{{ansible_hostname}}.json')| from_json}}"
+      tags: always
+    - debug:
+        var: all_results
+      tags: always
+
+    - name: Execute CIS benchmark Rollback for RHEL 7
+      include_role:
+        name: rhel7rollback
+      tags: always
+    - debug:
+        var: all_results
+#      tags: always
+
+    - name: MySQL DB Security Dashboard
+      import_tasks: dash-dbquery-rollback-job.yml
+      tags: always

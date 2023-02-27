@@ -1,0 +1,976 @@
+---
+#
+# Copyright 2020
+# This section contains 32 rules
+#
+#####
+# Manually
+#  - name: " 6.1.1 | HARDEN |   Audit system file permissions"
+#    block:
+#      - name: " 6.1.1 | SCAN_MANUAL |  Audit system file permissions"
+#        shell:   rpm -Va | grep -vw c
+#        register: rhel7cis_rule_6_1_1_rc
+#        ignore_errors: yes
+#      - debug:
+#          var: rhel7cis_rule_6_1_1_rc.stdout_lines
+##          msg:
+##          - "Please review all installed packages: {{ rhel7cis_rule_6_1_1_rc.stdout_lines|list }}. "
+##          - "Once verified, please set rhel7cis_rule_6_1_1 to true in default/main.yml ."
+#        register: rhel7cis_rule_6_1_1_system_packages_installed_list
+#      - set_fact:
+#          rhel7cis_rule_6_1_1_result: false
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'6.1.1':rhel7cis_rule_6_1_1_result|default(true)}) }}"
+#    when: rhel7cis_rule_6_1_1
+#    tags:
+#     - level2
+#     - scan
+#     - rule_6.1.1
+#     - rhel7
+
+#####
+  - name: " 6.1.2 | HARDEN | Ensure permissions on /etc/passwd are configured"
+    block:
+    - name: " 6.1.2 | HARDEN | Ensure permissions on /etc/passwd are configured"
+      stat:
+        path: /etc/passwd
+      register: before_6_1_2
+      ignore_errors: yes
+    - name: " 6.1.2 | HARDEN | Ensure permissions on /etc/passwd are configured"
+      file:
+        path: /etc/passwd
+        owner: root
+        group: root
+        mode: '0644'
+      register: result_6_1_2
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.1.2':{'result':result_6_1_2|default({}),'audits':before_6_1_2|default({})}}) }}"
+    when: rhel7cis_rule_6_1_2
+    tags:
+     - level1
+     - harden
+     - rule_6.1.2
+     - rhel7
+
+#####
+  - name: " 6.1.3 | HARDEN | Ensure permissions on /etc/shadow are configured"
+    block:
+    - name: " 6.1.3 | HARDEN | Ensure permissions on /etc/shadow are configured"
+      stat:
+        path: /etc/shadow
+      register: before_6_1_3
+      ignore_errors: yes
+    - name: " 6.1.3 | HARDEN | Ensure permissions on /etc/shadow are configured"
+      file:
+        path: /etc/shadow
+        owner: root
+        group: root
+        mode: '0000'
+      register: result_6_1_3
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.1.3':{'result':result_6_1_3|default({}),'audits':before_6_1_3|default({})}}) }}"
+    when: rhel7cis_rule_6_1_3
+    tags:
+     - level1
+     - harden
+     - rule_6.1.3
+     - rhel7
+
+#####
+  - name: " 6.1.4 | HARDEN | Ensure permissions on /etc/group are configured "
+    block:
+    - name: " 6.1.4 | HARDEN | Ensure permissions on /etc/group are configured "
+      stat:
+        path: /etc/group
+      register: before_6_1_4
+      ignore_errors: yes
+    - name: " 6.1.4 | HARDEN | Ensure permissions on /etc/group are configured"
+      file:
+        path: /etc/group
+        owner: root
+        group: root
+        mode: '0644'
+      register: result_6_1_4
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.1.4':{'result':result_6_1_4|default({}),'audits':before_6_1_4|default({})}}) }}"
+    when: rhel7cis_rule_6_1_4
+    tags:
+     - level1
+     - harden
+     - rule_6.1.4
+     - rhel7
+
+#####
+  - name: " 6.1.5 | HARDEN | Ensure permissions on /etc/gshadow are configured"
+    block:
+    - name: " 6.1.5 | HARDEN | Ensure permissions on /etc/gshadow are configured"
+      stat:
+        path: /etc/gshadow
+      register: before_6_1_5
+      ignore_errors: yes
+    - name: " 6.1.5 | HARDEN | Ensure permissions on /etc/gshadow are configured"
+      file:
+        path: /etc/gshadow
+        owner: root
+        group: root
+        mode: '0000'
+      register: result_6_1_5
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.1.5':{'result':result_6_1_5|default({}),'audits':before_6_1_5|default({})}}) }}"
+    when: rhel7cis_rule_6_1_5
+    tags:
+     - level1
+     - harden
+     - rule_6.1.5
+     - rhel7
+
+#####
+  - name: " 6.1.6 | HARDEN | Ensure permissions on /etc/passwd- are configured "
+    block:
+    - name: " 6.1.6 | HARDEN | Ensure permissions on /etc/passwd- are configured "
+      stat:
+        path: /etc/passwd-
+      register: before_6_1_6
+      ignore_errors: yes
+    - name: " 6.1.6 | HARDEN | Ensure permissions on /etc/passwd- are configured"
+      file:
+        path: /etc/passwd-
+        owner: root
+        group: root
+        mode: '0644'
+      register: result_6_1_6
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.1.6':{'result':result_6_1_6|default({}),'audits':before_6_1_6|default({})}}) }}"
+    when: rhel7cis_rule_6_1_6
+    tags:
+     - level1
+     - harden
+     - rule_6.1.6
+     - rhel7
+
+#####
+  - name: " 6.1.7 | HARDEN |  Ensure permissions on /etc/shadow- are configured"
+    block:
+    - name: " 6.1.7 | HARDEN |  Ensure permissions on /etc/shadow- are configured"
+      stat:
+        path: /etc/shadow-
+      register: before_6_1_7
+      ignore_errors: yes
+    - name: " 6.1.7 | HARDEN | Ensure permissions on /etc/shadow- are configured"
+      file:
+        path: /etc/shadow-
+        owner: root
+        group: root
+        mode: '0000'
+      register: result_6_1_7
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.1.7':{'result':result_6_1_7|default({}),'audits':before_6_1_7|default({})}}) }}"
+    when: rhel7cis_rule_6_1_7
+    tags:
+     - level1
+     - harden
+     - rule_6.1.7
+     - rhel7
+
+#####
+  - name: " 6.1.8 | HARDEN | Ensure permissions on /etc/group- are configured "
+    block:
+    - name: " 6.1.8 | HARDEN | Ensure permissions on /etc/group- are configured "
+      stat:
+        path: /etc/group-
+      register: before_6_1_8
+      ignore_errors: yes
+    - name: " 6.1.8 | HARDEN | Ensure permissions on /etc/group- are configured"
+      file:
+        path: /etc/group-
+        owner: root
+        group: root
+        mode: '0644'
+      register: result_6_1_8
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.1.8':{'result':result_6_1_8|default({}),'audits':before_6_1_8|default({})}}) }}"
+    when: rhel7cis_rule_6_1_8
+    tags:
+     - level1
+     - harden
+     - rule_6.1.8
+     - rhel7
+#####
+  - name: " 6.1.9 | HARDEN |  Ensure permissions on /etc/gshadow- are configured"
+    block:
+    - name: " 6.1.9 | HARDEN |  Ensure permissions on /etc/gshadow- are configured"
+      stat:
+        path: /etc/gshadow-
+      register: before_6_1_9
+      ignore_errors: yes
+    - name: " 6.1.9 | HARDEN | Ensure permissions on /etc/gshadow- are configured"
+      file:
+        path: /etc/gshadow-
+        owner: root
+        group: root
+        mode: '0000'
+      register: result_6_1_9
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.1.9':{'result':result_6_1_9|default({}),'audits':before_6_1_9|default({})}}) }}"
+    when: rhel7cis_rule_6_1_9
+    tags:
+     - level1
+     - harden
+     - rule_6.1.9
+     - rhel7
+
+#####
+# Manually
+  - name: " 6.1.10 | HARDEN |  Ensure no world writable files exist"
+    block:
+      - name: " 6.1.10 | HARDEN |  Ensure no world writable files exist"
+        shell:  df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -0002
+        register: file_system
+        ignore_errors: yes
+      - stat:
+          path: "{{ item }}"
+        register: before_6_1_10
+        with_items: "{{ file_system.stdout_lines }}"
+        ignore_errors: yes
+      - file:
+          path: "{{ item }}"
+          mode: o-w
+        register: result_6_1_10
+        ignore_errors: yes
+        diff: yes
+        with_items: "{{ file_system.stdout_lines }}"
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.10':{'result':result_6_1_10|default({}),'audits':before_6_1_10|default({})}}) }}"
+    when: rhel7cis_rule_6_1_10
+    tags:
+     - level1
+     - harden
+     - rule_6.1.10
+     - rhel7
+
+#####
+# Manually
+  - name: " 6.1.11 | HARDEN | Ensure no unowned files or directories exist"
+    block:
+      - name: " 6.1.11 | HARDEN |  Ensure no unowned files or directories exist"
+        shell:  df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nouser
+        register: rhel7cis_rule_6_1_11_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_11_result: false
+        when: rhel7cis_rule_6_1_11_rc.rc == 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.11':rhel7cis_rule_6_1_11_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_11
+    tags:
+     - level1
+     - scan
+     - rule_6.1.11
+     - rhel7
+
+#####
+# Manually
+  - name: " 6.1.12 | HARDEN | Ensure no ungrouped files or directories exist"
+    block:
+      - name: " 6.1.12 | HARDEN | Ensure no ungrouped files or directories exist"
+        shell:  df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -nogroup
+        register: rhel7cis_rule_6_1_12_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_12_result: false
+        when: rhel7cis_rule_6_1_12_rc.rc == 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.12':rhel7cis_rule_6_1_12_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_12
+    tags:
+     - level1
+     - scan
+     - rule_6.1.12
+     - rhel7
+
+#####
+# Manually
+  - name: " 6.1.13 | HARDEN |  Audit SUID executables"
+    block:
+      - name: " 6.1.13 | SCAN_MANUAL |  Audit SUID executables"
+        shell:  df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -4000
+        register: rhel7cis_rule_6_1_13_rc
+        ignore_errors: yes
+      - debug:
+          var: rhel7cis_rule_6_1_13_rc.stdout_lines
+##          msg:
+##          - "Please review all SUID files: {{ rhel7cis_rule_6_1_13_rc.stdout_lines|list }}. "
+##          - "Once verified, please set rhel7cis_rule_6_1_13 to true in default/main.yml ."
+        register: rhel7cis_rule_6_1_13_SUID_executables_list
+      - set_fact:
+          rhel7cis_rule_6_1_13_result: false
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.13':rhel7cis_rule_6_1_13_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_13
+    tags:
+     - level1
+     - scan
+     - rule_6.1.13
+     - rhel7
+
+#####
+# Manually
+  - name: " 6.1.14 | HARDEN |  Audit SGID executables"
+    block:
+      - name: " 6.1.14 | SCAN_MANUAL |  Audit SGID executables"
+        shell:  df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -4000
+        register: rhel7cis_rule_6_1_14_rc
+        ignore_errors: yes
+      - debug:
+          var: rhel7cis_rule_6_1_14_rc.stdout_lines
+##          msg:
+##          - "Please review all SUID files: {{ rhel7cis_rule_6_1_14_rc.stdout_lines|list }}. "
+##          - "Once verified, please set rhel7cis_rule_6_1_14 to true in default/main.yml ."
+        register: rhel7cis_rule_6_1_14_SGID_executables_list
+      - set_fact:
+          rhel7cis_rule_6_1_14_result: false
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.14':rhel7cis_rule_6_1_14_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_14
+    tags:
+     - level1
+     - scan
+     - rule_6.1.14
+     - rhel7
+
+#####
+  - name: " 6.2.1 | HARDEN | Ensure accounts in /etc/passwd use shadowed passwords"
+    block:
+    - name: " 6.2.1 | HARDEN | Ensure accounts in /etc/passwd use shadowed passwords - before"
+      shell: |
+         awk -F: '($2 != "x" ) { print $1 " is not set to shadowed passwords "}' /etc/passwd
+      register: rhel7cis_rule_6_2_1_rc
+      ignore_errors: yes
+    - slurp:
+        src: /etc/passwd
+      register: before_pwdfile
+      ignore_errors: yes
+    - name: " 6.2.1 | HARDEN | Ensure accounts in /etc/passwd use shadowed passwords - modify"
+      block:
+      - shell: |
+          sed -e 's/^\([a-zA-Z0-9_]*\):[^:]*:/\1:x:/' -i /etc/passwd
+        register: result_6_2_1
+        ignore_errors: yes
+      when: rhel7cis_rule_6_2_1_rc.stdout != ""
+    - name: "6.2.1 Setup before variable"
+      set_fact:
+        before_6_2_1: "{{ before_6_2_1|default([]) + [item] }}"
+      loop:
+        - "{{ before_pwdfile }}"
+        - "{{ rhel7cis_rule_6_2_1_rc.stdout_lines }}"
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.2.1':{'result':result_6_2_1|default({}),'audits':before_6_2_1|default({})}}) }}"
+    when: rhel7cis_rule_6_2_1
+    tags:
+     - level1
+     - harden
+     - rule_6.2.1
+     - rhel7
+
+#####
+  - name: " 6.2.2 | HARDEN | Ensure /etc/shadow password fields are not empty "
+    block:
+    - name: " 6.2.2 | HARDEN | Ensure /etc/shadow password fields are not empty - before"
+      shell: |
+         awk -F: '($2 == "" ) { print $1 " does not have a password "}' /etc/shadow
+      register: rhel7cis_rule_6_2_2_rc
+      ignore_errors: yes
+    - name: " 6.2.2 | HARDEN | Ensure /etc/shadow password fields are not empty - modify"
+      block:
+      - shell: |
+          awk -F: '($2 == "" ) { print $1 }' /etc/shadow
+        register:  before_6_2_2
+        ignore_errors: yes
+      - user:
+          name: "{{ item }}"
+          password_lock: true
+        diff: yes
+        register: result_6_2_2
+        ignore_errors: yes
+        with_items: "{{  before_6_2_2.stdout_lines | default([]) }}"
+      when: rhel7cis_rule_6_2_2_rc.stdout != ""
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.2.2':{'result':result_6_2_2|default({}),'audits':before_6_2_2|default({})}}) }}"
+    when: rhel7cis_rule_6_2_2
+    tags:
+     - level1
+     - harden
+     - rule_6.2.2
+     - rhel7
+
+#####
+  - name: " 6.2.3 | HARDEN | Ensure root is the only UID 0 account  "
+    block:
+    - name: " 6.2.3 | HARDEN | Ensure root is the only UID 0 account - before "
+      shell: |
+        awk -F: '($3 == 0) ' /etc/passwd | grep -v root
+      register: rhel7cis_rule_6_2_3_rc
+      ignore_errors: yes
+    - name: " 6.2.3 | HARDEN | Ensure root is the only UID 0 account - modify "
+      block:
+      - shell: |
+          awk -F: '($3 == 0) { print $1 }' /etc/passwd | grep -v root
+        register: before_6_2_3
+        ignore_errors: yes
+      - user:
+          name: "{{ item }}"
+          state: absent
+          remove: yes
+          force: yes
+        diff: yes
+        register: result_6_2_3
+        ignore_errors: yes
+        with_items: "{{ before_6_2_3.stdout_lines | default([]) }}"
+      when: rhel7cis_rule_6_2_3_rc.stdout != ""
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.2.3':{'result':result_6_2_3|default({}),'audits':before_6_2_3|default({})}}) }}"
+    when: rhel7cis_rule_6_2_3
+    tags:
+     - level1
+     - harden
+     - rule_6.2.3
+     - rhel7
+
+#####
+#  - name: " 6.2.4 | HARDEN | Ensure root PATH Integrity "
+#    block:
+#      - name: " 6.2.4 | HARDEN | Ensure root PATH Integrity "
+#        script: 6-2-4
+#        register: rhel7cis_rule_6_2_4_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_6_2_4_result: false
+#        when: rhel7cis_rule_6_2_4_rc.stdout != ""
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'6.2.4':rhel7cis_rule_6_2_4_result|default(true)}) }}"
+#    when: rhel7cis_rule_6_2_4
+#    tags:
+#     - level1
+#     - scan
+#     - rule_6.2.4
+#     - rhel7
+#####
+  - name: " 6.2.5 | HARDEN | Ensure all users' home directories exist"
+    block:
+      - name: " 6.2.5 | HARDEN | Ensure all users' home directories exist "
+        shell: |
+          grep -E -v '^(halt|sync|shutdown)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read -r user dir
+           do
+             if [ ! -d "$dir" ]; then
+                 uidno=$(grep -w "$user" /etc/passwd|cut -d: -f3)
+                 if [ "$uidno" -ge 1000 ]; then
+                   echo "$dir"
+                 fi
+             fi
+           done
+        register: rhel7cis_rule_6_2_5_rc
+        ignore_errors: yes
+      - name: " 6.2.6 | HARDEN | Ensure users' home directories permissions are 750 or more restrictive "
+        block:
+          - stat:
+              path: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_5_rc.stdout_lines|default([]) }}"
+            register: before_6_2_5
+          - shell: |
+              grep -E -v '^(halt|sync|shutdown)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read -r user dir
+                do
+                  if [ ! -d "$dir" ]; then
+                     uidno=$(grep -w "$user" /etc/passwd|cut -d: -f3)
+                     if [ "$uidno" -ge 1000 ]; then
+                        mkdir -p $dir
+                        chown $user. $dir
+                        chmod 0750 $dir
+                     fi
+                  fi
+                done
+            register: rhel7cis_rule_6_2_5_users
+            ignore_errors: yes
+          - stat:
+              path: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_5_rc.stdout_lines|default([]) }}"
+            register: result_6_2_5
+            ignore_errors: yes
+        when: rhel7cis_rule_6_2_5_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.5':{'result':result_6_2_5|default({}),'audits':before_6_2_5|default({})}}) }}"
+    when: rhel7cis_rule_6_2_5
+    tags:
+     - level1
+     - harden
+     - rule_6.2.5
+     - rhel7
+
+#####
+  - name: " 6.2.6 | HARDEN | Ensure users' home directories permissions are 750 or more restrictive"
+    block:
+      - name: " 6.2.6 | HARDEN | Ensure users' home directories permissions are 750 or more restrictive "
+        shell: |
+           grep -E -v '^(halt|sync|shutdown)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read user dir; do
+            if [ -d "$dir" ]; then
+              accessmod=$(stat -L -c "%a" "$dir")
+              if [ $accessmod -gt 750 ]; then
+                echo "$dir"
+              fi
+            fi
+           done
+        register: rhel7cis_rule_6_2_6_rc
+        ignore_errors: yes
+      - name: " 6.2.6 | HARDEN | Ensure users' home directories permissions are 750 or more restrictive "
+        block:
+          - stat:
+              path: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_6_rc.stdout_lines|default([]) }}"
+            register: before_6_2_6
+            ignore_errors: yes
+          - file:
+              path: "{{ item }}"
+              mode: 0750
+            diff: yes
+            with_items:
+              - "{{ rhel7cis_rule_6_2_6_rc.stdout_lines|default([]) }}"
+            register: result_6_2_6
+            ignore_errors: yes
+        when: rhel7cis_rule_6_2_6_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.6':{'result':result_6_2_6|default({}),'audits':before_6_2_6|default({})}}) }}"
+    when: rhel7cis_rule_6_2_6
+    tags:
+     - level1
+     - harden
+     - rule_6.2.6
+     - rhel7
+
+######
+  - name: " 6.2.7 | HARDEN |  Ensure users own their home directories"
+    block:
+      - name: " 6.2.7 | HARDEN |  Ensure users own their home directories"
+        shell: |
+           grep -E -v '^(halt|sync|shutdown|root)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read user dir; do
+              if [ -d "$dir" ]; then
+                 uidno=$(grep -w "$user" /etc/passwd|cut -d: -f3)
+                 owner=$(stat -L -c "%U" "$dir")
+                   if [ "$uidno" -ge 1000 -a "$owner" != "$user" ]; then
+                      echo "$dir"
+                   fi
+              fi
+           done
+        register: rhel7cis_rule_6_2_7_rc
+        ignore_errors: yes
+      - name: " 6.2.6 | HARDEN |  Ensure users own their home directories"
+        block:
+          - stat:
+              path: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_7_rc.stdout_lines|default([]) }}"
+            register: before_6_2_7
+          - shell: |
+              grep -E -v '^(halt|sync|shutdown|root)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read user dir; do
+                 if [ -d "$dir" ]; then
+                    uidno=$(grep -w "$user" /etc/passwd|cut -d: -f3)
+                    owner=$(stat -L -c "%U" "$dir")
+                      if [ "$uidno" -ge 1000 -a "$owner" != "$user" ]; then
+                        chown $user. $dir
+                      fi
+                 fi
+              done
+            register: rhel7cis_rule_6_2_7_users
+            ignore_errors: yes
+          - stat:
+              path: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_7_rc.stdout_lines|default([]) }}"
+            register: result_6_2_7
+            ignore_errors: yes
+        when: rhel7cis_rule_6_2_7_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.7':{'result':result_6_2_7|default({}),'audits':before_6_2_7|default({})}}) }}"
+    when: rhel7cis_rule_6_2_7
+    tags:
+     - level1
+     - harden
+     - rule_6.2.7
+     - rhel7
+
+#####
+  - name: " 6.2.8 | HARDEN |  Ensure users' dot files are not group or world writable"
+    block:
+      - name: " 6.2.8 | HARDEN |  Ensure users' dot files are not group or world writable"
+        shell: |
+          grep -E -v '^(halt|sync|shutdown)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read user dir; do
+           if [ -d "$dir" ]; then
+             for file in $dir/.[A-Za-z0-9]*; do
+               if [ ! -h "$file" -a -f "$file" ]; then
+                 fileperm=$(ls -ld $file | cut -f1 -d" ")
+                 if [ $(echo $fileperm | cut -c6) != "-" ] || [ $(echo $fileperm | cut -c9) != "-" ]; then
+                   echo "$file"
+                 fi
+              fi
+             done
+           fi
+          done
+        register: rhel7cis_rule_6_2_8_rc
+        ignore_errors: yes
+      - name: " 6.2.8 | HARDEN |  Ensure users' dot files are not group or world writable"
+        block:
+          - stat:
+              path: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_8_rc.stdout_lines|default([]) }}"
+            register: before_6_2_8
+          - shell: |
+              grep -E -v '^(halt|sync|shutdown)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read user dir; do
+                if [ -d "$dir" ]; then
+                 for file in $dir/.[A-Za-z0-9]*; do
+                   if [ ! -h "$file" -a -f "$file" ]; then
+                      fileperm=$(ls -ld $file | cut -f1 -d" ")
+                      if [ $(echo $fileperm | cut -c6) != "-" ] || [ $(echo $fileperm | cut -c9) != "-" ]; then
+                         chmod g-w,o-w $file
+                      fi
+                   fi
+                 done
+               fi
+              done
+            register: rhel7cis_rule_6_2_8_files
+            ignore_errors: yes
+          - stat:
+              path: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_8_rc.stdout_lines|default([]) }}"
+            register: result_6_2_8
+            ignore_errors: yes
+        when: rhel7cis_rule_6_2_8_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.8':{'result':result_6_2_8|default({}),'audits':before_6_2_8|default({})}}) }}"
+    when: rhel7cis_rule_6_2_8
+    tags:
+     - level1
+     - harden
+     - rule_6.2.8
+     - rhel7
+
+######
+  - name: " 6.2.9 | HARDEN | Ensure no users have .forward files"
+    block:
+      - name: " 6.2.9 | HARDEN | Ensure no users have .forward files"
+        shell: |
+            awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false" &&  $1 !~ /^(root|halt|sync|shutdown)$/ ) { print $1 " " $6 }' /etc/passwd | while read user dir; do
+             if [ -d "$dir" ] ; then
+               if [ ! -h "$dir/.forward" -a -f "$dir/.forward" ] ; then
+                 echo "$dir/.forward"
+               fi
+             fi
+            done
+        register: rhel7cis_rule_6_2_9_rc
+        ignore_errors: yes
+      - name: " 6.2.9 | HARDEN | Ensure no users have .forward files"
+        block:
+          - slurp:
+              src: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_9_rc.stdout_lines|default([]) }}"
+            register: before_6_2_9
+            ignore_errors: yes
+          - file:
+              path: "{{ item }}"
+              state: absent
+            with_items:
+              - "{{ rhel7cis_rule_6_2_9_rc.stdout_lines|default([]) }}"
+            register: result_6_2_9
+            ignore_errors: yes
+        when: rhel7cis_rule_6_2_9_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.9':{'result':result_6_2_9|default({}),'audits':before_6_2_9|default({})}}) }}"
+    when: rhel7cis_rule_6_2_9
+    tags:
+     - level1
+     - harden
+     - rule_6.2.9
+     - rhel7
+
+######
+#  - name: " 6.2.10 | HARDEN | Ensure no users have .netrc files"
+  - name: " 6.2.10 | HARDEN | Ensure no users have .netrc files"
+    block:
+      - name: " 6.2.10 | HARDEN | Ensure no users have .netrc files"
+        shell: |
+            awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false" &&  $1 !~ /^(root|halt|sync|shutdown)$/ ) { print $1 " " $6 }' /etc/passwd | while read user dir; do
+             if [ -d "$dir" ] ; then
+               if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ] ; then
+                 echo "$dir/.netrc"
+               fi
+             fi
+            done
+        register: rhel7cis_rule_6_2_10_rc
+        ignore_errors: yes
+      - name: " 6.2.10 | HARDEN | Ensure no users have .netrc files"
+        block:
+          - slurp:
+              src: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_10_rc.stdout_lines|default([]) }}"
+            register: before_6_2_10
+            ignore_errors: yes
+          - file:
+              path: "{{ item }}"
+              state: absent
+            with_items:
+              - "{{ rhel7cis_rule_6_2_10_rc.stdout_lines|default([]) }}"
+            register: result_6_2_10
+            ignore_errors: yes
+        when: rhel7cis_rule_6_2_10_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.10':{'result':result_6_2_10|default({}),'audits':before_6_2_10|default({})}}) }}"
+    when: rhel7cis_rule_6_2_10
+    tags:
+     - level1
+     - harden
+     - rule_6.2.10
+     - rhel7
+
+######
+#   - name: " 6.2.11 | HARDEN |  Ensure users' .netrc Files are not group or world accessible"
+  - name: " 6.2.11 | HARDEN |  Ensure users' .netrc Files are not group or world accessible"
+    block:
+      - name: " 6.2.11 | HARDEN |  Ensure users' .netrc Files are not group or world accessible"
+        shell: |
+           grep -E -v '^(root|halt|sync|shutdown)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read user dir; do
+            if [ -d "$dir" ]; then
+              for file in $dir/.netrc; do
+                if [ ! -h "$file" -a -f "$file" ]; then
+                   accessmod=$(stat -L -c "%a" "$file")
+                   if [ $accessmod -ne 700 ]; then
+                      echo "$file"
+                 fi
+               fi
+              done
+            fi
+           done
+        register: rhel7cis_rule_6_2_11_rc
+        ignore_errors: yes
+      - name: " 6.2.11 | HARDEN |  Ensure users' .netrc Files are not group or world accessible"
+        block:
+          - stat:
+              path: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_11_rc.stdout_lines|default([]) }}"
+            register: before_6_2_11
+          - shell: |
+              grep -E -v '^(root|halt|sync|shutdown)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read user dir; do
+               if [ -d "$dir" ]; then
+                 for file in $dir/.netrc; do
+                   if [ ! -h "$file" -a -f "$file" ]; then
+                      accessmod=$(stat -L -c "%a" "$file")
+                      if [ $accessmod -ne 700 ]; then
+                         chmod 0700 $file
+                    fi
+                  fi
+                 done
+               fi
+              done
+            register: rhel7cis_rule_6_2_11_files
+            ignore_errors: yes
+          - stat:
+              path: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_11_rc.stdout_lines|default([]) }}"
+            register: result_6_2_11
+            ignore_errors: yes
+        when: rhel7cis_rule_6_2_11_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.11':{'result':result_6_2_11|default({}),'audits':before_6_2_11|default({})}}) }}"
+    when: rhel7cis_rule_6_2_11
+    tags:
+     - level1
+     - harden
+     - rule_6.2.11
+     - rhel7
+
+######
+#  - name: " 6.2.12 | HARDEN | Ensure no users have .rhosts files"
+  - name: " 6.2.12 | HARDEN | Ensure no users have .rhosts files"
+    block:
+      - name: " 6.2.12 | HARDEN | Ensure no users have .rhosts files"
+        shell: |
+            awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false" &&  $1 !~ /^(root|halt|sync|shutdown)$/ ) { print $1 " " $6 }' /etc/passwd | while read user dir; do
+             if [ -d "$dir" ] ; then
+               if [ ! -h "$dir/.rhosts" -a -f "$dir/.rhosts" ] ; then
+                 echo "$dir/.rhosts"
+               fi
+             fi
+            done
+        register: rhel7cis_rule_6_2_12_rc
+        ignore_errors: yes
+      - name: " 6.2.12 | HARDEN | Ensure no users have .rhosts files"
+        block:
+          - slurp:
+              src: "{{ item }}"
+            with_items:
+              - "{{ rhel7cis_rule_6_2_12_rc.stdout_lines|default([]) }}"
+            register: before_6_2_12
+            ignore_errors: yes
+          - file:
+              path: "{{ item }}"
+              state: absent
+            with_items:
+              - "{{ rhel7cis_rule_6_2_12_rc.stdout_lines|default([]) }}"
+            register: result_6_2_12
+            ignore_errors: yes
+        when: rhel7cis_rule_6_2_12_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.12':{'result':result_6_2_12|default({}),'audits':before_6_2_12|default({})}}) }}"
+        ignore_errors: yes
+    when:
+      - rhel7cis_rule_6_2_12
+    tags:
+     - level1
+     - harden
+     - rule_6.2.12
+     - rhel7
+
+#####
+  - name: " 6.2.13 | HARDEN |  Ensure all groups in /etc/passwd exist in /etc/group "
+    block:
+    - name: " 6.2.13 | HARDEN |  Ensure all groups in /etc/passwd exist in /etc/group "
+      script: 6-2-13
+      register: groups_not_in_etc_groups
+      ignore_errors: yes
+    - slurp:
+        src: /etc/group
+      ignore_errors: yes
+      register: before
+    - group:
+        name: "{{ item }}"
+        gid: "{{ item }}"
+        state: present
+      with_items: "{{ groups_not_in_etc_groups.stdout_lines }}"
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'6.2.13':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when: rhel7cis_rule_6_2_13
+    tags:
+     - level1
+     - harden
+     - rule_6.2.13
+     - rhel7
+#####
+#  - name: " 6.2.14 | HARDEN |  Ensure no duplicate UIDs exist "
+#    block:
+#      - name: " 6.2.14 | HARDEN |  Ensure no duplicate UIDs exist "
+#        script: 6-2-14
+#        register: rhel7cis_rule_6_2_14_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_6_2_14_result: false
+#        when: rhel7cis_rule_6_2_14_rc.stdout != ""
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'6.2.14':rhel7cis_rule_6_2_14_result|default(true)}) }}"
+#    when: rhel7cis_rule_6_2_14
+#    tags:
+#     - level1
+#     - scan
+#     - rule_6.2.14
+#     - rhel7
+######
+#  - name: " 6.2.15 | HARDEN |  Ensure no duplicate GIDs exist "
+#    block:
+#      - name: " 6.2.15 | HARDEN |  Ensure no duplicate GIDs exist "
+#        script: 6-2-15
+#        register: rhel7cis_rule_6_2_15_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_6_2_15_result: false
+#        when: rhel7cis_rule_6_2_15_rc.stdout != ""
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'6.2.15':rhel7cis_rule_6_2_15_result|default(true)}) }}"
+#    when: rhel7cis_rule_6_2_15
+#    tags:
+#     - level1
+#     - scan
+#     - rule_6.2.15
+#     - rhel7
+######
+#  - name: " 6.2.16 | HARDEN | Ensure no duplicate user names exist "
+#    block:
+#      - name: " 6.2.16 | HARDEN | Ensure no duplicate user names exist "
+#        script: 6-2-16
+#        register: rhel7cis_rule_6_2_16_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_6_2_16_result: false
+#        when: rhel7cis_rule_6_2_16_rc.stdout != ""
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'6.2.16':rhel7cis_rule_6_2_16_result|default(true)}) }}"
+#    when: rhel7cis_rule_6_2_16
+#    tags:
+#     - level1
+#     - scan
+#     - rule_6.2.16
+#     - rhel7
+######
+#  - name: " 6.2.17 | HARDEN | Ensure no duplicate group names exist "
+#    block:
+#      - name: " 6.2.17 | HARDEN | Ensure no duplicate group names exist "
+#        script: 6-2-17
+#        register: rhel7cis_rule_6_2_17_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_6_2_17_result: false
+#        when: rhel7cis_rule_6_2_17_rc.stdout != ""
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'6.2.17':rhel7cis_rule_6_2_17_result|default(true)}) }}"
+#    when: rhel7cis_rule_6_2_17
+#    tags:
+#     - level1
+#     - scan
+#     - rule_6.2.17
+#     - rhel7
+######
+#  - name: " 6.2.18 | HARDEN | Ensure shadow group is empty  "
+#    block:
+#      - name: " 6.2.18 | HARDEN | Ensure shadow group is empty  "
+#        shell: " grep ^shadow:[^:]*:[^:]*:[^:]+ /etc/group "
+#        register: rhel7cis_rule_6_2_18_a_rc
+#        ignore_errors: yes
+#      - shell: " grep ^shadow:[^:]*:[^:]* /etc/group | cut -d: -f3 "
+#        register: rhel7cis_rule_6_2_18_b_rc
+#        ignore_errors: yes
+#      - shell: " awk -F: '($4 == {{ rhel7cis_rule_6_2_18_b_rc.stdout }} ) { print }' /etc/passwd "
+#        register: rhel7cis_rule_6_2_18_c_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_6_2_18_result: false
+#        when: rhel7cis_rule_6_2_18_a_rc.rc == 0 or rhel7cis_rule_6_2_18_c_rc.stdout != ""
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'6.2.18':rhel7cis_rule_6_2_18_result|default(true)}) }}"
+#    when: rhel7cis_rule_6_2_18
+#    tags:
+#     - level1
+#     - scan
+#     - rule_6.2.18
+#     - rhel7
+#####

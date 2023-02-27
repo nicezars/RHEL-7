@@ -1,0 +1,505 @@
+---
+#
+# Copyright 2020
+# This section contains 32 rules
+#
+#####
+# Manually
+#  - name: " 6.1.1 | HARDEN |   Audit system file permissions"
+#    block:
+#      - name: " 6.1.1 | SCAN_MANUAL |  Audit system file permissions"
+#        shell:   rpm -Va | grep -vw c
+#        register: rhel7cis_rule_6_1_1_rc
+#        ignore_errors: yes
+#      - debug:
+#          var: rhel7cis_rule_6_1_1_rc.stdout_lines
+##          msg:
+##          - "Please review all installed packages: {{ rhel7cis_rule_6_1_1_rc.stdout_lines|list }}. "
+##          - "Once verified, please set rhel7cis_rule_6_1_1 to true in default/main.yml ."
+#        register: rhel7cis_rule_6_1_1_system_packages_installed_list
+#      - set_fact:
+#          rhel7cis_rule_6_1_1_result: false
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'6.1.1':rhel7cis_rule_6_1_1_result|default(true)}) }}"
+#    when: rhel7cis_rule_6_1_1
+#    tags:
+#     - level2
+#     - scan
+#     - rule_6.1.1
+#     - rhel7
+
+#####
+  - name: " 6.1.2 | ROLLBACK | Ensure permissions on /etc/passwd are configured"
+    block:
+    - name: " 6.1.2 | ROLLBACK | Ensure permissions on /etc/passwd are configured"
+      block:
+      - name: " 6.1.2 | ROLLBACK | Ensure permissions on /etc/passwd are configured  "
+        set_fact:
+          before_mode: "{{ all_results['6.1.2'].audits.stat.mode }}"
+          before_user: "{{ all_results['6.1.2'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['6.1.2'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/passwd
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['6.1.2'].audits.stat.exists == true
+    when: rhel7cis_rule_6_1_2
+    tags:
+     - level1
+     - rollback
+     - rule_6.1.2
+     - rhel7
+
+#####
+  - name: " 6.1.3 | ROLLBACK | Ensure permissions on /etc/shadow are configured"
+    block:
+    - name: " 6.1.3 | ROLLBACK | Ensure permissions on /etc/shadow are configured"
+      block:
+      - name: " 6.1.3 | ROLLBACK | Ensure permissions on /etc/shadow are configured "
+        set_fact:
+          before_mode: "{{ all_results['6.1.3'].audits.stat.mode }}"
+          before_user: "{{ all_results['6.1.3'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['6.1.3'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/shadow
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['6.1.3'].audits.stat.exists == true
+    when: rhel7cis_rule_6_1_3
+    tags:
+     - level1
+     - rollback
+     - rule_6.1.3
+     - rhel7
+#####
+
+  - name: " 6.1.4 | ROLLBACK | Ensure permissions on /etc/group are configured "
+    block:
+    - name: " 6.1.4 | ROLLBACK | Ensure permissions on /etc/group are configured"
+      block:
+      - name: " 6.1.4 | ROLLBACK | Ensure permissions on /etc/group are configured"
+        set_fact:
+          before_mode: "{{ all_results['6.1.4'].audits.stat.mode }}"
+          before_user: "{{ all_results['6.1.4'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['6.1.4'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/group
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['6.1.4'].audits.stat.exists == true
+    when: rhel7cis_rule_6_1_4
+    tags:
+     - level1
+     - rollback
+     - rule_6.1.4
+     - rhel7
+
+#####
+  - name: " 6.1.5 | ROLLBACK | Ensure permissions on /etc/gshadow are configured"
+    block:
+    - name: " 6.1.5 | ROLLBACK | Ensure permissions on /etc/gshadow are configured"
+      block:
+      - name: " 6.1.5 | ROLLBACK | Ensure permissions on /etc/gshadow are configured"
+        set_fact:
+          before_mode: "{{ all_results['6.1.5'].audits.stat.mode }}"
+          before_user: "{{ all_results['6.1.5'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['6.1.5'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/gshadow
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['6.1.5'].audits.stat.exists == true
+    when: rhel7cis_rule_6_1_5
+    tags:
+     - level1
+     - rollback
+     - rule_6.1.5
+     - rhel7
+
+#####
+  - name: " 6.1.6 | ROLLBACK | Ensure permissions on /etc/passwd- are configured "
+    block:
+    - name: " 6.1.6 | ROLLBACK | Ensure permissions on /etc/passwd- are configured"
+      block:
+      - name: " 6.1.6 | ROLLBACK | Ensure permissions on /etc/passwd- are configured "
+        set_fact:
+          before_mode: "{{ all_results['6.1.6'].audits.stat.mode }}"
+          before_user: "{{ all_results['6.1.6'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['6.1.6'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/passwd-
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['6.1.6'].audits.stat.exists == true
+    when: rhel7cis_rule_6_1_6
+    tags:
+     - level1
+     - rollback
+     - rule_6.1.6
+     - rhel7
+#####
+
+  - name: " 6.1.7 | ROLLBACK |  Ensure permissions on /etc/shadow- are configured"
+    block:
+    - name: " 6.1.7 | ROLLBACK | Ensure permissions on /etc/shadow- are configured"
+      block:
+      - name: " 6.1.7 | ROLLBACK | Ensure permissions on /etc/shadow- are configured"
+        set_fact:
+          before_mode: "{{ all_results['6.1.7'].audits.stat.mode }}"
+          before_user: "{{ all_results['6.1.7'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['6.1.7'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/shadow-
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['6.1.7'].audits.stat.exists == true
+    when: rhel7cis_rule_6_1_7
+    tags:
+     - level1
+     - rollback
+     - rule_6.1.7
+     - rhel7
+#####
+
+  - name: " 6.1.8 | ROLLBACK | Ensure permissions on /etc/group- are configured "
+    block:
+    - name: " 6.1.8 | ROLLBACK | Ensure permissions on /etc/group- are configured"
+      block:
+      - name: " 6.1.8 | ROLLBACK | Ensure permissions on /etc/group- are configured"
+        set_fact:
+          before_mode: "{{ all_results['6.1.8'].audits.stat.mode }}"
+          before_user: "{{ all_results['6.1.8'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['6.1.8'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/group-
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['6.1.8'].audits.stat.exists == true
+    when: rhel7cis_rule_6_1_8
+    tags:
+     - level1
+     - rollback
+     - rule_6.1.8
+     - rhel7
+
+#####
+  - name: " 6.1.9 | ROLLBACK |  Ensure permissions on /etc/gshadow- are configured"
+    block:
+    - name: " 6.1.9 | ROLLBACK | Ensure permissions on /etc/gshadow- are configured"
+      block:
+      - name: " 6.1.9 | ROLLBACK | Ensure permissions on /etc/gshadow- are configured"
+        set_fact:
+          before_mode: "{{ all_results['6.1.9'].audits.stat.mode }}"
+          before_user: "{{ all_results['6.1.9'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['6.1.9'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/gshadow-
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['6.1.9'].audits.stat.exists == true
+    when: rhel7cis_rule_6_1_9
+    tags:
+     - level1
+     - rollback
+     - rule_6.1.9
+     - rhel7
+
+#####
+  - name: " 6.1.10 | ROLLBACK |  Ensure no world writable files exist"
+    block:
+    - block:
+      - name: " 6.1.10 | ROLLBACK |  Ensure no world writable files exist"
+        file:
+          path: "{{ item.stat.path }}"
+          owner: "{{ item.stat.pw_name }}"
+          group: "{{ item.stat.gr_name }}"
+          mode: "{{ item.stat.mode }}"
+        ignore_errors: yes
+        diff: yes
+        with_items: "{{ all_results['6.1.10'] | json_query('audits.results[*]')}}"
+      when: all_results['6.1.10'].audits.results[0].stat.exists == true
+    when: rhel7cis_rule_6_1_10
+    tags:
+     - level1
+     - rollback
+     - rule_6.1.10
+     - rhel7
+
+#####
+# HARDEN_MANUALY So No ROLLBACK Required
+#  - name: " 6.1.11 | HARDEN | Ensure no unowned files or directories exist"
+#  - name: " 6.1.12 | HARDEN | Ensure no ungrouped files or directories exist"
+#  - name: " 6.1.13 | HARDEN | Audit SUID executables"
+#  - name: " 6.1.14 | HARDEN | Audit SGID executables"
+##
+#
+  - name: " 6.2.1 | ROLLBACK | Ensure accounts in /etc/passwd use shadowed passwords"
+    block:
+    - name: " 6.2.1 | ROLLBACK | Ensure accounts in /etc/passwd use shadowed passwords"
+      file:
+        path: /etc/passwd
+        state: absent
+      ignore_errors: yes
+      when: all_results['6.2.1'].audits.msg is defined and all_results['6.2.1'].audits.msg.find('file not found') != -1
+    - name: " 6.2.1 | ROLLBACK | Ensure accounts in /etc/passwd use shadowed passwords"
+      block:
+      - set_fact:
+          data: "{{ all_results['6.2.1'].audits[0].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/passwd
+        ignore_errors: yes
+        when: all_results['6.2.1'].audits[0].content is defined
+      when:
+        - all_results['6.2.1'].audits[1] != "[]"
+        - all_results['6.2.1'].audits[1][0] is defined
+    when: rhel7cis_rule_6_2_1
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.1
+     - rhel7
+
+####
+  - name: " 6.2.2 | ROLLBACK | Ensure /etc/shadow password fields are not empty "
+    block:
+    - name: " 6.2.2 | ROLLBACK | Ensure /etc/shadow password fields are not empty - before"
+      block:
+      - shell: |
+          passwd -fu "{{ item }}"
+        diff: yes
+        ignore_errors: yes
+        with_items: "{{  all_results['6.2.2'].audits.stdout_lines | default([]) }}"
+      when: all_results['6.2.2'].audits.stdout_lines != "[]"
+    when: rhel7cis_rule_6_2_2
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.2
+     - rhel7
+
+####
+#####
+  - name: " 6.2.3 | HARDEN | Ensure root is the only UID 0 account  "
+    block:
+    - name: " 6.2.3 | HARDEN | Ensure root is the only UID 0 account - before "
+      debug:
+        msg:
+          - As a rollback, Manually edite and create {{ all_results['6.2.3'].audits.stdout_lines }} users
+          - The /etc/passwd backup file stored under the /tmp directory for more information.
+      ignore_errors: yes
+      when: all_results['6.2.3'].audits.stdout_lines != "[]"
+    when: rhel7cis_rule_6_2_3
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.3
+     - rhel7
+
+##  - name: " 6.2.4 | HARDEN | Ensure root PATH Integrity "
+
+#  - name: " 6.2.5 | HARDEN | Ensure all users' home directories exist"
+  - name: " 6.2.5 | HARDEN | Ensure all users' home directories exist"
+    block:
+    - name: " 6.2.5 | HARDEN | Ensure all users' home directories exist "
+      block:
+      - file:
+          path: "{{ item.item }}"
+          state: absent
+        diff: yes
+        ignore_errors: yes
+        with_items: "{{ all_results['6.2.5'] | json_query('audits.results[*]')}}"
+      when:
+        - all_results['6.2.5'].audits.results is defined
+    when: rhel7cis_rule_6_2_5
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.5
+     - rhel7
+
+#  - name: " 6.2.6 | HARDEN | Ensure users' home directories permissions are 750 or more restrictive"
+  - name: " 6.2.6 | HARDEN | Ensure users' home directories permissions are 750 or more restrictive"
+    block:
+    - name: " 6.2.6 | HARDEN | Ensure users' home directories permissions are 750 or more restrictive "
+      block:
+      - file:
+          path: "{{ item.diff.before.path }}"
+          mode: "{{ item.diff.before.mode }}"
+        diff: yes
+        ignore_errors: yes
+        with_items: "{{ all_results['6.2.6'] | json_query('result.results[*]')}}"
+      when:
+        - all_results['6.2.6'].audits.results is defined
+    when: rhel7cis_rule_6_2_6
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.6
+     - rhel7
+
+#  - name: " 6.2.7 | HARDEN | Ensure users own their home directories"
+  - name: " 6.2.7 | HARDEN |  Ensure users own their home directories"
+    block:
+    - name: " 6.2.7 | HARDEN |  Ensure users own their home directories"
+      block:
+      - file:
+          path: "{{ item.item }}"
+          owner: "{{ item.stat.pw_name }}"
+        diff: yes
+        ignore_errors: yes
+        with_items: "{{ all_results['6.2.7'] | json_query('audits.results[*]')}}"
+      when:
+        - all_results['6.2.7'].audits.results is defined
+    when: rhel7cis_rule_6_2_7
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.7
+     - rhel7
+
+####
+#  - name: " 6.2.8 | HARDEN | Ensure users' dot files are not group or world writable"
+  - name: " 6.2.8 | SCAN |  Ensure users' dot files are not group or world writable"
+    block:
+    - name: " 6.2.8 | SCAN |  Ensure users' dot files are not group or world writable"
+      block:
+      - file:
+          path: "{{ item.item }}"
+          mode: "{{ item.stat.mode }}"
+        diff: yes
+        ignore_errors: yes
+        with_items: "{{ all_results['6.2.8'] | json_query('audits.results[*]')}}"
+      when:
+        - all_results['6.2.8'].audits.results is defined
+    when: rhel7cis_rule_6_2_8
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.8
+     - rhel7
+#####
+#  - name: " 6.2.9 | HARDEN | Ensure no users have .forward files"
+  - name: " 6.2.9 | HARDEN | Ensure no users have .forward files"
+    block:
+    - name: " 6.2.9 | HARDEN | Ensure no users have .forward files"
+      block:
+      - copy:
+          content: "{{ item.content }}"
+          dest: "{{ item.item }}"
+        diff: yes
+        ignore_errors: yes
+        with_items: "{{ all_results['6.2.9'] | json_query('audits.results[*]')}}"
+      when:
+        - all_results['6.2.9'].audits.results is defined
+    when: rhel7cis_rule_6_2_9
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.9
+     - rhel7
+
+#####
+#  - name: " 6.2.10 | HARDEN | Ensure no users have .netrc files"
+  - name: " 6.2.10 | HARDEN | Ensure no users have .netrc files"
+    block:
+    - name: " 6.2.10 | HARDEN | Ensure no users have .netrc files"
+      block:
+      - copy:
+          content: "{{ item.content }}"
+          dest: "{{ item.item }}"
+        diff: yes
+        ignore_errors: yes
+        with_items: "{{ all_results['6.2.10'] | json_query('audits.results[*]')}}"
+      when:
+        - all_results['6.2.10'].audits.results is defined
+    when: rhel7cis_rule_6_2_10
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.10
+     - rhel7
+
+#####
+#  - name: " 6.2.11 | HARDEN | Ensure users' .netrc Files are not group or world accessible"
+  - name: " 6.2.11 | HARDEN | Ensure users' .netrc Files are not group or world accessible"
+    block:
+    - name: " 6.2.11 | HARDEN | Ensure users' .netrc Files are not group or world accessible"
+      block:
+      - file:
+          path: "{{ item.item }}"
+          mode: "{{ item.stat.mode }}"
+        diff: yes
+        ignore_errors: yes
+        with_items: "{{ all_results['6.2.11'] | json_query('audits.results[*]')}}"
+      when:
+        - all_results['6.2.11'].audits.results is defined
+    when: rhel7cis_rule_6_2_11
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.11
+     - rhel7
+
+#####
+#  - name: " 6.2.12 | HARDEN | Ensure no users have .rhosts files"
+  - name: " 6.2.12 | HARDEN | Ensure no users have .rhosts files"
+    block:
+    - name: " 6.2.12 | HARDEN | Ensure no users have .rhosts files"
+      block:
+      - copy:
+          content: "{{ item.content }}"
+          dest: "{{ item.item }}"
+        diff: yes
+        ignore_errors: yes
+        with_items: "{{ all_results['6.2.12'] | json_query('audits.results[*]')}}"
+      when:
+        - all_results['6.2.12'].audits.results is defined
+    when: rhel7cis_rule_6_2_12 and rhel7cis_rule_6_2_11 = false
+    tags:
+     - level1
+     - rollback
+     - rule_6.2.12
+     - rhel7
+
+####
+#  - name: " 6.2.13 | HARDEN | Ensure all groups in /etc/passwd exist in /etc/group "
+#  - name: " 6.2.14 | HARDEN | Ensure no duplicate UIDs exist "
+#  - name: " 6.2.15 | HARDEN | Ensure no duplicate GIDs exist "
+#  - name: " 6.2.16 | HARDEN | Ensure no duplicate user names exist "
+#  - name: " 6.2.17 | HARDEN | Ensure no duplicate group names exist "
+#  - name: " 6.2.18 | HARDEN | Ensure shadow group is empty  "
+#####

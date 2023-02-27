@@ -1,0 +1,715 @@
+---
+#
+# Copyright 2020
+# This section contains 32 rules
+# Has Hash-out all the rules apart From Mandatory Checklist
+#
+#####
+  - name: " 6.1.1 | SCAN |   Audit system file permissions"
+    block:
+      - name: " 6.1.1 | SCAN_MANUAL |  Audit system file permissions"
+        shell:   rpm -Va | grep -vw c
+        register: rhel7cis_rule_6_1_1_rc
+        ignore_errors: yes
+      - debug:
+          var: rhel7cis_rule_6_1_1_rc.stdout_lines
+#          msg:
+#          - "Please review all installed packages: {{ rhel7cis_rule_6_1_1_rc.stdout_lines|list }}. "
+#          - "Once verified, please set rhel7cis_rule_6_1_1 to true in default/main.yml ."
+        register: rhel7cis_rule_6_1_1_system_packages_installed_list
+
+    when: rhel7cis_rule_6_1_1
+    tags:
+     - level2
+     - scan
+     - rule_6.1.1
+     - rhel7
+
+#####
+  - name: " 6.1.2 | SCAN | Ensure permissions on /etc/passwd are configured"
+    block:
+      - name: " 6.1.2 | SCAN | Ensure permissions on /etc/passwd are configured"
+        shell:  stat  /etc/passwd | grep -E '(0644/|0640/|0600/)'
+        register: rhel7cis_rule_6_1_2_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_2_result: false
+        when: rhel7cis_rule_6_1_2_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.2':rhel7cis_rule_6_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_2
+    tags:
+     - level1
+     - scan
+     - rule_6.1.2
+     - rhel7
+
+#####
+  - name: " 6.1.3 | SCAN | Ensure permissions on /etc/shadow are configured"
+    block:
+      - name: " 6.1.3 | SCAN | Ensure permissions on /etc/shadow are configured"
+        shell:  stat  /etc/shadow | grep -E '(0000/)'
+        register: rhel7cis_rule_6_1_3_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_3_result: false
+        when: rhel7cis_rule_6_1_3_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.3':rhel7cis_rule_6_1_3_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_3
+    tags:
+     - level1
+     - scan
+     - rule_6.1.3
+     - rhel7
+
+#####
+  - name: " 6.1.4 | SCAN | Ensure permissions on /etc/group are configured "
+    block:
+      - name: " 6.1.4 | SCAN | Ensure permissions on /etc/group are configured "
+        shell:  stat  /etc/group | grep -E '(0644/|0640/|0600/)'
+        register: rhel7cis_rule_6_1_4_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_4_result: false
+        when: rhel7cis_rule_6_1_4_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.4':rhel7cis_rule_6_1_4_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_4
+    tags:
+     - level1
+     - scan
+     - rule_6.1.4
+     - rhel7
+#####
+
+  - name: " 6.1.5 | SCAN | Ensure permissions on /etc/gshadow are configured"
+    block:
+      - name: " 6.1.5 | SCAN | Ensure permissions on /etc/gshadow are configured"
+        shell:  stat  /etc/gshadow | grep -E '(0000/)'
+        register: rhel7cis_rule_6_1_5_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_5_result: false
+        when: rhel7cis_rule_6_1_5_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.5':rhel7cis_rule_6_1_5_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_5
+    tags:
+     - level1
+     - scan
+     - rule_6.1.5
+     - rhel7
+
+#####
+  - name: " 6.1.6 | SCAN | Ensure permissions on /etc/passwd- are configured "
+    block:
+      - name: " 6.1.6 | SCAN | Ensure permissions on /etc/passwd- are configured "
+        shell:  stat  /etc/passwd- | grep -E '(0644/|0640/|0600/)'
+        register: rhel7cis_rule_6_1_6_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_6_result: false
+        when: rhel7cis_rule_6_1_6_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.6':rhel7cis_rule_6_1_6_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_6
+    tags:
+     - level1
+     - scan
+     - rule_6.1.6
+     - rhel7
+#####
+
+  - name: " 6.1.7 | SCAN |  Ensure permissions on /etc/shadow- are configured"
+    block:
+      - name: " 6.1.7 | SCAN |  Ensure permissions on /etc/shadow- are configured"
+        shell:  stat  /etc/shadow- | grep -E '(0000/)'
+        register: rhel7cis_rule_6_1_7_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_7_result: false
+        when: rhel7cis_rule_6_1_7_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.7':rhel7cis_rule_6_1_7_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_7
+    tags:
+     - level1
+     - scan
+     - rule_6.1.7
+     - rhel7
+#####
+
+  - name: " 6.1.8 | SCAN | Ensure permissions on /etc/group- are configured "
+    block:
+      - name: " 6.1.8 | SCAN | Ensure permissions on /etc/group- are configured "
+        shell:  stat  /etc/group- | grep -E '(0644/|0640/|0600/)'
+        register: rhel7cis_rule_6_1_8_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_8_result: false
+        when: rhel7cis_rule_6_1_8_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.8':rhel7cis_rule_6_1_8_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_8
+    tags:
+     - level1
+     - scan
+     - rule_6.1.8
+     - rhel7
+#####
+
+  - name: " 6.1.9 | SCAN |  Ensure permissions on /etc/gshadow- are configured"
+    block:
+      - name: " 6.1.9 | SCAN |  Ensure permissions on /etc/gshadow- are configured"
+        shell:  stat  /etc/gshadow- | grep -E '(0000/)'
+        register: rhel7cis_rule_6_1_9_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_9_result: false
+        when: rhel7cis_rule_6_1_9_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.9':rhel7cis_rule_6_1_9_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_9
+    tags:
+     - level1
+     - scan
+     - rule_6.1.9
+     - rhel7
+
+#####
+  - name: " 6.1.10 | SCAN |  Ensure no world writable files exist"
+    block:
+      - name: " 6.1.10 | SCAN |  Ensure no world writable files exist"
+        shell:  df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -0002
+        register: rhel7cis_rule_6_1_10_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_10_result: false
+        when: rhel7cis_rule_6_1_10_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.10':rhel7cis_rule_6_1_10_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_10
+    tags:
+     - level1
+     - scan
+     - rule_6.1.10
+     - rhel7
+#####
+  - name: " 6.1.11 | SCAN | Ensure no unowned files or directories exist"
+    block:
+      - name: " 6.1.11 | SCAN |  Ensure no unowned files or directories exist"
+        shell:  df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nouser
+        register: rhel7cis_rule_6_1_11_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_11_result: false
+        when: rhel7cis_rule_6_1_11_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.11':rhel7cis_rule_6_1_11_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_11
+    tags:
+     - level1
+     - scan
+     - rule_6.1.11
+     - rhel7
+#####
+
+  - name: " 6.1.12 | SCAN | Ensure no ungrouped files or directories exist"
+    block:
+      - name: " 6.1.12 | SCAN | Ensure no ungrouped files or directories exist"
+        shell:  df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -nogroup
+        register: rhel7cis_rule_6_1_12_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_1_12_result: false
+        when: rhel7cis_rule_6_1_12_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.1.12':rhel7cis_rule_6_1_12_result|default(true)}) }}"
+    when: rhel7cis_rule_6_1_12
+    tags:
+     - level1
+     - scan
+     - rule_6.1.12
+     - rhel7
+#####
+
+  - name: " 6.1.13 | SCAN |  Audit SUID executables"
+    block:
+      - name: " 6.1.13 | SCAN_MANUAL |  Audit SUID executables"
+        shell:  df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -2000
+        register: rhel7cis_rule_6_1_13_rc
+        ignore_errors: yes
+      - debug:
+          var: rhel7cis_rule_6_1_13_rc.stdout_lines
+#          msg:
+#          - "Please review all SUID files: {{ rhel7cis_rule_6_1_13_rc.stdout_lines|list }}. "
+#          - "Once verified, please set rhel7cis_rule_6_1_13 to true in default/main.yml ."
+        register: rhel7cis_rule_6_1_13_SUID_executables_list
+
+    when: rhel7cis_rule_6_1_13
+    tags:
+     - level1
+     - scan
+     - rule_6.1.13
+     - rhel7
+#####
+  - name: " 6.1.14 | SCAN |  Audit SGID executables"
+    block:
+      - name: " 6.1.14 | SCAN_MANUAL |  Audit SGID executables"
+        shell:  df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -4000
+        register: rhel7cis_rule_6_1_14_rc
+        ignore_errors: yes
+      - debug:
+          var: rhel7cis_rule_6_1_14_rc.stdout_lines
+#          msg:
+#          - "Please review all SUID files: {{ rhel7cis_rule_6_1_14_rc.stdout_lines|list }}. "
+#          - "Once verified, please set rhel7cis_rule_6_1_14 to true in default/main.yml ."
+        register: rhel7cis_rule_6_1_14_SGID_executables_list
+
+    when: rhel7cis_rule_6_1_14
+    tags:
+     - level1
+     - scan
+     - rule_6.1.14
+     - rhel7
+
+#####
+  - name: " 6.2.1 | SCAN | Ensure accounts in /etc/passwd use shadowed passwords"
+    block:
+      - name: " 6.2.1 | SCAN | Ensure accounts in /etc/passwd use shadowed passwords"
+        shell: |
+           awk -F: '($2 != "x" ) { print $1 " is not set to shadowed passwords "}' /etc/passwd
+        register: rhel7cis_rule_6_2_1_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_1_result: false
+        when: rhel7cis_rule_6_2_1_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.1':rhel7cis_rule_6_2_1_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_1
+    tags:
+     - level1
+     - scan
+     - rule_6.2.1
+     - rhel7
+
+#####
+  - name: " 6.2.2 | SCAN | Ensure /etc/shadow password fields are not empty "
+    block:
+      - name: " 6.2.2 | SCAN | Ensure /etc/shadow password fields are not empty "
+        shell: |
+           awk -F: '($2 == "" ) { print $1 " does not have a password "}' /etc/shadow
+        register: rhel7cis_rule_6_2_2_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_2_result: false
+        when: rhel7cis_rule_6_2_2_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.2':rhel7cis_rule_6_2_2_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_2
+    tags:
+     - level1
+     - scan
+     - rule_6.2.2
+     - rhel7
+
+#####
+  - name: " 6.2.3 | SCAN | Ensure /etc/shadow password fields are not empty "
+    block:
+      - name: " 6.2.3 | SCAN | Ensure /etc/shadow password fields are not empty "
+        shell: |
+          awk -F: '($3 == 0) { print $1 }' /etc/passwd
+        register: rhel7cis_rule_6_2_3_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_3_result: false
+        when: rhel7cis_rule_6_2_3_rc.stdout != "root"
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.3':rhel7cis_rule_6_2_3_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_3
+    tags:
+     - level1
+     - scan
+     - rule_6.2.3
+     - rhel7
+
+#####
+  - name: " 6.2.4 | SCAN | Ensure root PATH Integrity "
+    block:
+      - name: " 6.2.4 | SCAN | Ensure root PATH Integrity "
+        script: 6-2-4
+        register: rhel7cis_rule_6_2_4_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_4_result: false
+        when: rhel7cis_rule_6_2_4_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.4':rhel7cis_rule_6_2_4_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_4
+    tags:
+     - level1
+     - scan
+     - rule_6.2.4
+     - rhel7
+
+#####
+  - name: " 6.2.5 | SCAN | Ensure all users' home directories exist"
+    block:
+      - name: " 6.2.5 | SCAN | Ensure all users' home directories exist "
+        shell: |
+          grep -E -v '^(halt|sync|shutdown)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read -r user dir
+           do
+             if [ ! -d "$dir" ]; then
+                echo "$user"
+             fi
+           done
+        register: users_identified
+        ignore_errors: yes
+      - shell: cat /etc/passwd  | grep {{ item }} | cut -d ':' -f3
+        register: users_identified_uid
+        ignore_errors: yes
+        with_items: "{{ users_identified.stdout_lines }}"
+      - assert:
+          that:
+            - "{{ item.stdout|int }} < 1000"
+          fail_msg: "'{{ item.stdout|int }}' should have the home directory"
+          quiet: true
+        with_items: "{{ users_identified_uid.results }}"
+        register: rhel7cis_rule_6_2_5_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_5_result: false
+        when: rhel7cis_rule_6_2_5_rc.failed is defined
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.5':rhel7cis_rule_6_2_5_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_5
+    tags:
+     - level1
+     - scan
+     - rule_6.2.5
+     - rhel7
+
+#####
+  - name: " 6.2.6 | SCAN | Ensure users' home directories permissions are 750 or more restrictive"
+    block:
+      - name: " 6.2.6 | SCAN | Ensure users' home directories permissions are 750 or more restrictive "
+        shell: |
+           grep -E -v '^(halt|sync|shutdown)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read user dir; do
+            if [ ! -d "$dir" ]; then
+              echo "The home directory ($dir) of user $user does not exist."
+            else
+              accessmod=$(stat -L -c "%a" "$dir")
+              if [ $accessmod -gt 750 ]; then
+                echo "Wrong permission set on the home directory ($dir) of user $user"
+              fi
+            fi
+           done
+        register: rhel7cis_rule_6_2_6_rc
+        ignore_errors: yes
+      - debug:   var=rhel7cis_rule_6_2_6_rc.stdout
+      - set_fact:
+          rhel7cis_rule_6_2_6_result: false
+        when: rhel7cis_rule_6_2_6_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.6':rhel7cis_rule_6_2_6_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_6
+    tags:
+     - level1
+     - scan
+     - rule_6.2.6
+     - rhel7
+
+#####
+  - name: " 6.2.7 | SCAN |  Ensure users own their home directories"
+    block:
+      - name: " 6.2.7 | SCAN |  Ensure users own their home directories"
+        shell: |
+           grep -E -v '^(halt|sync|shutdown|root)' /etc/passwd | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin" && $7 != "/usr/bin/false") { print $1 " " $6 }' | while read user dir; do
+              if [ ! -d "$dir" ]; then
+                 echo "The home directory ($dir) of user $user does not exist."
+              else
+                  uidno=$(grep -w "$user" /etc/passwd|cut -d: -f3)
+                  owner=$(stat -L -c "%U" "$dir")
+                    if [ "$uidno" -ge 1000 -a "$owner" != "$user" ]; then
+                       echo "The home directory ($dir) of user $user is owned by $owner."
+                    fi
+              fi
+           done
+        register: rhel7cis_rule_6_2_7_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_7_result: false
+        when: rhel7cis_rule_6_2_7_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.7':rhel7cis_rule_6_2_7_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_7
+    tags:
+     - level1
+     - scan
+     - rule_6.2.7
+     - rhel7
+
+#####
+  - name: " 6.2.8 | SCAN |  Ensure users' dot files are not group or world writable"
+    block:
+      - name: " 6.2.8 | SCAN |  Ensure users' dot files are not group or world writable"
+        shell: |
+            awk -F: '($1!~/(halt|sync|shutdown)/ && $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { print $1 " " $6 }' /etc/passwd | while read -r user dir; do
+             if [ -d "$dir" ]; then
+               for file in "$dir"/.*; do
+               if [ ! -h "$file" ] && [ -f "$file" ]; then
+                 fileperm=$(stat -L -c "%A" "$file")
+                 if [ "$(echo "$fileperm" | cut -c6)" != "-" ] || [ "$(echo "$fileperm" | cut -c9)" != "-" ]; then
+                   echo "User: \"$user\" file: \"$file\" has permissions: \"$fileperm\""
+                 fi
+               fi
+              done
+             fi
+            done
+        register: rhel7cis_rule_6_2_8_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_8_result: false
+        when: rhel7cis_rule_6_2_8_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.8':rhel7cis_rule_6_2_8_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_8
+    tags:
+     - level1
+     - scan
+     - rule_6.2.8
+     - rhel7
+
+#####
+  - name: " 6.2.9 | SCAN | Ensure no users have .forward files"
+    block:
+      - name: " 6.2.9 | SCAN | Ensure no users have .forward files"
+        shell: |
+            awk -F: '($1!~/(root|halt|sync|shutdown)/ && $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { print $1 " " $6 }' /etc/passwd | while read -r user dir; do
+             if [ -d "$dir" ]; then
+               file="$dir/.forward"
+               if [ ! -h "$file" ] && [ -f "$file" ]; then 
+                 echo "User: \"$user\" file: \"$file\" exists"
+               fi
+             fi
+            done
+        register: rhel7cis_rule_6_2_9_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_9_result: false
+        when: rhel7cis_rule_6_2_9_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.9':rhel7cis_rule_6_2_9_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_9
+    tags:
+     - level1
+     - scan
+     - rule_6.2.9
+     - rhel7
+
+#####
+  - name: " 6.2.10 | SCAN | Ensure no users have .netrc files"
+    block:
+      - name: " 6.2.10 | SCAN | Ensure no users have .netrc files"
+        shell: |
+            awk -F: '($1!~/(root|halt|sync|shutdown)/ && $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { print $1 " " $6 }' /etc/passwd | while read -r user dir; do
+             if [ -d "$dir" ]; then
+               file="$dir/.netrc"
+               if [ ! -h "$file" ] && [ -f "$file" ]; then 
+                 echo "User: \"$user\" file: \"$file\" exists"
+               fi
+             fi
+            done
+        register: rhel7cis_rule_6_2_10_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_10_result: false
+        when: rhel7cis_rule_6_2_10_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.10':rhel7cis_rule_6_2_10_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_10
+    tags:
+     - level1
+     - scan
+     - rule_6.2.10
+     - rhel7
+
+#####
+  - name: " 6.2.11 | SCAN |  Ensure users' .netrc Files are not group or world accessible"
+    block:
+      - name: " 6.2.11 | SCAN |  Ensure users' .netrc Files are not group or world accessible"
+        shell: |
+            awk -F: '($1!~/(halt|sync|shutdown)/ && $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { print $1 " " $6 }' /etc/passwd | while read -r user dir; do
+             if [ -d "$dir" ]; then
+               for file in "$dir"/.netrc; do
+               if [ ! -h "$file" ] && [ -f "$file" ]; then
+                 fileperm=$(stat -L -c "%A" "$file")
+                 if [ "$(echo "$fileperm" | cut -c6)" != "-" ] || [ "$(echo "$fileperm" | cut -c9)" != "-" ]; then
+                   echo "User: \"$user\" file: \"$file\" has permissions: \"$fileperm\""
+                 fi
+               fi
+              done
+             fi
+            done
+        register: rhel7cis_rule_6_2_11_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_11_result: false
+        when: rhel7cis_rule_6_2_11_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.11':rhel7cis_rule_6_2_11_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_11
+    tags:
+     - level1
+     - scan
+     - rule_6.2.11
+     - rhel7
+
+#####
+  - name: " 6.2.12 | SCAN | Ensure no users have .rhosts files"
+    block:
+      - name: " 6.2.12 | SCAN | Ensure no users have .rhosts files"
+        shell: |
+            awk -F: '($1!~/(root|halt|sync|shutdown)/ && $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { print $1 " " $6 }' /etc/passwd | while read -r user dir; do
+             if [ -d "$dir" ]; then
+               file="$dir/.rhosts"
+               if [ ! -h "$file" ] && [ -f "$file" ]; then 
+                 echo "User: \"$user\" file: \"$file\" exists"
+               fi
+             fi
+            done
+        register: rhel7cis_rule_6_2_12_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_12_result: false
+        when: rhel7cis_rule_6_2_12_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.12':rhel7cis_rule_6_2_12_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_12
+    tags:
+     - level1
+     - scan
+     - rule_6.2.12
+     - rhel7
+
+#####
+  - name: " 6.2.13 | SCAN |  Ensure all groups in /etc/passwd exist in /etc/group "
+    block:
+      - name: " 6.2.13 | SCAN |  Ensure all groups in /etc/passwd exist in /etc/group "
+        script: 6-2-13
+        register: rhel7cis_rule_6_2_13_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_13_result: false
+        when: rhel7cis_rule_6_2_13_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.13':rhel7cis_rule_6_2_13_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_13
+    tags:
+     - level1
+     - scan
+     - rule_6.2.13
+     - rhel7
+
+#####
+  - name: " 6.2.14 | SCAN |  Ensure no duplicate UIDs exist "
+    block:
+      - name: " 6.2.14 | SCAN |  Ensure no duplicate UIDs exist "
+        script: 6-2-14
+        register: rhel7cis_rule_6_2_14_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_14_result: false
+        when: rhel7cis_rule_6_2_14_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.14':rhel7cis_rule_6_2_14_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_14
+    tags:
+     - level1
+     - scan
+     - rule_6.2.14
+     - rhel7
+
+#####
+  - name: " 6.2.15 | SCAN |  Ensure no duplicate GIDs exist "
+    block:
+      - name: " 6.2.15 | SCAN |  Ensure no duplicate GIDs exist "
+        script: 6-2-15
+        register: rhel7cis_rule_6_2_15_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_15_result: false
+        when: rhel7cis_rule_6_2_15_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.15':rhel7cis_rule_6_2_15_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_15
+    tags:
+     - level1
+     - scan
+     - rule_6.2.15
+     - rhel7
+
+#####
+  - name: " 6.2.16 | SCAN | Ensure no duplicate user names exist "
+    block:
+      - name: " 6.2.16 | SCAN | Ensure no duplicate user names exist "
+        script: 6-2-16
+        register: rhel7cis_rule_6_2_16_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_16_result: false
+        when: rhel7cis_rule_6_2_16_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.16':rhel7cis_rule_6_2_16_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_16
+    tags:
+     - level1
+     - scan
+     - rule_6.2.16
+     - rhel7
+
+#####
+  - name: " 6.2.17 | SCAN | Ensure no duplicate group names exist "
+    block:
+      - name: " 6.2.17 | SCAN | Ensure no duplicate group names exist "
+        script: 6-2-17
+        register: rhel7cis_rule_6_2_17_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_17_result: false
+        when: rhel7cis_rule_6_2_17_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.17':rhel7cis_rule_6_2_17_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_17
+    tags:
+     - level1
+     - scan
+     - rule_6.2.17
+     - rhel7
+
+#####
+  - name: " 6.2.18 | SCAN | Ensure shadow group is empty  "
+    block:
+      - name: " 6.2.18 | SCAN | Ensure shadow group is empty  "
+        shell: " grep ^shadow:[^:]*:[^:]*:[^:]+ /etc/group "
+        register: rhel7cis_rule_6_2_18_a_rc
+        ignore_errors: yes
+      - shell: " grep ^shadow:[^:]*:[^:]* /etc/group | cut -d: -f3 "
+        register: rhel7cis_rule_6_2_18_b_rc
+        ignore_errors: yes
+      - shell: " awk -F: '($4 == {{ rhel7cis_rule_6_2_18_b_rc.stdout }} ) { print }' /etc/passwd "
+        register: rhel7cis_rule_6_2_18_c_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_6_2_18_result: false
+        when: rhel7cis_rule_6_2_18_a_rc.rc == 0 or rhel7cis_rule_6_2_18_c_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'6.2.18':rhel7cis_rule_6_2_18_result|default(true)}) }}"
+    when: rhel7cis_rule_6_2_18
+    tags:
+     - level1
+     - scan
+     - rule_6.2.18
+     - rhel7
+#####

@@ -1,0 +1,1965 @@
+---
+#
+# Copyright 2020
+# This section contains 60 rules
+#
+#  - name: " 1.1.1.1 | HARDEN | Ensure mounting of cramfs filesystems is disabled"
+#    block:
+#    - name: " 1.1.1.1 | HARDEN | Ensure mounting of cramfs filesystems is disabled - check"
+#      slurp:
+#        src: /etc/modprobe.d/cramfs.conf
+#      ignore_errors: yes
+#      register: before
+#    - name: " 1.1.1.1 | HARDEN | Ensure mounting of cramfs filesystems is disabled - modify/create"
+#      lineinfile:
+#        create: true
+#        dest: /etc/modprobe.d/cramfs.conf
+#        regexp: cramfs
+#        line: install cramfs /bin/true
+#      ignore_errors: yes
+#      register: result_conf
+#      diff: yes
+#    - shell: rmmod cramfs
+#      ignore_errors: yes
+#      register: result_unload
+#
+#    - name: "1.1.1.1 - Setup result variable"
+#      set_fact:
+#        result_1_1_1_1: "{{ result_1_1_1_1|default([]) + [item] }}"
+#      loop:
+#      - "{{ result_conf }}"
+#      - "{{ result_unload }}"
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.1.1.1':{'result':result_1_1_1_1|default({}),'audits':before|default({})}}) }}"
+#
+#    when: rhel7cis_rule_1_1_1_1
+#    tags:
+#     - level1
+#     - harden
+#     - rule_1.1.1.1
+#     - cramfs
+#     - rhel7
+#
+#
+#####
+#
+#  - name: " 1.1.1.2 | HARDEN | Ensure mounting of squashfs filesystems is disabled"
+#    block:
+#    - name: " 1.1.1.2 | HARDEN | Ensure mounting of squashfs filesystems is disabled"
+#      slurp:
+#        src: /etc/modprobe.d/squashfs.conf
+#      ignore_errors: yes
+#      register: before
+#    - name: " 1.1.1.2 | HARDEN | Ensure mounting of squashfs filesystems is disabled - modify/create"
+#      lineinfile:
+#        create: true
+#        dest: /etc/modprobe.d/squashfs.conf
+#        regexp: squashfs
+#        line: install squashfs /bin/true
+#      ignore_errors: yes
+#      register: result_conf
+#    - shell: rmmod squashfs
+#      ignore_errors: yes
+#      register: result_unload
+#
+#    - name: "1.1.1.2 - Setup result variable"
+#      set_fact:
+#        result_1_1_1_2: "{{ result_1_1_1_2|default([]) + [item] }}"
+#      loop:
+#      - "{{ result_conf }}"
+#      - "{{ result_unload }}"
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.1.1.2':{'result':result_1_1_1_2|default({}),'audits':before|default({})}}) }}"
+#    when: rhel7cis_rule_1_1_1_2
+#    tags:
+#     - level2
+#     - harden
+#     - rule_1.1.1.2
+#     - squashfs
+#     - rhel7
+#
+#####
+#
+#  - name: " 1.1.1.3 | HARDEN | Ensure mounting of udf filesystems is disabled"
+#    block:
+#    - name: " 1.1.1.3 | HARDEN | Ensure mounting of udf filesystems is disabled"
+#      slurp:
+#        src: /etc/modprobe.d/udf.conf
+#      ignore_errors: yes
+#      register: before
+#    - name: " 1.1.1.3 | HARDEN | Ensure mounting of udf filesystems is disabled - modify/create"
+#      lineinfile:
+#        create: true
+#        dest: /etc/modprobe.d/udf.conf
+#        regexp: udf
+#        line: install udf /bin/true
+#      ignore_errors: yes
+#      register: result_conf
+#    - shell: rmmod udf
+#      ignore_errors: yes
+#      register: result_unload
+#
+#    - name: "1.1.1.3 - Setup result variable"
+#      set_fact:
+#        result_1_1_1_3: "{{ result_1_1_1_3|default([]) + [item] }}"
+#      loop:
+#      - "{{ result_conf }}"
+#      - "{{ result_unload }}"
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.1.1.3':{'result':result_1_1_1_3|default({}),'audits':before|default({})}}) }}"
+#    when: rhel7cis_rule_1_1_1_3
+#    tags:
+#     - level1
+#     - harden
+#     - rule_1.1.1.3
+#     - udf
+#     - rhel7
+#
+#
+#####
+#
+#  - name: " 1.1.1.4 | HARDEN | Ensure mounting of FAT filesystems is limited"
+#    block:
+#    - name: " 1.1.1.4 | SCAN_NON_UEFI | Ensure mounting of FAT filesystems is limited"
+#      slurp:
+#        src: /etc/modprobe.d/{{ item }}.conf
+#      ignore_errors: yes
+#      register: before
+#      with_items:
+#      - msdos
+#      - vfat
+#      - fat
+#
+#    - name: " 1.1.1.4 | SCAN_NON_UEFI | Ensure mounting of FAT filesystems is limited - modify/create"
+#      lineinfile:
+#        create: true
+#        dest: /etc/modprobe.d/{{ item }}.conf
+#        regexp: "{{ item }}"
+#        line: install {{ item }} /bin/true
+#      ignore_errors: yes
+#      register: result_conf
+#      with_items:
+#      - msdos
+#      - vfat
+#      - fat
+#
+#    - shell: rmmod {{ item }}
+#      ignore_errors: yes
+#      register: result_unload
+#      with_items:
+#      - msdos
+#      - vfat
+#      - fat
+#
+#    - name: "1.1.1.4 - Setup result variable"
+#      set_fact:
+#        result_1_1_1_4: "{{ result_1_1_1_4|default([]) + [item] }}"
+#      loop:
+#      - "{{ result_conf }}"
+#      - "{{ result_unload }}"
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.1.1.4':{'result':result_1_1_1_4|default({}),'audits':before|default({})}}) }}"
+#    when: rhel7cis_rule_1_1_1_4_uefi == false and rhel7cis_rule_1_1_1_4
+#    tags:
+#     - level2
+#     - harden
+#     - rule_1.1.1.4
+#     - rhel7
+#
+#  - name: Gathering File System Type
+#    setup:
+#      filter: ansible_mounts
+#    register: mount_type
+#    ignore_errors: true
+#  - set_fact:
+#      fs_type: "{{ mount_type.ansible_facts.ansible_mounts[0].fstype }}"
+#    ignore_errors: true
+#
+  - name: Gathering File System Type
+    setup:
+      filter: ansible_mounts
+    register: mount_type
+    ignore_errors: true
+  - set_fact:
+      fs_type: "{{ mount_type.ansible_facts.ansible_mounts[0].fstype }}"
+    ignore_errors: true
+    tags:
+      -  rule_1.1.3
+      -  rule_1.1.11
+      -  rule_1.1.17
+
+  - name: " 1.1.0.0 | HARDEN | /etc/fstab backup"
+    block:
+    - name: " 1.1.0.0 | HARDEN | /etc/fstab backup - before"
+      slurp:
+        src: /etc/fstab
+      ignore_errors: yes
+      register: before_1_1_0_0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.0.0':{'result':result_1_1_0_0|default({}),'audits':before_1_1_0_0|default({})}}) }}"
+      ignore_errors: yes
+    when:
+      - rhel7cis_rule_1_1_3
+      - rhel7cis_rule_1_1_7
+      - rhel7cis_rule_1_1_13
+    tags:
+     - level1
+     - harden
+     - rule_1.1.0.0
+     - rhel7
+
+
+  - name: " 1.1.2 | HARDEN | Ensure /tmp is configured -- systemd tmp.mount
+            1.1.3 | HARDEN | Ensure noexec option set on /tmp partition
+            1.1.4 | HARDEN | Ensure nodev option set on /tmp partition
+            1.1.5 | HARDEN | Ensure nosuid option set on /tmp partition"
+    block:
+    - name: " 1.1.2 | HARDEN | Ensure /tmp is configured"
+      shell: mount | grep -E '\s/tmp\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_2_rc
+    - shell: systemctl is-enabled tmp.mount 2> /dev/null
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_2_sysd_rc
+    - block:
+      - stat:
+          path: /etc/systemd/system/tmp.mount
+        register: tmp_status
+        ignore_errors: yes
+      - name: Create tmp.mount file
+        shell: "[ ! -f /etc/systemd/system/tmp.mount ] && cp -v /usr/lib/systemd/system/tmp.mount /etc/systemd/system/"
+        ignore_errors: yes
+        when: tmp_status.stat.exists == false
+      - name: Add content
+        blockinfile:
+          path: /etc/systemd/system/tmp.mount
+          block: "{{ lookup('file', '1.1.2') }}"
+        ignore_errors: yes
+        register: rhel7cis_rule_1_1_2_result
+      - shell: systemctl daemon-reload
+        ignore_errors: yes
+      - shell: systemctl unmask tmp.mpunt
+        ignore_errors: yes
+      - shell: systemctl enable --now tmp.mount
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_1_1_2_result: false
+      when: rhel7cis_rule_1_1_2_rc.rc != 0 and rhel7cis_rule_1_1_2_sysd_rc.stdout == "enabled"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.2':rhel7cis_rule_1_1_2_result|default(true)}) }}"
+    when:
+      - rhel7cis_rule_1_1_3
+      - rhel7cis_rule_1_1_4
+      - rhel7cis_rule_1_1_5
+    tags:
+     - level1
+     - harden
+     - rule_1.1.2
+     - tmp
+     - rhel7
+
+#####
+  - name: " 1.1.2 | HARDEN | Ensure /tmp is configured -- /etc/fstab
+            1.1.3 | HARDEN | Ensure noexec option set on /tmp partition
+            1.1.4 | HARDEN | Ensure nodev option set on /tmp partition
+            1.1.5 | HARDEN | Ensure nosuid option set on /tmp partition"
+    block:
+    - name: " 1.1.3 | HARDEN |  Ensure /tmp is configured -- /etc/fstab"
+      shell: mount | grep -E '\s/tmp\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_3_rc
+    - shell: grep -E '\s/tmp\s' /etc/fstab|grep -E 'noexec.*nodev.*nosuid'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_3_fs_rc
+    - block:
+      - name: Find partition name
+        shell:  mount | grep -E '\s/tmp\s' | awk '{print $1"\n"$5}'
+        ignore_errors: yes
+        register: rhel7cis_rule_1_1_3_part
+      - mount:
+          path: /tmp
+          src: "{{ rhel7cis_rule_1_1_3_part.stdout_lines[0] }}"
+          state: present
+          fstype: "{{ rhel7cis_rule_1_1_3_part.stdout_lines[1] }}"
+          opts: "defaults,rw,noexec,nodev,nosuid"
+        diff: yes
+        register: result_1_1_3
+        ignore_errors: yes
+      - shell: mount -o remount /tmp
+        ignore_errors: yes
+      when: rhel7cis_rule_1_1_3_rc.rc == 0 and rhel7cis_rule_1_1_3_fs_rc.rc != 0
+    - set_fact:
+        before_1_1_3: "{{ rhel7cis_rule_1_1_3_rc.stdout }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.3':{'result':result_1_1_3|default({}),'audits':before_1_1_3|default({})}}) }}"
+    when:
+      - rhel7cis_rule_1_1_3
+      - rhel7cis_rule_1_1_4
+      - rhel7cis_rule_1_1_5
+    tags:
+     - level1
+     - harden
+     - rule_1.1.3
+     - rule_1.1.4
+     - rule_1.1.5
+     - rhel7
+
+#####
+  - name: " 1.1.6 | HARDEN |  Ensure /dev/shm is configured
+            1.1.7 | HARDEN | Ensure nodev option set on /dev/shm partition
+            1.1.8 | HARDEN | Ensure nosuid option set on /dev/shm partition
+            1.1.9 | HARDEN | Ensure noexec option set on /dev/shm partition"
+    block:
+    - name: " 1.1.6 | HARDEN | Ensure /dev/shm is configured"
+      shell: mount | grep -E '\s/dev/shm\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_6_a_rc
+    - shell: grep -E '\s/dev/shm\s' /etc/fstab|grep -E 'noexec.*nodev.*nosuid'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_6_b_rc
+    - block:
+      - mount:
+          path: /dev/shm
+          src: tmpfs
+          state: present
+          fstype: tmpfs
+          opts: "defaults,noexec,nodev,nosuid,seclabel"
+        diff: yes
+        register: result_1_1_6
+        ignore_errors: yes
+      - shell: mount -o remount,noexec,nodev,nosuid /dev/shm
+      when: rhel7cis_rule_1_1_6_a_rc.rc == 0 and rhel7cis_rule_1_1_6_b_rc.rc != 0
+    - set_fact:
+        rhel7cis_rule_1_1_6_result: false
+      when: rhel7cis_rule_1_1_6_a_rc.rc != 0
+    - set_fact:
+        before_1_1_6: "{{ rhel7cis_rule_1_1_6_a_rc.stdout }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.6':{'result':result_1_1_6|default({}),'audits':before_1_1_6|default({})}}) }}"
+    when:
+      - rhel7cis_rule_1_1_7
+      - rhel7cis_rule_1_1_8
+      - rhel7cis_rule_1_1_9
+    tags:
+     - level1
+     - harden
+     - rule_1.1.6
+     - rule_1.1.7
+     - rule_1.1.8
+     - rule_1.1.9
+     - dev_shm
+     - rhel7
+
+#####
+# 1.1.10 Ensure separate partition exists for /var
+# Just need to scanning, but nothing need to do with hardening
+#####
+  - name: " 1.1.11 | HARDEN | Ensure separate partition exists for /var/tmp
+            1.1.12 | HARDEN | Ensure nodev option set on /var/tmp partition
+            1.1.13 | HARDEN | Ensure nosuid option set on /var/tmp partition
+            1.1.14 | HARDEN | Ensure noexec option set on /var/tmp partition"
+    block:
+    - name: " 1.1.11 | HARDEN | Ensure separate partition exists for /var/tmp"
+      shell: mount | grep -E '\s/var/tmp\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_11_rc
+    - shell: grep -E '\s/var/tmp\s' /etc/fstab|grep -E 'noexec.*nodev.*nosuid'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_11_fs_rc
+    - block:
+      - name: Find partition name
+        shell: mount | grep -E '\s/var/tmp\s' | awk '{print $1"\n"$5}'
+        ignore_errors: yes
+        register: rhel7cis_rule_1_1_11_part
+      - mount:
+          path: /var/tmp
+          src: "{{ rhel7cis_rule_1_1_11_part.stdout_lines[0] }}"
+          state: present
+          fstype: "{{ rhel7cis_rule_1_1_11_part.stdout_lines[1] }}"
+          opts: "defaults,rw,noexec,nodev,nosuid"
+        register: result_1_1_11
+        diff: yes
+        ignore_errors: yes
+      - shell: mount -o remount /var/tmp
+        ignore_errors: yes
+      when: rhel7cis_rule_1_1_11_rc.rc == 0 and rhel7cis_rule_1_1_11_fs_rc.rc !=0
+    - set_fact:
+        before_1_1_11: "{{ rhel7cis_rule_1_1_11_rc.stdout }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.11':{'result':result_1_1_11|default({}),'audits':before_1_1_11|default({})}}) }}"
+    when:
+      - rhel7cis_rule_1_1_12
+      - rhel7cis_rule_1_1_13
+      - rhel7cis_rule_1_1_14
+    tags:
+     - level2
+     - harden
+     - rule_1.1.11
+     - rule_1.1.12
+     - rule_1.1.13
+     - rule_1.1.14
+     - var_tmp
+     - rhel7
+
+#####
+# 1.1.15 Ensure separate partition exists for /var/log
+# 1.1.16 Ensure separate partition exists for /var/log/audit
+# Just need to scanning, but nothing need to do with hardening
+#####
+  - name: " 1.1.17 | HARDEN | Ensure separate partition exists for /home
+            1.1.18 | HARDEN | Ensure nodev option set on /home partition"
+    block:
+    - name: " 1.1.17 | HARDEN | Ensure separate partition exists for /home"
+      shell: mount | grep -E '\s/home\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_17_rc
+    - shell: grep -E '\s/home\s' /etc/fstab|grep -E 'nodev'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_17_fs_rc
+    - block:
+      - name: Find partition name
+        shell: mount | grep -E '\s/home\s' | awk '{print $1"\n"$5}'
+        ignore_errors: yes
+        register: rhel7cis_rule_1_1_17_part
+      - mount:
+          path: /home
+          src: "{{ rhel7cis_rule_1_1_17_part.stdout_lines[0] }}"
+          state: present
+          fstype: "{{ rhel7cis_rule_1_1_17_part.stdout_lines[1] }}"
+          opts: "defaults,rw,nodev"
+        register: result_1_1_17
+        diff: yes
+        ignore_errors: yes
+      - shell: mount -o remount /home
+        ignore_errors: yes
+      when: rhel7cis_rule_1_1_17_rc.rc == 0 and rhel7cis_rule_1_1_17_fs_rc.rc != 0
+    - set_fact:
+        before_1_1_17: "{{ rhel7cis_rule_1_1_17_rc.stdout }}"
+        ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.17':{'result':result_1_1_17|default({}),'audits':before_1_1_17|default({})}}) }}"
+    when:
+      - rhel7cis_rule_1_1_18
+    tags:
+     - level2
+     - harden
+     - rule_1.1.17
+     - rule_1.1.18
+     - home
+     - rhel7
+
+#####
+#  - name: " 1.1.19 | HARDEN | Ensure noexec option set on removable media partitions"
+#    block:
+#    - name: " 1.1.19 | HARDEN | Ensure noexec option set on removable media partitions"
+#      shell: mount | grep -v noexec
+#      ignore_errors: yes
+#      register: rhel7cis_rule_1_1_19_rc
+#
+#    - name: " 1.1.19 | MANUAL_CHECK_NOEXEC | Ensure noexec option set on removable media partitions"
+#      block:
+#      - debug:
+#          msg:
+#          - "The following removable media does not have noexec option set: {{ rhel7cis_rule_1_1_19_rc.stdout }}. "
+#          - "Please ensure that the noexec option is set for the above partition(s) in /etc/fstab."
+#          - "Once updated, verify with 'mount | grep -v noexec' and ensure that all removable media partition(s) have noexec option set."
+#          - "Please set rhel7cis_rule_1_1_19 to true in default/main.yml ."
+#        register: rhel7cis_rule_1_1_19_removable_media_noexec_list
+#
+#      - set_fact:
+#          rhel7cis_rule_1_1_19_result: false
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'1.1.19':rhel7cis_rule_1_1_19_result|default(true)}) }}"
+#      when: rhel7cis_rule_1_1_19_rc.rc == 0
+#    when: rhel7cis_rule_1_1_19
+#    tags:
+#     - level1
+#     - harden
+#     - rule_1.1.19
+#     - removable_media
+#     - noexec
+#     - rhel7
+#
+######
+#  - name: " 1.1.20 | HARDEN | Ensure nodev option set on removable media partitions"
+#    block:
+#    - name: " 1.1.20 | HARDEN | Ensure nodev option set on removable media partitions"
+#      shell: mount | grep -v nodev
+#      ignore_errors: yes
+#      register: rhel7cis_rule_1_1_20_rc
+#
+#    - name: " 1.1.20 | MANUAL_CHECK_NODEV | Ensure nodev option set on removable media partitions"
+#      block:
+#
+#      - debug:
+#          msg:
+#          - "The following removable media does not have nodev option set: {{ rhel7cis_rule_1_1_20_rc.stdout }}. "
+#          - "Please ensure that the nodev option is set for the above partition(s) in /etc/fstab."
+#          - "Once updated, verify with 'mount | grep -v nodev' and ensure that all removable media partition(s) have nodev option set."
+#          - "Please set rhel7cis_rule_1_1_20 to true in default/main.yml ."
+#        register: rhel7cis_rule_1_1_20_removable_media_nodev_list
+#
+#      - set_fact:
+#          rhel7cis_rule_1_1_20_result: false
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'1.1.20':rhel7cis_rule_1_1_20_result|default(true)}) }}"
+#      when: rhel7cis_rule_1_1_20_rc.rc == 0
+#    when: rhel7cis_rule_1_1_20
+#    tags:
+#     - level1
+#     - harden
+#     - rule_1.1.20
+#     - removable_media
+#     - nodev
+#     - rhel7
+#
+######
+#  - name: " 1.1.21 | HARDEN | Ensure nosuid option set on removable media partitions"
+#    block:
+#    - name: " 1.1.21 | HARDEN | Ensure nosuid option set on removable media partitions"
+#      shell: mount | grep -v nosuid
+#      ignore_errors: yes
+#      register: rhel7cis_rule_1_1_21_rc
+#
+#    - name: " 1.1.21 | MANUAL_CHECK_NOSUID | Ensure nosuid option set on removable media partitions"
+#      block:
+#
+#      - debug:
+#          msg:
+#          - "The following removable media does not have nosuid option set: {{ rhel7cis_rule_1_1_21_rc.stdout }}. "
+#          - "Please ensure that the nosuid option is set for the above partition(s) in /etc/fstab."
+#          - "Once updated, verify with 'mount | grep -v nosuid' and ensure that all removable media partition(s) have nosuid option set."
+#          - "Please set rhel7cis_rule_1_1_21 to true in default/main.yml ."
+#        register: rhel7cis_rule_1_1_21_removable_media_nosuid_list
+#
+#      - set_fact:
+#          rhel7cis_rule_1_1_21_result: false
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'1.1.21':rhel7cis_rule_1_1_21_result|default(true)}) }}"
+#      when: rhel7cis_rule_1_1_21_rc.rc == 0
+#    when: rhel7cis_rule_1_1_21
+#    tags:
+#     - level1
+#     - harden
+#     - rule_1.1.21
+#     - removable_media
+#     - nosuid
+#     - rhel7
+#
+######
+  - name: " 1.1.22 | HARDEN | Ensure sticky bit is set on all world-writable directories"
+    block:
+    - name: " 1.1.22 | HARDEN | Ensure sticky bit is set on all world-writable directories"
+      shell: df --local -P 2> /dev/null  | awk '{if (NR!=1) print $6}'  | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \)
+      ignore_errors: yes
+      register: world_writable_dir_without_stickybit
+    - block:
+      - name: " 1.1.22 | HARDEN | Ensure sticky bit is set on all world-writable directories - before"
+        stat:
+          path: "{{ item }}"
+        register: before_1_1_22
+        with_items:
+          - "{{ world_writable_dir_without_stickybit.stdout_lines }}"
+        ignore_errors: yes
+      - name: " 1.1.22 | HARDEN | Ensure sticky bit is set on all world-writable directories - modify"
+        file:
+          path: "{{ item }}"
+          mode: a+t
+        register: result_1_1_22
+        ignore_errors: yes
+        diff: yes
+        with_items:
+          - "{{ world_writable_dir_without_stickybit.stdout_lines }}"
+      when: world_writable_dir_without_stickybit.stdout != ""
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.22':{'result':result_1_1_22|default({}),'audits':before_1_1_22|default({})}}) }}"
+    when: rhel7cis_rule_1_1_22
+    tags:
+     - level1
+     - harden
+     - rule_1.1.22
+     - rhel7
+
+#####
+  - name: " 1.1.23 | HARDEN | Disable Automounting"
+    block:
+    - shell: rpm -q autofs
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_23_rc
+    - name: " 1.1.23 | HARDEN | Disable Automounting - before"
+      block:
+      - name: " 1.1.23 | HARDEN | Disable Automounting - before"
+        service_facts:
+        ignore_errors: yes
+      - set_fact:
+          sf: "{{ ansible_facts.services }}"
+        ignore_errors: yes
+      - set_fact:
+          before_1_1_23: "{{ sf['autofs.service']|default({'state': 'none', 'status': 'none'}) }}"
+        ignore_errors: yes
+      - name: " 1.1.23 | HARDEN | Disable Automounting"
+        systemd:
+          name: autofs
+          state: stopped
+          masked: yes
+        register: result_1_1_23
+        ignore_errors: yes
+      - set_fact:
+          all_results: "{{ all_results|combine({'1.1.23':{'result':result_1_1_23|default({}),'audits':before_1_1_23|default({})}}) }}"
+      when: rhel7cis_rule_1_1_23_rc.rc == 0
+    when: rhel7cis_rule_1_1_23
+    tags:
+     - level1
+     - harden
+     - rule_1.1.23
+     - rhel7
+
+#####
+  - name: " 1.1.24 | HARDEN | Disable USB Storage"
+    block:
+    - name: " 1.1.24 | HARDEN | Disable USB Storage - before"
+      slurp:
+        src: /etc/modprobe.d/usb_storage.conf
+      ignore_errors: yes
+      register: before_1_1_24
+    - name: " 1.1.24 | HARDEN | Disable USB Storage - modify/create"
+      lineinfile:
+        create: true
+        dest: /etc/modprobe.d/usb_storage.conf
+        regexp: usb-storage
+        line: install usb-storage /bin/true
+      ignore_errors: yes
+      register: result_conf
+      diff: yes
+    - shell: rmmod usb-storage
+      ignore_errors: yes
+      register: result_unload
+    - name: "1.1.24 - Setup result variable"
+      set_fact:
+        result_1_1_24: "{{ result_1_1_24|default([]) + [item] }}"
+      loop:
+      - "{{ result_conf }}"
+      - "{{ result_unload }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.24':{'result':result_1_1_24|default({}),'audits':before_1_1_24|default({})}}) }}"
+    when: rhel7cis_rule_1_1_24
+    tags:
+     - level1
+     - harden
+     - rule_1.1.24
+     - rhel7
+
+#####
+#  - name: " 1.2.1 | HARDEN | Ensure GPG keys are configured"
+#    block:
+#    - name: " 1.2.1 | HARDEN | Ensure GPG keys are configured"
+#      shell: rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n'
+#      ignore_errors: yes
+#      register: rhel7cis_rule_1_2_1_rc
+#
+#    - name: " 1.2.1 | MANUAL_CHECK_GPGKEYS | Ensure GPG keys are configured"
+#      block:
+#      - debug:
+#          msg:
+#          - "The following lists the GPG Key(s) configured: {{ rhel7cis_rule_1_2_1_rc.stdout }}. "
+#          - "Please verify that the GPG Key(s) configured are correct."
+#          - "Once verified, please set rhel7cis_rule_1_2_1 to true in default/main.yml ."
+#        register: rhel7cis_rule_1_2_1_gpgkeys_list
+#
+#      - set_fact:
+#          rhel7cis_rule_1_2_1_result: false
+#      when: rhel7cis_rule_1_2_1_rc.rc == 0 and rhel7cis_rule_1_2_1_rc.stdout != "package gpg-pubkey is not installed"
+#
+#    - name: " 1.2.1 | MANUAL_CHECK_NO_GPGKEYS | Ensure GPG keys are configured"
+#      block:
+#
+#      - debug:
+#          msg:
+#          - " {{ rhel7cis_rule_1_2_1_rc.stdout }}. "
+#          - "Please verify."
+#        register: rhel7cis_rule_1_2_1_gpgkeys_list
+#
+#      - set_fact:
+#          rhel7cis_rule_1_2_1_result: false
+#      when: rhel7cis_rule_1_2_1_rc.rc == 0 and rhel7cis_rule_1_2_1_rc.stdout == "package gpg-pubkey is not installed"
+#
+#####
+#    - name: " 1.2.1 | MANUAL_CHECK_ERR_GPGKEYS | Ensure GPG keys are configured"
+#      block:
+#
+#      - debug:
+#          msg:
+#          - "Please verify GPG Keys configuration. Run the following command to verify: rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n' "
+#        register: rhel7cis_rule_1_2_1_gpgkeys_list
+#
+#      - set_fact:
+#          rhel7cis_rule_1_2_1_result: false
+#      when: rhel7cis_rule_1_2_1_rc.rc == 1
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.2.1':rhel7cis_rule_1_2_1_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_2_1
+#    tags:
+#     - level1
+#     - harden
+#     - rule_1.2.1
+#     - gpg
+#     - rhel7
+#
+#####
+#  - name: " 1.2.2 | HARDEN | Ensure package manager repositories are configured"
+#    block:
+#    - name: " 1.2.2 | HARDEN | Ensure package manager repositories are configured"
+#      shell: yum repolist
+#      ignore_errors: yes
+#      register: rhel7cis_rule_1_2_2_rc
+#
+#
+#    - name: " 1.2.2 | MANUAL_CHECK_REPOSITORIES | Ensure package manager repositories are configured"
+#      block:
+#
+#      - debug:
+#          msg:
+#          - "The following lists the repositories configured: {{ rhel7cis_rule_1_2_2_rc.stdout }}. "
+#          - "Please verify the configured repositories are correct."
+#          - "Once verified, please set rhel7cis_rule_1_2_2 to true in default/main.yml ."
+#        register: rhel7cis_rule_1_2_2_repolist
+#
+#      - set_fact:
+#          rhel7cis_rule_1_2_2_result: false
+#      when: rhel7cis_rule_1_2_2_rc.rc == 0
+#
+#    - name: " 1.2.2 | MANUAL_CHECK_ERR_REPOSITORIES | Ensure package manager repositories are configured"
+#      block:
+#
+#      - debug:
+#          msg:
+#          - "Please verify GPG Keys configuration. Run the following command to verify: yum repolist "
+#        register: rhel7cis_rule_1_2_2_repolist
+#
+#      - set_fact:
+#          rhel7cis_rule_1_2_2_result: false
+#      when: rhel7cis_rule_1_2_2_rc.rc == 1
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.2.2':rhel7cis_rule_1_2_2_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_2_2
+#    tags:
+#     - level1
+#     - harden
+#     - rule_1.2.2
+#     - yum
+#     - rhel7
+#
+#####
+  - name: " 1.2.3 | HARDEN | Ensure gpgcheck is globally activated"
+    block:
+    - name: " 1.2.3 | HARDEN | Ensure gpgcheck is globally activated - before"
+      slurp:
+        src:  /etc/yum.conf
+      ignore_errors: yes
+      register: before_conf
+    - name: " 1.2.3 | HARDEN | Ensure gpgcheck is globally activated - modify"
+      ini_file:
+        path:  /etc/yum.conf
+        section: main
+        option: gpgcheck
+        value: '1'
+        no_extra_spaces: yes
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+    - name: " 1.2.3 | HARDEN | Ensure gpgcheck is globally activated - before"
+      shell: ls /etc/yum.repos.d/*.repo
+      ignore_errors: yes
+      register: d_repo
+    - block:
+      - name: 1.2.3 | HARDEN | Ensure gpgcheck is individual activated - modify
+        slurp:
+          src: "{{ item }}"
+        ignore_errors: yes
+        register: before_d_repo
+        with_items:
+          - "{{ d_repo.stdout_lines | default([]) }}"
+      - name: " 1.2.3 | HARDEN | Ensure gpgcheck is individual activated - modify"
+        replace:
+          path: "{{ item }}"
+          regexp: '^gpgcheck.?=.?0'
+          replace: 'gpgcheck=1'
+        register: result_d_repo
+        ignore_errors: yes
+        diff: yes
+        with_items:
+          - "{{ d_repo.stdout_lines | default([]) }}"
+      when: d_repo.stdout != ""
+    - name: "1.2.3 - Setup audit variable"
+      set_fact:
+        before_1_2_3: "{{ before_1_2_3|default([]) + [item] }}"
+      loop:
+      - "{{ before_conf }}"
+      - "{{ before_d_repo }}"
+    - name: "1.2.3 - Setup result variable"
+      set_fact:
+        result_1_2_3: "{{ result_1_2_3|default([]) + [item] }}"
+      loop:
+      - "{{ result_conf }}"
+      - "{{ result_d_repo }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.2.3':{'result':result_1_2_3|default({}),'audits':before_1_2_3|default({})}}) }}"
+    when: rhel7cis_rule_1_2_3
+    tags:
+     - level1
+     - harden
+     - rule_1.2.3
+     - rhel7
+
+#####
+# Need to manually configure
+  - name: " 1.2.4 | HARDEN | Ensure Red Hat Subscription Manager connection is configured"
+    block:
+    - name: " 1.2.4 | HARDEN | Ensure Red Hat Subscription Manager connection is configured"
+      shell: subscription-manager status  2> /dev/null
+      register: rhel7cis_rule_1_2_4_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_2_4_result: false
+      when: rhel7cis_rule_1_2_4_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.2.4':rhel7cis_rule_1_2_4_result|default(true)}) }}"
+    when: rhel7cis_rule_1_2_4
+    tags:
+     - level1
+     - scan
+     - rule_1.2.4
+     - rhm
+     - rhel7
+
+#####
+  - name: " 1.2.5 | HARDEN |  Disable the rhnsd Daemon"
+    block:
+    - name: " 1.2.5 | HARDEN |  Disable the rhnsd Daemon - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_1_2_5: "{{ sf['rhnsd']|default({}) }}"
+      ignore_errors: yes
+    - name: " 1.2.5 | HARDEN |  Disable the rhnsd Daemon"
+      systemd:
+        name: "rhnsd"
+        state: stopped
+        masked: yes
+      register: result_1_2_5
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.2.5':{'result':result_1_2_5|default({}),'audits':before_1_2_5|default({})}}) }}"
+    when: rhel7cis_rule_1_2_5
+    tags:
+     - level2
+     - harden
+     - rule_1.2.5
+     - rhel7
+
+#####
+  - name: " 1.3.1 | HARDEN |  Ensure sudo is installed"
+    block:
+    - name: " 1.3.1 | SCAN |  Ensure sudo is installed"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_1_3_1: "{{ pf['sudo']|default({}) }}"
+      ignore_errors: yes
+    - name: " 1.3.1 | HARDEN |  Ensure sudo is installed"
+      package:
+        name: "sudo"
+        state: present
+      register: result_1_3_1
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.3.1':{'result':result_1_3_1|default({}),'audits':before_1_3_1|default({})}}) }}"
+    when: rhel7cis_rule_1_3_1
+    tags:
+     - level1
+     - harden
+     - rule_1.3.1
+     - sudo
+     - rhel7
+
+#####
+  - name: " 1.3.2 | HARDEN | Ensure sudo commands use pty"
+    block:
+    - name: " 1.3.2 | HARDEN | Ensure sudo commands use pty"
+      slurp:
+        src:   /etc/sudoers
+      ignore_errors: yes
+      register: before_1_3_2
+    - name: " 1.3.2 | HARDEN | Ensure sudo commands use pty - modify"
+      lineinfile:
+        path:   /etc/sudoers
+        regexp: '^Defaults use_pty'
+        line: 'Defaults use_pty'
+      register: result_1_3_2
+      ignore_errors: yes
+      diff: yes
+#
+#    - name: " 1.3.2 | HARDEN | Ensure sudo commands use pty - before"
+#      slurp:
+#        src: "{{ item }}"
+#      ignore_errors: yes
+#      register: before_d_conf
+#      with_fileglob:
+#        - " /etc/sudoers.d/*"
+#    - name: " 1.3.2 | HARDEN | Ensure sudo commands use pty - modify"
+#      lineinfile:
+#        path: "{{ item }}"
+#        regexp: '^Defaults use_pty'
+#        line: 'Defaults use_pty'
+#      register: result_d_conf
+#      ignore_errors: yes
+#      diff: yes
+#      with_fileglob:
+#        - " /etc/sudoers.d/*"
+#    - name: "1.3.2 - Setup audit variable"
+#      set_fact:
+#        before_1_3_2: "{{ before_1_3_2|default([]) + [item] }}"
+#      loop:
+#      - "{{ before_conf }}"
+#      - "{{ before_d_conf }}"
+#    - name: "1.3.2 - Setup result variable"
+#      set_fact:
+#        result_1_3_2: "{{ result_1_3_2|default([]) + [item] }}"
+#      loop:
+#      - "{{ result_conf }}"
+#      - "{{ result_d_conf }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.3.2':{'result':result_1_3_2|default({}),'audits':before_1_3_2|default({})}}) }}"
+    when: rhel7cis_rule_1_3_2
+    tags:
+     - level1
+     - harden
+     - rule_1.3.2
+     - rhel7
+
+#####
+  - name: " 1.3.3 | HARDEN | Ensure sudo log file exists"
+    block:
+    - name: " 1.3.3 | HARDEN | Ensure sudo log file exists"
+      slurp:
+        src:   /etc/sudoers
+      ignore_errors: yes
+      register: before_1_3_3
+    - name: " 1.3.3 | HARDEN | Ensure sudo log file exists - modify"
+      lineinfile:
+        path:   /etc/sudoers
+        regexp: '^Defaults logfile='
+        line: 'Defaults logfile="/var/log/sudo.log"'
+      register: result_1_3_3
+      ignore_errors: yes
+      diff: yes
+#    - name: " 1.3.3 | HARDEN | Ensure sudo log file exists - before"
+#      slurp:
+#        src: "{{ item }}"
+#      ignore_errors: yes
+#      register: before_d_conf
+#      with_fileglob:
+#        - " /etc/sudoers.d/*"
+#    - name: " 1.3.3 | HARDEN | Ensure sudo log file exists - modify"
+#      lineinfile:
+#        path: "{{ item }}"
+#        regexp: '^Defaults logfile='
+#        line: 'Defaults logfile="/var/log/sudo.log"'
+#      register: result_d_conf
+#      ignore_errors: yes
+#      diff: yes
+#      with_fileglob:
+#        - " /etc/sudoers.d/*"
+#    - name: "1.3.3 - Setup audit variable"
+#      set_fact:
+#        before_1_3_3: "{{ before_1_3_3|default([]) + [item] }}"
+#      loop:
+#      - "{{ before_conf }}"
+#      - "{{ before_d_conf }}"
+#    - name: "1.3.3 - Setup result variable"
+#      set_fact:
+#        result_1_3_3: "{{ result_1_3_3|default([]) + [item] }}"
+#      loop:
+#      - "{{ result_conf }}"
+#      - "{{ result_d_conf }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.3.3':{'result':result_1_3_3|default({}),'audits':before_1_3_3|default({})}}) }}"
+    when:  rhel7cis_rule_1_3_3
+    tags:
+     - level1
+     - harden
+     - rule_1.3.3
+     - rhel7
+
+#####
+  - name: " 1.4.1 | HARDEN |  Ensure AIDE is installed"
+    block:
+    - name: " 1.4.1 | HARDEN |  Ensure AIDE is installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_1_4_1: "{{ pf['aide']|default({}) }}"
+      ignore_errors: yes
+    - name: " 1.4.1 | HARDEN |  Ensure AIDE is installed"
+      yum:
+        name: "aide"
+        state: present
+        conf_file: '/etc/yum.conf'
+      register: result_1_4_1
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.4.1':{'result':result_1_4_1|default({}),'audits':before_1_4_1|default({})}}) }}"
+    when: rhel7cis_rule_1_4_1
+    tags:
+     - level1
+     - harden
+     - rule_1.4.1
+     - rhel7
+
+#####
+  - name: " 1.4.2 | HARDEN | Ensure filesystem integrity is regularly checked"
+    block:
+    - shell: rpm -q aide
+      ignore_errors: yes
+      register: aide_rpm_rc
+    - block:
+      - name: "1.4.2 | HARDEN | Ensure filesystem integrity is regularly checked - before "
+        shell: crontab -l -u root| grep -i "aide" 2> /dev/null
+        ignore_errors: yes
+        register: before_1_4_2
+      - name: " 1.4.2 | HARDEN | Ensure filesystem integrity is regularly checked"
+        cron:
+          name: Run AIDE integrity check
+          minute: '0'
+          hour: '5'
+          day: '*'
+          month: '*'
+          weekday: '*'
+          user: root
+          job: /usr/sbin/aide --check
+        ignore_errors: yes
+        register: result_1_4_2
+      - set_fact:
+          all_results: "{{ all_results|combine({'1.4.2':{'result':result_1_4_2|default({}),'audits':before_1_4_2|default({})}}) }}"
+      when: aide_rpm_rc.rc == 0
+    when: rhel7cis_rule_1_4_2
+    tags:
+     - level1
+     - harden
+     - rule_1.4.2
+     - rhel7
+
+#####
+# python2-pexpect-4.5-1.el7.noarch.rpm
+#
+  - name: " 1.5.1 | HARDEN | Ensure bootloader password is set"
+    shell:  grep -i release /etc/redhat-release|sed 's/[^0-9]*//g' 2> /dev/null
+    register: rhel7cis_rule_1_5_1_o_rc
+    ignore_errors: yes
+    tags:
+     - level1
+     - harden
+     - rule_1.5.1
+     - grub2_password
+     - rhel7
+
+  - name: " 1.5.1 | HARDEN | Ensure bootloader password is set"
+    block:
+    - name: " 1.5.1 | HARDEN | Ensure bootloader password is set - before"
+      slurp:
+        src: /boot/grub2/user.cfg
+      register: before_1_5_1
+      ignore_errors: yes
+# required python2-pexpect-4.5-1.el7.noarch.rpm in the targeted host
+#    - name: " 1.5.1 | HARDEN | Ensure bootloader password is set - for RHEL 7.2 and newer"
+#      expect:
+#        command: /usr/sbin/grub2-setpassword
+#        responses:
+#          Enter password: "{{ grub2_password }}"
+#          Confirm password: "{{ grub2_password }}"
+#      no_log: true
+#      register: result
+#      ignore_errors: yes
+#      when: rhel7cis_rule_1_5_1_o_rc.stdout != "71"
+    - name: " 1.5.1 | HARDEN | Ensure bootloader password is set - for RHEL 7.2 and newer"
+      template:
+        src: user_72.cfg.j2
+        dest: /boot/grub2/user.cfg
+      diff: yes
+      ignore_errors: yes
+      no_log: true
+      register: result
+      when: rhel7cis_rule_1_5_1_o_rc.stdout != "71"
+    - block:
+#  required python2-pexpect-4.5-1.el7.noarch.rpm in the targeted host
+#      - name: " 1.5.1 | HARDEN | Ensure bootloader password is set - for RHEL 7.1 and Older"
+#        expect:
+#          command: /usr/bin/grub2-mkpasswd-pbkdf2
+#          responses:
+#            Enter password: "{{ grub2_password }}"
+#            Reenter password: "{{ grub2_password }}"
+#        no_log: true
+#        register: result
+#        ignore_errors: yes
+#      - name: Ensure bootloader password is set - config file
+      - name: " 1.5.1 | HARDEN | Ensure bootloader password is set - for RHEL 7.1 and Older"
+        template:
+          src: 01_users_71.cfg.j2
+          dest: /etc/grub.d/01_users
+        diff: yes
+        register: result_config
+        ignore_errors: yes
+      - shell:  grub2-mkconfig -o /boot/grub2/grub.cfg
+        ignore_errors: yes
+      - set_fact:
+          result_1_5_1: "{{ result_1_5_1|default([]) + [item] }}"
+        loop:
+          - "{{ result_config }}"
+      when: rhel7cis_rule_1_5_1_o_rc.stdout == "71"
+    - name: "1.5.1 - Setup result variable"
+      set_fact:
+        result_1_5_1: "{{ result_1_5_1|default([]) + [item] }}"
+      loop:
+        - "{{ result }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.5.1':{'result':result_1_5_1|default({}),'audits':before_1_5_1|default({})}}) }}"
+    when: rhel7cis_rule_1_5_1
+    tags:
+     - level1
+     - harden
+     - rule_1.5.1
+     - rhel7
+
+#####
+  - name: " 1.5.2 | HARDEN | Ensure permissions on bootloader config are configured"
+    block:
+    - name: " 1.5.2 | HARDEN | Ensure permissions on bootloader config are configured - before"
+      stat:
+        path: /boot/grub2/grub.cfg
+      register: before_grub
+    - name: " 1.5.2 | HARDEN | Ensure permissions on bootloader config are configured"
+      file:
+        path: /boot/grub2/grub.cfg
+        owner: root
+        group: root
+        mode: '0600'
+      register: result_grub
+      ignore_errors: yes
+      diff: yes
+    - name: " 1.5.2 | HARDEN | Ensure permissions on bootloader config are configured - before"
+      stat:
+        path: /boot/grub2/user.cfg
+      register: before_grubuser
+    - name: " 1.5.2 | HARDEN | Ensure permissions on bootloader config are configured"
+      file:
+        path: /boot/grub2/user.cfg
+        owner: root
+        group: root
+        mode: '0600'
+      register: result_grubuser
+      ignore_errors: yes
+      diff: yes
+
+    - name: "1.5.2 - Setup audit variable"
+      set_fact:
+        before_1_5_2: "{{ before_1_5_2|default([]) + [item] }}"
+      loop:
+      - "{{ before_grub }}"
+      - "{{ before_grubuser }}"
+    - name: "1.5.2 - Setup result variable"
+      set_fact:
+        result_1_5_2: "{{ result_1_5_2|default([]) + [item] }}"
+      loop:
+      - "{{ result_grub }}"
+      - "{{ result_grubuser }}"
+
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.5.2':{'result':result_1_5_2|default({}),'audits':before_1_5_2|default({})}}) }}"
+    when: rhel7cis_rule_1_5_2
+    tags:
+     - level1
+     - harden
+     - rule_1.5.2
+     - rhel7
+#####
+
+  - name: " 1.5.3 | HARDEN | Ensure authentication required for single user mode"
+    block:
+    - name: " 1.5.3 | HARDEN | Ensure authentication required for single user mode"
+      slurp:
+        src:   "{{ item }}"
+      ignore_errors: yes
+      register: before_1_5_3
+      with_items:
+        - /usr/lib/systemd/system/rescue.service
+        - /usr/lib/systemd/system/emergency.service
+    - name: " 1.5.3  | HARDEN | Ensure authentication required for single user mode - modify"
+      ini_file:
+        path:  "{{ item }}"
+        section: Service
+        option: 'ExecStart'
+        value: '-/bin/sh -c "/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"'
+        no_extra_spaces: yes
+      with_items:
+        - /usr/lib/systemd/system/rescue.service
+        - /usr/lib/systemd/system/emergency.service
+      register: result
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.5.3':{'result':result|default({}),'audits':before_1_5_3|default({})}}) }}"
+    when: rhel7cis_rule_1_5_3
+    tags:
+     - level1
+     - harden
+     - rule_1.5.3
+     - rhel7
+
+#####
+  - name: " 1.6.1 | HARDEN | Ensure core dumps are restricted"
+    block:
+    - name: " 1.6.1 | HARDEN | Ensure core dumps are restricted"
+      slurp:
+        src:   /etc/security/limits.conf
+      ignore_errors: yes
+      register: before_sec
+    - slurp:
+        src:  /etc/sysctl.conf
+      ignore_errors: yes
+      register: before_sys
+    - name: " 1.6.1 | HARDEN | Ensure core dumps are restricted "
+      lineinfile:
+        dest: /etc/security/limits.conf
+        regexp: ^[^#].*core
+        line: '*        hard       core      0'
+        create: true
+      register: result_sec
+      ignore_errors: yes
+      diff: yes
+    - sysctl:
+        name: fs.suid_dumpable
+        value: '0'
+        sysctl_set: yes
+        state: present
+        reload: yes
+      register: result_sysctl
+      ignore_errors: yes
+    - shell: sysctl -w fs.suid_dumpable=0
+      register: result_flush
+      ignore_errors: yes
+    - shell: systemctl is-enabled coredump.service
+      register: result_syscoredump
+      ignore_errors: yes
+    - block:
+      - slurp:
+          src:   /etc/systemd/coredump.conf
+        ignore_errors: yes
+        register: before_coredump
+      - ini_file:
+          path:  /etc/systemd/coredump.conf
+          section: Storage
+          option: "{{ item.option }}"
+          value: "{{ item.value }}"
+          no_extra_spaces: yes
+        register: result_coredump
+        ignore_errors: yes
+        diff: yes
+        with_items:
+        - { option: 'Storage', value: 'none' }
+        - { option: 'ProcessSizeMax', value: '0' }
+      - systemd:
+          daemon_reload: yes
+        register: result_daemon_reload
+        ignore_errors: yes
+      when: result_syscoredump.rc == 0
+    - name: "1.6.1 - Setup audit variable"
+      set_fact:
+        before_1_6_1: "{{ before_1_6_1|default([]) + [item] }}"
+      loop:
+      - "{{ before_sec }}"
+      - "{{ before_sys }}"
+      - "{{ before_coredump }}"
+    - name: "1.6.1 - Setup result variable"
+      set_fact:
+        result_1_6_1: "{{ result_1_6_1|default([]) + [item] }}"
+      loop:
+      - "{{ result_sec }}"
+      - "{{ result_sysctl }}"
+      - "{{ result_flush }}"
+      - "{{ result_coredump }}"
+      - "{{ result_daemon_reload }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.6.1':{'result':result_1_6_1|default({}),'audits':before_1_6_1|default({})}}) }}"
+    when: rhel7cis_rule_1_6_1
+    tags:
+     - level1
+     - harden
+     - rule_1.6.1
+     - rhel7
+
+#####
+  - name: " 1.6.2 | HARDEN | Ensure XD/NX support is enabled"
+    block:
+    - name: " 1.6.2 | HARDEN | Ensure XD/NX support is enabled"
+      shell: "journalctl | grep 'protection: active'"
+      register: rhel7cis_rule_1_6_2_a_rc
+      ignore_errors: yes
+
+    - name: " 1.6.2 | HARDEN | Ensure XD/NX support is enabled"
+      shell: "journalctl | grep 'protection: active'"
+      register: rhel7cis_rule_1_6_2_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_6_2_result: false
+      when: rhel7cis_rule_1_6_2_a_rc.rc != 0 and rhel7cis_rule_1_6_2_b_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.6.2':rhel7cis_rule_1_6_2_result|default(true)}) }}"
+    when: rhel7cis_rule_1_6_2
+    tags:
+     - level1
+     - harden
+     - rule_1.6.2
+     - rhel7
+
+#####
+# Exception adopt option 1 (CIS recommends 2 causes issue with Trend)
+  - name: " 1.6.3 | HARDEN | Ensure address space layout randomization (ASLR) is enabled "
+    block:
+    - name: " 1.6.3 | HARDEN | Ensure address space layout randomization (ASLR) is enabled "
+      slurp:
+        src:  /etc/sysctl.conf
+      ignore_errors: yes
+      register: before_1_6_3
+    - name: " 1.6.3 | HARDEN | Ensure address space layout randomization (ASLR) is enabled "
+      sysctl:
+          name: '{{ item.name }}'
+          value: '{{ item.value }}'
+          sysctl_set: yes
+          state: present
+          reload: yes
+      with_items:
+          - { name: kernel.randomize_va_space, value: 1 }
+      register: result_1_6_3
+      diff: yes
+      ignore_errors: yes
+    - shell:  sysctl -w kernel.randomize_va_space=1
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.6.3':{'result':result_1_6_3|default({}),'audits':before_1_6_3|default({})}}) }}"
+    when: rhel7cis_rule_1_6_3
+    tags:
+     - level1
+     - harden
+     - rule_1.6.3
+     - rhel7
+
+#####
+  - name: " 1.6.4 | HARDEN |  Ensure prelink is disabled"
+    block:
+    - name: "1.6.4 | HARDEN |  Ensure prelink is disabled - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_1_6_4: "{{ pf['prelink']|default({}) }}"
+      ignore_errors: yes
+    - name: " 1.6.4 | HARDEN |  Ensure prelink is disabled"
+      shell: prelink -ua
+      register: result_restore
+      ignore_errors: yes
+    - yum:
+        name: prelink
+        state: absent
+      register: result_yum_164
+      ignore_errors: yes
+    - name: "1.6.1 - Setup result variable"
+      set_fact:
+        result_1_6_4: "{{ result_1_6_4|default([]) + [item] }}"
+      loop:
+        - "{{ result_restore }}"
+        - "{{ result_yum_164 }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.6.4':{'result':result_1_6_4|default({}),'audits':before_1_6_4|default({})}}) }}"
+    when: rhel7cis_rule_1_6_4
+    tags:
+     - level1
+     - harden
+     - rule_1.6.4
+     - rhel7
+
+#####
+  - name: " 1.7.1.1 | HARDEN |  Ensure SELinux is installed"
+    block:
+    - name: " 1.7.1.1 | HARDEN |  Ensure SELinux is installed"
+      package:
+        name: libselinux
+        state: present
+      register: result
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.7.1.1':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when: rhel7cis_rule_1_7_1_1
+    tags:
+     - level1
+     - harden
+     - rule_1.7.1.1
+     - rhel7
+
+#####
+  - name: " 1.7.1.2 | HARDEN |  Ensure SELinux is not disabled in bootloader configuration"
+    block:
+    - shell: |
+        grep "^\s*linux" /boot/grub2/grub.cfg | grep 'selinux=0'
+      register: rhel7cis_rule_1_7_1_2_a_rc
+      ignore_errors: yes
+    - shell: |
+         grep "^\s*linux" /boot/grub2/grub.cfg | grep 'enforcing=0'
+      register: rhel7cis_rule_1_7_1_2_b_rc
+      ignore_errors: yes
+    - name: " 1.7.1.2 | HARDEN |  Ensure SELinux is not disabled in bootloader configuration - check"
+      block:
+      - slurp:
+          src: /etc/default/grub
+        register: before_1_7_1_2
+        ignore_errors: yes
+      - name: 1.7.1.2 | HARDEN |  Ensure SELinux is not disabled in bootloader configuration - modify
+        replace:
+          path: /etc/default/grub
+          regexp: 'selinux=0'
+          replace: ""
+        register: result_conf
+        ignore_errors: yes
+        diff: yes
+        when: rhel7cis_rule_1_7_1_2_a_rc.rc == 0
+      - replace:
+          path: /etc/default/grub
+          regexp: 'enforcing=0'
+          replace: ""
+        register: result_conf
+        ignore_errors: yes
+        diff: yes
+        when: rhel7cis_rule_1_7_1_2_b_rc.rc == 0
+      - shell:  grub2-mkconfig -o /boot/grub2/grub.cfg
+        register: result_update
+        ignore_errors: yes
+      - name: "1.7.1.2 - Setup result variable"
+        set_fact:
+          result_1_7_1_2: "{{ result_1_7_1_2|default([]) + [item] }}"
+        loop:
+          - "{{ result_conf }}"
+          - "{{ result_update }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.7.1.2':{'result':result_1_7_1_2|default({}),'audits':before_1_7_1_2|default({})}}) }}"
+    when: rhel7cis_rule_1_7_1_2
+    tags:
+     - level1
+     - harden
+     - rule_1.7.1.2
+     - rhel7
+
+#####
+  - name: " 1.7.1.3 | HARDEN |  Ensure SELinux policy is configured "
+    block:
+    - name: " 1.7.1.3 | HARDEN |  Ensure SELinux policy is configured "
+      slurp:
+        src: /etc/selinux/config
+      register: before
+      ignore_errors: yes
+    - name: 1.7.1.3 | HARDEN |  Ensure SELinux policy is configured  - modify
+      lineinfile:
+        path: /etc/selinux/config
+        regexp: '^SELINUXTYPE='
+        line: SELINUXTYPE=targeted
+      register: result
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.7.1.3':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when: rhel7cis_rule_1_7_1_3
+    tags:
+     - level1
+     - harden
+     - rule_1.7.1.3
+     - rhel7
+
+#####
+  - name: " 1.7.1.4 | HARDEN |  Ensure the SELinux mode is enforcing or permissive "
+    block:
+    - name: " 1.7.1.4 | HARDEN |  Ensure the SELinux mode is enforcing or permissive "
+      slurp:
+        src: /etc/selinux/config
+      register: before_config
+      ignore_errors: yes
+    - shell: getenforce
+      ignore_errors: yes
+      register: before_status
+    - name: 1.7.1.4 | HARDEN |  Ensure the SELinux mode is enforcing or permissive  - modify
+      lineinfile:
+        path: /etc/selinux/config
+        regexp: '^SELINUX='
+        line: SELINUX={{ selinux_mode }}
+      register: result_config
+      ignore_errors: yes
+      diff: yes
+    - name: Run setenforce command
+      shell: setenforce 1
+      register: result_enforce
+      ignore_errors: yes
+      when: selinux_mode == "enforcing"
+    - shell: setenforce 0
+      register: result_permissive
+      ignore_errors: yes
+      when: selinux_mode == "permissive"
+    - name: "1.7.1.4 - Setup audit variable"
+      set_fact:
+        before_1_7_1_4: "{{ before_1_7_1_4|default([]) + [item] }}"
+      loop:
+      - "{{ before_config }}"
+      - "{{ before_status }}"
+    - name: "1.7.1.4 - Setup result variable"
+      set_fact:
+        result_1_7_1_4: "{{ result_1_7_1_4|default([]) + [item] }}"
+      loop:
+      - "{{ result_config }}"
+      - "{{ result_enforce|default([]) }}"
+      - "{{ result_permissive|default([]) }}"
+
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.7.1.4':{'result':result_1_7_1_4|default({}),'audits':before_1_7_1_4|default({})}}) }}"
+    when: rhel7cis_rule_1_7_1_4
+    tags:
+     - level1
+     - harden
+     - rule_1.7.1.4
+     - rhel7
+
+#####
+  - name: " 1.7.1.5 | HARDEN |  Ensure the SELinux mode is enforcing "
+    block:
+    - name: " 1.7.1.5 | HARDEN |  Ensure the SELinux mode is enforcing "
+      slurp:
+        src: /etc/selinux/config
+      register: before_config
+      ignore_errors: yes
+    - shell: getenforce
+      ignore_errors: yes
+      register: before_status
+    - name: 1.7.1.5 | HARDEN |  Ensure the SELinux mode is enforcing  - modify
+      lineinfile:
+        path: /etc/selinux/config
+        regexp: '^SELINUX='
+        line: SELINUX=enforcing
+      register: result_config
+      ignore_errors: yes
+      diff: yes
+    - name: Run setenforce command
+      shell: setenforce 1
+      register: result_enforce
+      ignore_errors: yes
+    - name: "1.7.1.4 - Setup audit variable"
+      set_fact:
+        before_1_7_1_4: "{{ before_1_7_1_4|default([]) + [item] }}"
+      loop:
+      - "{{ before_config }}"
+      - "{{ before_status }}"
+    - name: "1.7.1.5 - Setup result variable"
+      set_fact:
+        result_1_7_1_5: "{{ result_1_7_1_5|default([]) + [item] }}"
+      loop:
+      - "{{ result_config }}"
+      - "{{ result_enforce }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.7.1.5':{'result':result_1_7_1_5|default({}),'audits':before_1_7_1_4|default({})}}) }}"
+    when: rhel7cis_rule_1_7_1_5
+    tags:
+     - level2
+     - harden
+     - rule_1.7.1.5
+     - rhel7
+
+#####
+  - name: " 1.7.1.6 | HARDEN |   Ensure no unconfined services exist "
+    block:
+    - name: " 1.7.1.6 | HARDEN |   Ensure no unconfined services exist "
+      shell:   ps -eZ | grep unconfined_service_t
+      register: rhel7cis_rule_1_7_1_6_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_7_1_6_result: false
+      when: rhel7cis_rule_1_7_1_6_rc.stdout != ""
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.7.1.6':rhel7cis_rule_1_7_1_6_result|default(true)}) }}"
+    when: rhel7cis_rule_1_7_1_6
+    tags:
+     - level1
+     - scan
+     - rule_1.7.1.6
+     - rhel7
+
+#####
+  - name: " 1.7.1.7 | HARDEN |    Ensure SETroubleshoot is not installed "
+    block:
+    - name: "1.7.1.7 | HARDEN |    Ensure SETroubleshoot is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before: "{{ pf['setroubleshoot']|default({}) }}"
+      ignore_errors: yes
+    - name: " 1.7.1.7 | HARDEN |    Ensure SETroubleshoot is not installed "
+      package:
+        name: setroubleshoot
+        state: absent
+      register: result
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.7.1.7':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when: rhel7cis_rule_1_7_1_7
+    tags:
+     - level1
+     - harden
+     - rule_1.7.1.7
+     - rhel7
+#####
+  - name: " 1.7.1.8 | HARDEN | Ensure the MCS Translation Service (mcstrans) is not installed "
+    block:
+    - name: "1.7.1.8 | HARDEN | Ensure the MCS Translation Service (mcstrans) is not installed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before: "{{ pf['mcstrans']|default({}) }}"
+      ignore_errors: yes
+    - name: " 1.7.1.8 | HARDEN | Ensure the MCS Translation Service (mcstrans) is not installed "
+      package:
+        name: mcstrans
+        state: absent
+      register: result
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.7.1.8':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when:  rhel7cis_rule_1_7_1_8
+    tags:
+     - level1
+     - harden
+     - rule_1.7.1.8
+     - rhel7
+
+#####
+  - name: " 1.8.1.1 | HARDEN | Ensure message of the day is configured properly "
+    block:
+    - name: Ensure message of the day is configured properly - check current banner
+      slurp:
+        src: /etc/motd
+      ignore_errors: yes
+      register: before_1_8_1_1
+    - name: Ensure message of the day is configured properly - edit correct banner
+      copy:
+        src: banner_txt
+        dest: /etc/motd
+      diff: yes
+      register: result_1_8_1_1
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.1':{'result':result_1_8_1_1|default({}),'audits':before_1_8_1_1|default({})}}) }}"
+    when: rhel7cis_rule_1_8_1_1
+    tags:
+     - level1
+     - harden
+     - rule_1.8.1.1
+     - rhel7
+
+#####
+  - name: " 1.8.1.2 | HARDEN | Ensure local login warning banner is configured properly "
+    block:
+    - name: Ensure local login warning banner is configured properly - check current banner
+      slurp:
+        src: /etc/issue
+      ignore_errors: yes
+      register: before_1_8_1_3
+    - name: Ensure local login warning banner is configured properly - add correct banner
+      copy:
+        src: banner_txt
+        dest: /etc/issue
+      diff: yes
+      register: result_1_8_1_3
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.2':{'result':result_1_8_1_3|default({}),'audits':before_1_8_1_3|default({})}}) }}"
+    when: rhel7cis_rule_1_8_1_2
+    tags:
+     - level1
+     - harden
+     - rule_1.8.1.2
+     - rhel7
+
+#####
+  - name: " 1.8.1.3 | HARDEN | Ensure remote login warning banner is configured properly"
+    block:
+    - name: " 1.8.1.3 | HARDEN | Ensure remote login warning banner is configured properly"
+      slurp:
+        src: /etc/issue.net
+      ignore_errors: yes
+      register: before_1_8_1_4
+    - name: Ensure local login warning banner is configured properly - add correct banner
+      copy:
+        src: banner_txt
+        dest: /etc/issue.net
+      diff: yes
+      register: result_1_8_1_4
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.3':{'result':result_1_8_1_4|default({}),'audits':before_1_8_1_4|default({})}}) }}"
+    when: rhel7cis_rule_1_8_1_3
+    tags:
+     - level1
+     - harden
+     - rule_1.8.1.3
+     - rhel7
+
+#####
+  - name: " 1.8.1.4 | HARDEN |  Ensure permissions on /etc/motd are configured  "
+    block:
+    - name: " 1.8.1.4 | HARDEN |  Ensure permissions on /etc/motd are configured - before "
+      stat:
+        path: /etc/motd
+      register: before
+      ignore_errors: yes
+    - name: " 1.8.1.4 | HARDEN |  Ensure permissions on /etc/motd are configured  "
+      file:
+        path: /etc/motd
+        owner: root
+        group: root
+        mode: '0644'
+      register: result
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.4':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when: rhel7cis_rule_1_8_1_4
+    tags:
+     - level1
+     - harden
+     - rule_1.8.1.4
+     - rhel7
+
+#####
+  - name: " 1.8.1.5 | HARDEN |  Ensure permissions on /etc/issue are configured  "
+    block:
+    - name: " 1.8.1.5 | HARDEN |  Ensure permissions on /etc/issue are configured  "
+      stat:
+        path: /etc/issue
+      register: before
+      ignore_errors: yes
+    - name: " 1.8.1.5 | HARDEN |  Ensure permissions on /etc/issue are configured  "
+      file:
+        path: /etc/issue
+        owner: root
+        group: root
+        mode: '0644'
+      register: result
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.5':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when: rhel7cis_rule_1_8_1_5
+    tags:
+     - level1
+     - harden
+     - rule_1.8.1.5
+     - rhel7
+
+#####
+  - name: " 1.8.1.6 | HARDEN |  Ensure permissions on /etc/issue.net are configured  "
+    block:
+    - name: " 1.8.1.6 | HARDEN |  Ensure permissions on /etc/issue.net are configured  "
+      stat:
+        path: /etc/issue.net
+      register: before
+      ignore_errors: yes
+    - name: " 1.8.1.6 | HARDEN |  Ensure permissions on /etc/issue.net are configured  "
+      file:
+        path: /etc/issue.net
+        owner: root
+        group: root
+        mode: '0644'
+      register: result
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.6':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when: rhel7cis_rule_1_8_1_6
+    tags:
+     - level1
+     - harden
+     - rule_1.8.1.6
+     - rhel7
+
+#####
+#  - name: " 1.9 | HARDEN |  Ensure updates, patches, and additional security software are installed  "
+#    block:
+#    - name: " 1.9 | HARDEN |  Ensure updates, patches, and additional security software are installed  "
+#      yum:
+#        name: '*'
+#        security: yes
+#        state: latest
+#      register: result
+#      check_mode: yes
+#      diff: yes
+#      ignore_errors: yes
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.9':{'result':result|default({}),'audits':before|default({})}}) }}"
+#    when: rhel7cis_rule_1_9
+#    tags:
+#     - level1
+#     - harden
+#     - rule_1.9
+#     - rhel7
+#
+#####
+  - name: " 1.10 | HARDEN | Ensure GDM is removed or login is configured "
+    block:
+      - name: "1.10 | HARDEN | Ensure GDM is removed or login is configured"
+        package_facts:
+        ignore_errors: yes
+      - set_fact:
+          pf: "{{ ansible_facts.packages }}"
+        ignore_errors: yes
+      - set_fact:
+          before_1_10_0: "{{ pf['gdm']|default({}) }}"
+        ignore_errors: yes
+      - name: " 1.10 | HARDEN | Ensure GDM is removed  "
+        yum:
+          name: gdm
+          state: absent
+        diff: yes
+        register: result_1_10_0
+        ignore_errors: yes
+
+      - set_fact:
+          all_results: "{{ all_results|combine({'1.10':{'result':result_1_10_0|default({}),'audits':before_1_10_0|default({})}}) }}"
+    when: rhel7cis_rule_1_10_gdm_required == false and rhel7cis_rule_1_10
+    tags:
+     - level1
+     - harden
+     - rule_1.10
+     - rhel7
+
+
+  - name: " 1.10 | HARDEN | Ensure GDM is removed or login is configured"
+    block:
+      - name: " 1.10 | HARDEN | Ensure GDM is removed or login is configured"
+        file:
+          path: /etc/dconf/{{ item }}
+          owner: root
+          group: root
+          mode: '0755'
+          state: directory
+        with_items:
+          - db/gdm.d
+          - profile
+        diff: yes
+        register: result_dir
+        ignore_errors: yes
+      - name: Check content of /etc/dconf/profile/gdm
+        slurp:
+          src: /etc/dconf/profile/gdm
+        ignore_errors: yes
+        register: before_gdm
+      - name: Create or edit content of /etc/dconf/profile/gdm
+        lineinfile:
+          path: /etc/dconf/profile/gdm
+          line: "{{ item.line }}"
+          create: yes
+        with_items:
+          - { line: 'user-db:user' }
+          - { line: 'system-db:gdm' }
+          - { line: 'file-db:/usr/share/gdm/greeter-dconf-defaults' }
+        diff: yes
+        register: result_gdm
+        ignore_errors: yes
+
+      - name: Check content of /etc/dconf/db/gdm.d/01-banner-message
+        slurp:
+          src: /etc/dconf/db/gdm.d/01-banner-message
+        ignore_errors: yes
+        register: before_gdmd_banner
+      - name: Create or edit content of /etc/dconf/db/gdm.d/01-banner-message
+        ini_file:
+          path: /etc/dconf/db/gdm.d/01-banner-message
+          section: org/gnome/login-screen
+          option: "{{ item.option }}"
+          value: "{{ item.value }}"
+          create: yes
+          no_extra_spaces: yes
+        with_items:
+          - { option: 'banner-message-enable', value: 'true' }
+          - { option: 'banner-message-text', value: '{{ login_banner_text }}' }
+        diff: yes
+        register: result_gdmd_banner
+        ignore_errors: yes
+
+      - name: Check content of /etc/dconf/db/gdm.d/00-login-screen
+        slurp:
+          src: /etc/dconf/db/gdm.d/00-login-screen
+        ignore_errors: yes
+        register: before_gdmd_login
+      - name: Create or edit content of /etc/dconf/db/gdm.d/00-login-screen
+        ini_file:
+          path: /etc/dconf/db/gdm.d/00-login-screen
+          section: org/gnome/login-screen
+          option: "{{ item.option }}"
+          value: "{{ item.value }}"
+          create: yes
+          no_extra_spaces: yes
+        with_items:
+          - { option: 'disable-user-list', value: 'true' }
+        diff: yes
+        register: result_gdmd_login
+        ignore_errors: yes
+
+      - name: "1.10 - Setup audit variable"
+        set_fact:
+          before_1_10: "{{ before_1_10|default([]) + [item] }}"
+        loop:
+        - "{{ before_gdm }}"
+        - "{{ before_gdmd_banner }}"
+        - "{{ before_gdmd_login }}"
+
+      - name: "1.10 - Setup result variable"
+        set_fact:
+          result_1_10: "{{ result_1_10|default([]) + [item] }}"
+        loop:
+        - "{{ result_dir }}"
+        - "{{ result_gdm }}"
+        - "{{ result_gdmd_banner }}"
+        - "{{ result_gdmd_login }}"
+
+      - set_fact:
+          all_results: "{{ all_results|combine({'1.10':{'result':result_1_10|default({}),'audits':before_1_10|default({})}}) }}"
+
+    when: rhel7cis_rule_1_10_gdm_required == true and rhel7cis_rule_1_10
+    tags:
+     - level1
+     - harden
+     - rule_1.10
+     - rhel7
+#####

@@ -1,0 +1,101 @@
+---
+#
+# Copyright 2020
+# description: this playbook is dedicated for Telkomsel Indonesia
+#
+- hosts: all
+  ignore_unreachable: yes
+  any_errors_fatal: false
+  become: yes
+  gather_facts: true
+  vars:
+    all_results: {}
+
+  tasks:
+    - name: Get start time
+      block:
+        - setup:
+            filter: ansible_date_time
+          register: result
+        - set_fact:
+            start_time: "{{ lookup('pipe','date \"+%T %Z %F\"') }}"
+      delegate_to: localhost
+      become: no
+      tags: always
+
+    - set_fact:
+        ign_var: "{{ group_names | to_nice_yaml | replace(' ','') | replace('-','')|replace('\n','') }}"
+      become: no
+      delegate_to: localhost
+      tags: always
+    - set_fact:
+        rpt_path_v1: "/var/report/v1/{{ ign_var }}"
+        rpt_path_v2: "/var/report/v2/{{ ign_var }}"
+        rpt_path_v3: "/var/report/v3/{{ ign_var }}"
+        rpt_file_v1: "/var/report/v1/{{ ign_var }}/{{ ansible_hostname }}.html"
+        rpt_file_v2: "/var/report/v2/{{ ign_var }}/{{ ansible_hostname }}.html"
+        rpt_file_v3: "/var/report/v3/{{ ign_var }}/{{ ansible_hostname }}.html"
+      become: no
+      delegate_to: localhost
+      tags: always
+    - name: To create directory on Tower controller node for reports
+      file:
+        path: "{{ item }}"
+        recurse: yes
+        state: directory
+        mode: '0777'
+      with_items:
+        - "{{ rpt_path_v1 }}"
+        - "{{ rpt_path_v2 }}"
+        - "{{ rpt_path_v3 }}"
+      delegate_to: localhost
+      become: no
+      tags: always
+      ignore_errors: true
+
+    - name: Execute CIS benchmark Scan for RHEL
+      include_role:
+        name: rhel7scanning
+      tags: always
+
+    - name: Get end time
+      block:
+        - setup:
+            filter: ansible_date_time
+          register: result
+        - set_fact:
+            end_time: "{{ lookup('pipe','date \"+%T %Z %F\"') }}"
+      delegate_to: localhost
+      become: no
+      tags: always
+
+    - debug:
+        var: all_results
+
+    - name: MySQL DB Security Dashboard
+      import_tasks: dash-dbquery-scan-job.yml
+      tags: always
+
+    - name: Generate report
+      block:
+        - read_csv:
+            path: files/rhel7-cis-benchmarks.csv
+            fieldnames: rule,name,s_lv,ws_lv
+            key: rule
+          register: rules
+          no_log: false
+          delegate_to: localhost
+          become: no
+        - shell: |
+            [[ -f {{ rpt_file_v3 }} ]] && [[ -f {{ rpt_file_v2 }} ]] && mv {{ rpt_file_v2 }} {{ rpt_file_v1 }}
+            [[ -f {{ rpt_file_v3 }} ]] && mv {{ rpt_file_v3 }} {{ rpt_file_v2 }}
+            exit 0
+          become: no
+          delegate_to: localhost
+        - template:
+            src: rhel7-cis-report.html.j2
+            dest: "{{ rpt_file_v3 }}"
+            mode: '0777'
+          delegate_to: localhost
+          become: no
+      tags: always

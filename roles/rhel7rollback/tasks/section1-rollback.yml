@@ -1,0 +1,1034 @@
+---
+#
+# Copyright 2020
+# This section contains 60 rules
+#
+#####
+#####
+  - name: " 1.1.0.0 | HARDEN | /etc/fstab backup"
+    block:
+    - name: "1.1.0.0 | HARDEN | /etc/fstab backup - before"
+      file:
+        path:  /etc/fstab
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.1.0.0'].audits.msg is defined and all_results['1.1.0.0'].audits.msg.find('file not found') != -1
+    - name: "1.1.0.0 | HARDEN | /etc/fstab backup - after"
+      block:
+        - set_fact:
+            data: "{{ all_results['1.1.0.0'].audits.content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/fstab
+          ignore_errors: yes
+        - shell: mount -o remount /var/tmp
+          ignore_errors: yes
+        - shell: mount -o remount /tmp
+          ignore_errors: yes
+        - shell: mount -o remount /home
+          ignore_errors: yes
+        - shell: mount -o remount /dev/shm
+          ignore_errors: yes
+      when: all_results['1.1.0.0'].audits.content is defined
+    when:
+      - rhel7cis_rule_1_1_3
+      - rhel7cis_rule_1_1_7
+      - rhel7cis_rule_1_1_12
+    tags:
+     - level1
+     - harden
+     - rule_1.1.0.0
+     - rhel7
+
+  - name: " 1.1.22 | ROLLBACK | Ensure sticky bit is set on all world-writable directories"
+    block:
+      - block:
+        - set_fact:
+            file1: "{{ all_results['1.1.22'].audits.results[0].item }}"
+            file2: "{{ all_results['1.1.22'].audits.results[1].item }}"
+            mode1: "{{ all_results['1.1.22'].audits.results[0].stat.mode }}"
+            mode2: "{{ all_results['1.1.22'].audits.results[1].stat.mode }}"
+          ignore_errors: yes
+        - name: " 1.1.22 | ROLLBACK | Ensure sticky bit is set on all world-writable directories - modify"
+          file:
+            path: "{{ item.name }}"
+            mode: "{{ item.mode }}"
+          register: result
+          ignore_errors: yes
+          diff: yes
+          with_items:
+            - { name: "{{ file1 }}", mode: "{{ mode1 }}" }
+            - { name: "{{ file2 }}", mode: "{{ mode2 }}" }
+        when: all_results['1.1.22'].audits.results[0] is defined
+    when: rhel7cis_rule_1_1_22
+    tags:
+     - level1
+     - rollback
+     - rule_1.1.22
+     - rhel7
+
+#####
+  - name: " 1.1.23 | ROLLBACK | Disable Automounting"
+    block:
+      - set_fact:
+          before_status: "yes"
+        ignore_errors: yes
+        when: all_results['1.1.23'].audits.status == "enabled"
+      - set_fact:
+          before_status: "no"
+        ignore_errors: yes
+        when: all_results['1.1.23'].audits.status != "enabled"
+      - set_fact:
+          before_state: "started"
+        ignore_errors: yes
+        when: all_results['1.1.23'].audits.state == "running"
+      - set_fact:
+          before_state: "stopped"
+        ignore_errors: yes
+        when: all_results['1.1.23'].audits.state is not defined or all_results['1.1.23'].audits.state != "running"
+      - name: " 1.1.23 | ROLLBACK | Disable Automounting"
+        systemd:
+          name: autofs
+          state: "{{ before_state }}"
+          enabled: "{{ before_status }}"
+          masked: no
+        ignore_errors: yes
+        diff: yes
+    when:
+      - rhel7cis_rule_1_1_23
+      - ( all_results['1.1.23'].audits is defined )
+      - all_results['1.1.23'].audits|length > 2
+    tags:
+     - level1
+     - rollback
+     - rule_1.1.23
+     - rhel7
+
+#####
+  - name: " 1.1.24 | ROLLBACK | Disable USB Storage"
+    block:
+    - file:
+        path: /etc/modprobe.d/usb_storage.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.1.24'].audits.msg is defined and all_results['1.1.24'].audits.msg.find('file not found') != -1
+    - block:
+      - set_fact:
+          data: "{{ all_results['1.1.24'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/modprobe.d/usb_storage.conf
+        ignore_errors: yes
+      when: all_results['1.1.24'].audits.content is defined
+    when: rhel7cis_rule_1_1_24
+    tags:
+     - level1
+     - rollback
+     - rule_1.1.24
+     - rhel7
+
+#####
+  - name: " 1.2.3 | ROLLBACK | Ensure gpgcheck is globally activated"
+    block:
+    - name: " 1.2.3 | ROLLBACK | Ensure gpgcheck is globally activated"
+      file:
+        path: /etc/yum.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.2.3'].audits[0].msg is defined and all_results['1.2.3'].audits[0].msg.find('file not found') != -1
+    - block:
+      - set_fact:
+          data: "{{ all_results['1.2.3'].audits[0].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/yum.conf
+        ignore_errors: yes
+      when: all_results['1.2.3'].audits[0].content is defined
+    - name: " 1.2.3 | ROLLBACK | Ensure gpgcheck is globally activated"
+      block:
+      - file:
+          path: "{{ item }}"
+          state: absent
+        ignore_errors: yes
+        with_items:
+          -  "{{ all_results['1.2.3'].audits[1]|json_query('results[*].item') }}"
+      when: all_results['1.2.3'].audits[1].results[0].msg is defined and all_results['1.2.3'].audits[1].results[0].msg.find('file not found') != -1
+    - block:
+      - copy:
+          content: "{{ item.content| b64decode}}"
+          dest: "{{ item.item }}"
+        ignore_errors: yes
+        with_items:
+          - "{{all_results['1.2.3'].audits[1]|json_query('results[*]')}}"
+      when: all_results['1.2.3'].audits[1].results[0].content is defined
+    when: rhel7cis_rule_1_2_3
+    tags:
+     - level1
+     - rollback
+     - rule_1.2.3
+     - rhel7
+
+#####
+  - name: " 1.2.5 | ROLLBACK |  Disable the rhnsd Daemon"
+    block:
+     - set_fact:
+         before_status: "{{'yes' if all_results['1.2.5'].audits.status == 'enabled' else 'no'}}"
+       ignore_errors: yes
+     - debug: var=all_results['1.2.5']
+     - set_fact:
+         before_state: "{{'started' if all_results['1.2.5'].audits.state == 'running' else 'stopped'}}"
+       ignore_errors: yes
+     - name: " 1.2.5 | ROLLBACK |  Disable the rhnsd Daemon"
+       systemd:
+         name: "rhnsd"
+         state: "{{ before_state }}"
+         masked: no
+         enabled: "{{ before_status }}"
+       ignore_errors: yes
+    when:
+      - rhel7cis_rule_1_2_5
+      - ( all_results['1.2.5'].audits is defined )
+      - all_results['1.2.5'].audits|length > 0
+    tags:
+     - level2
+     - rollback
+     - rule_1.2.5
+     - rhel7
+
+#####
+  - name: " 1.3.1 | ROLLBACK |  Ensure sudo is installed"
+    block:
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['1.3.1'].audits.name is defined
+    - set_fact:
+        before_state: "absent"
+      ignore_errors: yes
+      when: all_results['1.3.1'].audits.name is not defined
+    - debug: var=all_results['1.3.1']
+#    - name: " 1.3.1 | ROLLBACK |  Ensure sudo is installed"
+#      yum:
+#        name: sudo
+#        state: "{{ before_state }}"
+#        conf_file: '/etc/yum.conf'
+#      ignore_errors: yes
+    when: rhel7cis_rule_1_3_1
+    tags:
+     - level1
+     - rollback
+     - rule_1.3.1
+     - sudo
+     - rhel7
+
+#####
+  - name: " 1.3.2 | ROLLBACK | Ensure sudo commands use pty"
+    block:
+    - name: " 1.3.2 | ROLLBACK | Ensure sudo commands use pty"
+      file:
+        path: /etc/sudoers
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.3.2'].audits.msg is defined and all_results['1.3.2'].audits.msg.find('file not found') != -1
+    - block:
+      - set_fact:
+          data: "{{ all_results['1.3.2'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/sudoers
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_1_3_3: false
+        ignore_errors: yes
+      when: all_results['1.3.2'].audits.content is defined
+    when: rhel7cis_rule_1_3_2
+    tags:
+     - level1
+     - rollback
+     - rule_1.3.2
+     - rhel7
+
+#####
+  - name: " 1.3.3 | ROLLBACK | Ensure sudo log file exists"
+    block:
+    - name: " 1.3.3 | ROLLBACK | Ensure sudo log file exists"
+      file:
+        path: /etc/sudoers
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.3.3'].audits.msg is defined and all_results['1.3.3'].audits.msg.find('file not found') != -1
+    - block:
+      - set_fact:
+          data: "{{ all_results['1.3.3'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/sudoers
+        ignore_errors: yes
+      when: all_results['1.3.3'].audits.content is defined
+    when:  rhel7cis_rule_1_3_3
+    tags:
+     - level1
+     - rollback
+     - rule_1.3.3
+     - rhel7
+
+#####
+  - name: " 1.4.1 | ROLLBACK |  Ensure AIDE is installed"
+    block:
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['1.4.1'].audits[0].name is defined
+    - set_fact:
+        before_state: "absent"
+      ignore_errors: yes
+      when: all_results['1.4.1'].audits[0].name is not defined
+    - name: " 1.4.1 | ROLLBACK |  Ensure AIDE is installed"
+      yum:
+        name: aide
+        state: "{{ before_state }}"
+        conf_file: '/etc/yum.conf'
+      ignore_errors: yes
+    when: rhel7cis_rule_1_4_1
+    tags:
+     - level1
+     - rollback
+     - rule_1.4.1
+     - rhel7
+
+#####
+  - name: " 1.4.2 | ROLLBACK | Ensure filesystem integrity is regularly checked"
+    block:
+    - name: "1.4.2 | HARDEN | Ensure filesystem integrity is regularly checked - before "
+      shell: crontab -l -u root| grep -i "aide" 2> /dev/null
+      ignore_errors: yes
+      register: rhel7cis_rule_1_4_2_rc
+    - name: "1.4.2 | ROLLBACK | Ensure filesystem integrity is regularly checked "
+      cron:
+        name: Run AIDE integrity check
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.4.2'].audits.stdout == "" and rhel7cis_rule_1_4_2_rc.rc == 0
+    when: rhel7cis_rule_1_4_2
+    tags:
+     - level1
+     - rollback
+     - rule_1.4.2
+     - rhel7
+
+#####
+  - name: " 1.5.1 | HARDEN | Ensure bootloader password is set"
+    shell:  grep -i release /etc/redhat-release|sed 's/[^0-9]*//g' 2> /dev/null
+    register: rhel7cis_rule_1_5_1_o_rc
+    ignore_errors: yes
+    tags:
+     - level1
+     - harden
+     - rule_1.5.1
+     - grub2_password
+     - rhel7
+
+  - name: " 1.5.1 | HARDEN | Ensure bootloader password is set - for RHEL 7.2 and newer"
+    block:
+    - file:
+        path: /boot/grub2/user.cfg
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.5.1'].audits.msg is defined and all_results['1.5.1'].audits.msg.find('file not found') != -1
+    - debug: var=all_results['1.5.1']
+    - block:
+      - set_fact:
+          data: "{{ all_results['1.5.1'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /boot/grub2/user.cfg
+        ignore_errors: yes
+      when: all_results['1.5.1'].audits.content is defined
+    when: rhel7cis_rule_1_5_1 and rhel7cis_rule_1_5_1_o_rc.stdout != "71"
+    tags:
+     - level1
+     - rollback
+     - rule_1.5.1
+     - rhel7
+
+#####
+  - name: " 1.5.2 | ROLLBACK | Ensure permissions on bootloader config are configured"
+    block:
+    - name: " 1.5.2 | ROLLBACK | Ensure permissions on bootloader config are configured"
+      file:
+        path: /boot/grub2/grub.cfg
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.5.2'].audits[0].stat.exists == false
+    - block:
+      - name: " 1.5.2 | ROLLBACK | Ensure permissions on bootloader config are configured"
+        set_fact:
+          before_mode: "{{ all_results['1.5.2'].audits[0].stat.mode }}"
+          before_user: "{{ all_results['1.5.2'].audits[0].stat.pw_name }}"
+          before_group: "{{ all_results['1.5.2'].audits[0].stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /boot/grub2/grub.cfg
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['1.5.2'].audits[0].stat.exists == true
+    - name: " 1.5.2 | ROLLBACK | Ensure permissions on bootloader config are configured"
+      file:
+        path: /boot/grub2/user.cfg
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.5.2'].audits[1].stat.exists == false
+    - block:
+      - name: " 1.5.2 | ROLLBACK | Ensure permissions on bootloader config are configured"
+        set_fact:
+          before_mode: "{{ all_results['1.5.2'].audits[1].stat.mode }}"
+          before_user: "{{ all_results['1.5.2'].audits[1].stat.pw_name }}"
+          before_group: "{{ all_results['1.5.2'].audits[1].stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /boot/grub2/user.cfg
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['1.5.2'].audits[1].stat.exists == true
+    when: rhel7cis_rule_1_5_2
+    tags:
+     - level1
+     - rollback
+     - rule_1.5.2
+     - rhel7
+
+#####
+  - name: " 1.5.3 | ROLLBACK | Ensure authentication required for single user mode"
+    block:
+    - name: " 1.5.3 | ROLLBACK | Ensure authentication required for single user mode"
+      file:
+        path: "{{ item }}"
+        state: absent
+      ignore_errors: yes
+      with_items:
+        - /usr/lib/systemd/system/rescue.service
+        - /usr/lib/systemd/system/emergency.service
+      when: all_results['1.5.3'].audits.results[0].msg is defined and all_results['1.5.3'].audits.results[0].msg.find('file not found') != -1
+    - set_fact:
+        data1: "{{ all_results['1.5.3'].audits.results[0].content | b64decode }}"
+        data2: "{{ all_results['1.5.3'].audits.results[1].content | b64decode }}"
+      ignore_errors: yes
+      when: all_results['1.5.3'].audits.results[0].content is defined or all_results['1.5.3'].audits.results[1].content is defined
+    - name: " 1.5.3  | ROLLBACK | Ensure authentication required for single user mode"
+      copy:
+        content: "{{ item.data }}"
+        dest: "{{ item.name }}"
+      ignore_errors: yes
+      when: all_results['1.5.3'].audits.{{ item.query }}.content is defined
+      with_items:
+        - { data: "{{ data1 }}", name: '/usr/lib/systemd/system/rescue.service', query: 'results[0]' }
+        - { data: "{{ data2 }}", name: '/usr/lib/systemd/system/emergency.service', query: 'results[1]' }
+      diff: yes
+
+    when: rhel7cis_rule_1_5_3
+    tags:
+     - level1
+     - rollback
+     - rule_1.5.3
+     - rhel7
+
+#####
+  - name: " 1.6.1 | ROLLBACK | Ensure core dumps are restricted"
+    block:
+    - name: " 1.6.1 | ROLLBACK | Ensure core dumps are restricted"
+      file:
+        path: /etc/security/limits.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.6.1'].audits[0].msg is defined and all_results['1.6.1'].audits[0].msg.find('file not found') != -1
+    - name: " 1.6.1 | ROLLBACK | Ensure core dumps are restricted"
+      file:
+        path: /etc/sysctl.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.6.1'].audits[1].msg is defined and all_results['1.6.1'].audits[1].msg.find('file not found') != -1
+    - name: " 1.6.1 | ROLLBACK | Ensure core dumps are restricted "
+      set_fact:
+        data1: "{{ all_results['1.6.1'].audits[0].content | b64decode }}"
+        data2: "{{ all_results['1.6.1'].audits[1].content | b64decode }}"
+      ignore_errors: yes
+      when: all_results['1.6.1'].audits[0].content is defined or all_results['1.6.1'].audits[1].content is defined
+    - copy:
+        content: "{{ item.data }}"
+        dest: "{{ item.name }}"
+      ignore_errors: yes
+      when: all_results['1.6.1'].{{ item.query }}.content is defined
+      with_items:
+        - { data: "{{ data1 }}", name: '/etc/security/limits.conf', query: 'audits[0]' }
+        - { data: "{{ data2 }}", name: '/etc/sysctl.conf', query: 'audits[1]' }
+      diff: yes
+
+    - shell: systemctl is-enabled coredump.service
+      register: result_syscoredump
+      ignore_errors: yes
+    - block:
+      - name: " 1.6.1 | ROLLBACK | Ensure core dumps are restricted"
+        file:
+          path: /etc/systemd/coredump.conf
+          state: absent
+        ignore_errors: yes
+        when: all_results['1.6.1'].audits[2].msg is defined and all_results['1.6.1'].audits[0].msg.find('file not found') != -1
+      - name: " 1.6.1 | ROLLBACK | Ensure core dumps are restricted "
+        set_fact:
+          data: "{{ all_results['1.6.1'].audits[2].content | b64decode }}"
+        ignore_errors: yes
+        when: all_results['1.6.1'].audits[2].content is defined
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/systemd/coredump.conf
+        ignore_errors: yes
+        when: all_results['1.6.1'].audits[2].content is defined
+        diff: yes
+      when: result_syscoredump.rc == 0
+    - set_fact:
+        rhel7cis_rule_1_6_3: false
+        rhel7cis_rule_3_1_1: false
+        rhel7cis_rule_3_2_1: false
+        rhel7cis_rule_3_2_2: false
+        rhel7cis_rule_3_3_1: false
+        rhel7cis_rule_3_3_2: false
+        rhel7cis_rule_3_3_3: false
+        rhel7cis_rule_3_3_4: false
+        rhel7cis_rule_3_3_5: false
+        rhel7cis_rule_3_3_6: false
+        rhel7cis_rule_3_3_7: false
+        rhel7cis_rule_3_3_8: false
+        rhel7cis_rule_3_3_9: false
+      ignore_errors: yes
+    when: rhel7cis_rule_1_6_1
+    tags:
+     - level1
+     - rollback
+     - rule_1.6.1
+     - rhel7
+
+#####
+  - name: " 1.6.3 | ROLLBACK | Ensure address space layout randomization (ASLR) is enabled "
+    block:
+    - name: " 1.6.3 | ROLLBACK | Ensure address space layout randomization (ASLR) is enabled "
+      file:
+        path: /etc/sysctl.conf
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.6.3'].audits.msg is defined and all_results['1.6.3'].audits.msg.find('file not found') != -1
+    - name: " 1.6.3 | ROLLBACK | Ensure address space layout randomization (ASLR) is enabled "
+      block:
+      - set_fact:
+          data: "{{ all_results['1.6.3'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/sysctl.conf
+        ignore_errors: yes
+      when: all_results['1.6.3'].audits.content is defined
+    - set_fact:
+        rhel7cis_rule_3_1_1: false
+        rhel7cis_rule_3_2_1: false
+        rhel7cis_rule_3_2_2: false
+        rhel7cis_rule_3_3_1: false
+        rhel7cis_rule_3_3_2: false
+        rhel7cis_rule_3_3_3: false
+        rhel7cis_rule_3_3_4: false
+        rhel7cis_rule_3_3_5: false
+        rhel7cis_rule_3_3_6: false
+        rhel7cis_rule_3_3_7: false
+        rhel7cis_rule_3_3_8: false
+        rhel7cis_rule_3_3_9: false
+      ignore_errors: yes
+    when: rhel7cis_rule_1_6_3
+    tags:
+     - level1
+     - rollback
+     - rule_1.6.3
+     - rhel7
+
+#####
+  - name: " 1.6.4 | ROLLBACK |  Ensure prelink is disabled"
+    block:
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['1.6.4'].audits[0].name is defined
+    - set_fact:
+        before_state: "absent"
+      ignore_errors: yes
+      when: all_results['1.6.4'].audits[0].name is not defined
+    - yum:
+        name: prelink
+        state: "{{ before_state }}"
+        conf_file: '/etc/yum.conf'
+      ignore_errors: yes
+    when: rhel7cis_rule_1_6_4
+    tags:
+     - level1
+     - rollback
+     - rule_1.6.4
+     - rhel7
+
+######
+
+  - name: " 1.7.1.2 | ROLLBACK |  Ensure SELinux is not disabled in bootloader configuration"
+    block:
+    - name: " 1.7.1.2 | ROLLBACK |  Ensure SELinux is not disabled in bootloader configuration "
+      file:
+        path: /etc/default/grub
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.7.1.2'].audits.msg is defined and all_results['1.7.1.2'].audits.msg.find('file not found') != -1
+    - name: 1.7.1.2 | ROLLBACK |  Ensure SELinux is not disabled in bootloader configuration
+      block:
+      - set_fact:
+          data: "{{ all_results['1.7.1.2'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/default/grub
+        ignore_errors: yes
+      when: all_results['1.7.1.2'].audits.content is defined
+    - block:
+      - set_fact:
+          data: "{{ all_results.CONFIG.results[9].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/default/grub
+        ignore_errors: yes
+      when: all_results.CONFIG.results[9].content is defined
+
+    when: rhel7cis_rule_1_7_1_2
+    tags:
+     - level1
+     - rollback
+     - rule_1.7.1.2
+     - rhel7
+
+######
+
+  - name: " 1.7.1.3 | ROLLBACK |  Ensure SELinux policy is configured "
+    block:
+    - name: " 1.7.1.3 | ROLLBACK |  Ensure SELinux policy is configured "
+      file:
+        path: /etc/selinux/config
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.7.1.3'].audits.msg is defined and all_results['1.7.1.3'].audits.msg.find('file not found') != -1
+    - name: 1.7.1.3 | ROLLBACK |  Ensure SELinux policy is configured
+      block:
+      - set_fact:
+          data: "{{ all_results['1.7.1.3'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/selinux/config
+        ignore_errors: yes
+      when: all_results['1.7.1.3'].audits.content is defined
+    - block:
+      - set_fact:
+          data: "{{ all_results.CONFIG.results[10].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/selinux/config
+        ignore_errors: yes
+      when: all_results.CONFIG.results[10].content is defined
+    when: rhel7cis_rule_1_7_1_3
+    tags:
+     - level1
+     - rollback
+     - rule_1.7.1.3
+     - rhel7
+
+#####
+  - name: " 1.7.1.4 | ROLLBACK |  Ensure the SELinux mode is enforcing or permissive "
+    block:
+    - name: " 1.7.1.4 | ROLLBACK |  Ensure the SELinux mode is enforcing or permissive "
+      file:
+        path: /etc/selinux/config
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.7.1.4'].audits[0].msg is defined and all_results['1.7.1.4'].audits[0].msg.find('file not found') != -1
+    - name: 1.7.1.4 | ROLLBACK |  Ensure the SELinux mode is enforcing or permissive
+      block:
+      - set_fact:
+          data: "{{ all_results['1.7.1.4'].audits[0].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/selinux/config
+        ignore_errors: yes
+      when: all_results['1.7.1.4'].audits[0].content is defined
+    - block:
+      - set_fact:
+          data: "{{ all_results.CONFIG.results[10].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/selinux/config
+        ignore_errors: yes
+      when: all_results.CONFIG.results[10].content is defined
+    - block:
+      - set_fact:
+          before_se: "{{ all_results['1.7.1.4'].audits[1].stdout }}"
+      - name: Run setenforce command
+        shell: setenforce 1
+        ignore_errors: yes
+        when: before_se == "enforcing"
+      - shell: setenforce 0
+        ignore_errors: yes
+        when: before_se == "permissive"
+      when: all_results['1.7.1.4'].audits[1].stdout is defined
+    when: rhel7cis_rule_1_7_1_4
+    tags:
+     - level1
+     - rollback
+     - rule_1.7.1.4
+     - rhel7
+#####
+  - name: " 1.7.1.5 | ROLLBACK |  Ensure the SELinux mode is enforcing "
+    block:
+    - name: " 1.7.1.5 | ROLLBACK |  Ensure the SELinux mode is enforcing "
+      file:
+        path: /etc/selinux/config
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.7.1.5'].audits[0].msg is defined and all_results['1.7.1.5'].audits[0].msg.find('file not found') != -1
+    - name: 1.7.1.5 | ROLLBACK |  Ensure the SELinux mode is enforcing
+      block:
+      - set_fact:
+          data: "{{ all_results['1.7.1.5'].audits[0].content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/selinux/config
+        ignore_errors: yes
+      when: all_results['1.7.1.5'].audits[0].content is defined
+    - set_fact:
+        data: "{{ all_results.CONFIG.results[10].content | b64decode }}"
+      ignore_errors: yes
+    - copy:
+        content: "{{ data }}"
+        dest: /etc/selinux/config
+      ignore_errors: yes
+      when: all_results.CONFIG.results[10].content is defined
+    - block:
+      - set_fact:
+          before_se: "{{ all_results['1.7.1.5'].audits[1].stdout }}"
+      - name: Run setenforce command
+        shell: setenforce 1
+        ignore_errors: yes
+        when: before_se == "enforcing"
+      - shell: setenforce 0
+        ignore_errors: yes
+        when: before_se == "permissive"
+      when: all_results['1.7.1.5'].audits[1].stdout is defined
+    when: rhel7cis_rule_1_7_1_5
+    tags:
+     - level2
+     - rollback
+     - rule_1.7.1.5
+     - rhel7
+#####
+
+  - name: " 1.7.1.8 | ROLLBACK | Ensure the MCS Translation Service (mcstrans) is not installed "
+    block:
+    - name: " 1.7.1.8 | ROLLBACK | Ensure the MCS Translation Service (mcstrans) is not installed "
+      set_fact:
+        before_state: "absent"
+    - set_fact:
+        before_state: "present"
+      ignore_errors: yes
+      when: all_results['1.7.1.8'].audits[0].name is defined
+    - set_fact:
+        before_state: "absent"
+      ignore_errors: yes
+      when: all_results['1.7.1.8'].audits[0].name is not defined
+    - package:
+        name: mcstrans
+        state: "{{ before_state }}"
+      ignore_errors: yes
+
+    when:  rhel7cis_rule_1_7_1_8
+    tags:
+     - level1
+     - rollback
+     - rule_1.7.1.8
+     - rhel7
+
+#####
+  - name: " 1.8.1.1 | ROLLBACK | Ensure message of the day is configured properly "
+    block:
+    - name: Ensure message of the day is configured properly - check current banner
+      file:
+        path: /etc/motd
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.8.1.1'].audits.msg is defined and all_results['1.8.1.1'].audits.msg.find('file not found') != -1
+    - name: Ensure message of the day is configured properly - edit correct banner
+      block:
+      - set_fact:
+          data: "{{ all_results['1.8.1.1'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/motd
+        ignore_errors: yes
+      when: all_results['1.8.1.1'].audits.content is defined
+    when: rhel7cis_rule_1_8_1_1
+    tags:
+     - level1
+     - rollback
+     - rule_1.8.1.1
+     - rhel7
+
+#####
+  - name: " 1.8.1.2 | ROLLBACK | Ensure local login warning banner is configured properly "
+    block:
+    - name: Ensure local login warning banner is configured properly - check current banner
+      file:
+        path: /etc/issue
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.8.1.2'].audits.msg is defined and all_results['1.8.1.2'].audits.msg.find('file not found') != -1
+    - name: Ensure local login warning banner is configured properly - add correct banner
+      block:
+      - set_fact:
+          data: "{{ all_results['1.8.1.2'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/issue
+        ignore_errors: yes
+      when: all_results['1.8.1.2'].audits.content is defined
+    when: rhel7cis_rule_1_8_1_2
+    tags:
+     - level1
+     - rollback
+     - rule_1.8.1.2
+     - rhel7
+
+#####
+  - name: " 1.8.1.3 | ROLLBACK | Ensure remote login warning banner is configured properly"
+    block:
+    - name: " 1.8.1.3 | ROLLBACK | Ensure remote login warning banner is configured properly"
+      file:
+        path: /etc/issue.net
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.8.1.3'].audits.msg is defined and all_results['1.8.1.3'].audits.msg.find('file not found') != -1
+    - name: Ensure local login warning banner is configured properly - add correct banner
+      block:
+      - set_fact:
+          data: "{{ all_results['1.8.1.3'].audits.content | b64decode }}"
+        ignore_errors: yes
+      - copy:
+          content: "{{ data }}"
+          dest: /etc/issue.net
+        ignore_errors: yes
+      when: all_results['1.8.1.3'].audits.content is defined
+    when: rhel7cis_rule_1_8_1_3
+    tags:
+     - level1
+     - rollback
+     - rule_1.8.1.3
+     - rhel7
+
+#####
+  - name: " 1.8.1.4 | ROLLBACK |  Ensure permissions on /etc/motd are configured  "
+    block:
+    - name: " 1.8.1.4 | ROLLBACK |  Ensure permissions on /etc/motd are configured "
+      file:
+        path: /etc/motd
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.8.1.4'].audits.stat.exists == false
+    - block:
+      - name: " 1.8.1.4 | HARDEN |  Ensure permissions on /etc/motd are configured  "
+        set_fact:
+          before_mode: "{{ all_results['1.8.1.4'].audits.stat.mode }}"
+          before_user: "{{ all_results['1.8.1.4'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['1.8.1.4'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/motd
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['1.8.1.4'].audits.stat.exists == true
+    when: rhel7cis_rule_1_8_1_4
+    tags:
+     - level1
+     - rollback
+     - rule_1.8.1.4
+     - rhel7
+
+#####
+  - name: " 1.8.1.5 | ROLLBACK |  Ensure permissions on /etc/issue are configured  "
+    block:
+    - name: " 1.8.1.5 | ROLLBACK |  Ensure permissions on /etc/issue are configured  "
+      file:
+        path: /etc/issue
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.8.1.5'].audits.stat.exists == false
+    - block:
+      - name: " 1.8.1.5 | ROLLBACK |  Ensure permissions on /etc/issue are configured  "
+        set_fact:
+          before_mode: "{{ all_results['1.8.1.5'].audits.stat.mode }}"
+          before_user: "{{ all_results['1.8.1.5'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['1.8.1.5'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/issue
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['1.8.1.5'].audits.stat.exists == true
+    when: rhel7cis_rule_1_8_1_5
+    tags:
+     - level1
+     - rollback
+     - rule_1.8.1.5
+     - rhel7
+
+#####
+  - name: " 1.8.1.6 | ROLLBACK |  Ensure permissions on /etc/issue.net are configured  "
+    block:
+    - name: " 1.8.1.6 | ROLLBACK |  Ensure permissions on /etc/issue.net are configured  "
+      file:
+        path: /etc/issue.net
+        state: absent
+      ignore_errors: yes
+      when: all_results['1.8.1.6'].audits.stat.exists == false
+    - block:
+      - name: " 1.8.1.6 | ROLLBACK |  Ensure permissions on /etc/issue.net are configured  "
+        set_fact:
+          before_mode: "{{ all_results['1.8.1.6'].audits.stat.mode }}"
+          before_user: "{{ all_results['1.8.1.6'].audits.stat.pw_name }}"
+          before_group: "{{ all_results['1.8.1.6'].audits.stat.gr_name }}"
+        ignore_errors: yes
+      - file:
+          path: /etc/issue.net
+          owner: "{{ before_user }}"
+          group: "{{ before_group }}"
+          mode: "{{ before_mode }}"
+        ignore_errors: yes
+        diff: yes
+      when: all_results['1.8.1.6'].audits.stat.exists == true
+    when: rhel7cis_rule_1_8_1_6
+    tags:
+     - level1
+     - rollback
+     - rule_1.8.1.6
+     - rhel7
+
+#####
+#  - name: " 1.9 | HARDEN |  Ensure updates, patches, and additional security software are installed  "
+# manually
+
+#####
+  - name: " 1.10 | ROLLBACK | Ensure GDM is removed or login is configured "
+    block:
+      - set_fact:
+          before_state: "present"
+        ignore_errors: yes
+        when: all_results['1.10'].audits[0].name is defined
+      - set_fact:
+          before_state: "absent"
+        ignore_errors: yes
+        when: all_results['1.10'].audits[0].name is not defined
+      - name: " 1.10 | HARDEN | Ensure GDM is removed  "
+        yum:
+          name: gdm
+          state: "{{ before_state }}"
+          conf_file: '/etc/yum.conf'
+        diff: yes
+        register: result
+    when: rhel7cis_rule_1_10_gdm_required == false and rhel7cis_rule_1_10
+    tags:
+     - level1
+     - rollback
+     - rule_1.10
+     - rhel7
+
+#####
+  - name: " 1.10 | ROLLBACK | Ensure GDM is removed or login is configured"
+    block:
+      - name: Check content of /etc/dconf/profile/gdm
+        file:
+          path: /etc/dconf/profile/gdm
+          state: absent
+        ignore_errors: yes
+        when: all_results['1.10'].audits[0].msg is defined and all_results['1.10'].audits[0].msg.find('file not found') != -1
+      - name: Create or edit content of /etc/dconf/profile/gdm
+        block:
+        - set_fact:
+            data: "{{ all_results['1.10'].audits[0].content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/dconf/profile/gdm
+          ignore_errors: yes
+        when: all_results['1.10'].audits[0].content is defined
+      - name: Check content of /etc/dconf/db/gdm.d/01-banner-message
+        file:
+          path: /etc/dconf/db/gdm.d/01-banner-message
+          state: absent
+        ignore_errors: yes
+        when: all_results['1.10'].audits[1].msg is defined and all_results['1.10'].audits[1].msg.find('file not found') != -1
+      - name: Create or edit content of /etc/dconf/db/gdm.d/01-banner-message
+        block:
+        - set_fact:
+            data: "{{ all_results['1.10'].audits[1].content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/dconf/db/gdm.d/01-banner-message
+          ignore_errors: yes
+        when: all_results['1.10'].audits[1].content is defined
+      - name: Check content of /etc/dconf/db/gdm.d/00-login-screen
+        file:
+          path: /etc/dconf/db/gdm.d/00-login-screen
+          state: absent
+        ignore_errors: yes
+        when: all_results['1.10'].audits[2].msg is defined and all_results['1.10'].audits[2].msg.find('file not found') != -1
+      - name: Create or edit content of /etc/dconf/db/gdm.d/00-login-screen
+        block:
+        - set_fact:
+            data: "{{ all_results['1.10'].audits[2].content | b64decode }}"
+          ignore_errors: yes
+        - copy:
+            content: "{{ data }}"
+            dest: /etc/dconf/db/gdm.d/00-login-screen
+          ignore_errors: yes
+        when: all_results['1.10'].audits[2].content is defined
+    when:
+      - rhel7cis_rule_1_10_gdm_required == true
+      - rhel7cis_rule_1_10
+    tags:
+     - level1
+     - rollback
+     - rule_1.10
+     - rhel7
+
+#####

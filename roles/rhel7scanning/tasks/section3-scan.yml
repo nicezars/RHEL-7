@@ -1,0 +1,660 @@
+---
+#
+# Copyright 2020
+# This section contains 22 rules
+# Has Hash-out all the rules apart From Mandatory Checklist
+#
+#####
+#  - name: " 3.1.1 | SCAN | Disable IPv6"
+#    block:
+#    - name: " 3.1.1 | SCAN | Disable IPv6"
+#      block:
+#        - name: " 3.1.1 | SCAN | Disable IPv6"
+#          shell:   grep "^\s*linux" /boot/grub2/grub.cfg | grep -v 'ipv6.disable=1'
+#          register: rhel7cis_rule_3_1_1_a_rc
+#          ignore_errors: yes
+#
+#        - shell:   sysctl net.ipv6.conf.all.disable_ipv6 | grep -Ei 'net.ipv6.conf.all.disable_ipv6\s+=\s1'
+#          register: rhel7cis_rule_3_1_1_b_rc
+#          ignore_errors: yes
+#
+#        - shell:   sysctl net.ipv6.conf.default.disable_ipv6 | grep -i 'net.ipv6.conf.default.disable_ipv6\s+=\s1'
+#          register: rhel7cis_rule_3_1_1_c_rc
+#          ignore_errors: yes
+#
+#        - shell:    grep -E '^\s*net\.ipv6\.conf\.(all|default)\.disable_ipv6\s*=\s*1\b(\s+#.*)?$' /etc/sysctl.conf /etc/sysctl.d/* | cut -d= -f2
+#          register: rhel7cis_rule_3_1_1_d_rc
+#          ignore_errors: yes
+#
+#        - set_fact:
+#            rhel7cis_rule_3_1_1_result: false
+#          when: rhel7cis_rule_3_1_1_a_rc.rc == 0 and (rhel7cis_rule_3_1_1_b_rc.rc != 0 or rhel7cis_rule_3_1_1_c_rc.rc != 0 or rhel7cis_rule_3_1_1_d_rc.stdout != "")
+#        - set_fact:
+#            all_results: "{{ all_results|combine({'3.1.1':rhel7cis_rule_3_1_1_result|default(true)}) }}"
+#      when: rhel7cis_rule_3_1_1_ipv6_disable == true
+#
+#    - name: " 3.1.1 | SCAN | Disable IPv6"
+#      block:
+#        - name: " 3.1.1 | SCAN_MANUAL_CHECK | IPv6 not to be disabled"
+#          debug:
+#            msg: "IPv6 will not be disabled. Rule rhel7cis_rule_3_1_1 should be set to false."
+#          register: rhel7cis_rule_3_1_1_msg
+#          ignore_errors: yes
+#
+#      when: rhel7cis_rule_3_1_1_ipv6_disable == false and rhel7cis_rule_3_1_1
+#
+#    when: rhel7cis_rule_3_1_1
+#    tags:
+#     - level2
+#     - scan
+#     - rule_3.1.1
+#     - rhel7
+#
+#####
+  - name: " 3.1.2 | SCAN | Ensure wireless interfaces are disabled"
+    block:
+      - name: " 3.1.2 | SCAN | Ensure wireless interfaces are disabled"
+        shell: |
+          [[ -f /sbin/iw ]] && iwconfig 2> /dev/null |grep -E '^[a-z,A-Z]|^[0-9]'
+        register: rhel7cis_rule_3_1_2_a_rc
+        ignore_errors: yes
+      - shell:   ip link show up | grep wl
+        register: rhel7cis_rule_3_1_2_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_3_1_2_result: false
+        when: rhel7cis_rule_3_1_2_a_rc.rc == 0 or rhel7cis_rule_3_1_2_b_rc.rc == 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.1.2':rhel7cis_rule_3_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_3_1_2
+    tags:
+     - level1
+     - scan
+     - rule_3.1.2
+     - rhel7
+
+#####
+  - name: " 3.2.1 | SCAN_IPv4 | Ensure IP forwarding is disabled"
+    block:
+    - name: " 3.2.1 | SCAN_IPv4 | Ensure IP forwarding is disabled"
+      shell:    sysctl net.ipv4.ip_forward | grep -Ei 'net.ipv4.ip_forward\s+=\s0'
+      register: rhel7cis_rule_3_2_1_a_rc
+      ignore_errors: yes
+
+    - shell:  grep -E -s "^\s*net\.ipv4\.ip_forward\s*=\s*1" /etc/sysctl.conf /etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*
+      register: rhel7cis_rule_3_2_1_b_rc
+      ignore_errors: yes
+
+    - name: " 3.2.1 | SCAN_IPv6 | Ensure IP forwarding is disabled"
+      block:
+        - name: "3.2.1 | SCAN_IPv6_ENABLED | Ensure IP forwarding is disabled"
+          shell:   sysctl net.ipv6.conf.all.disable_ipv6 | grep -Ei 'net.ipv6.conf.all.disable_ipv6\s+=\s0'
+          register: rhel7cis_rule_3_2_1_c_rc
+          ignore_errors: yes
+        - shell: grep -E -s "^\s*net\.ipv6\.conf\.all\.forwarding\s*=\s*1" /etc/sysctl.conf  /etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf
+          register: rhel7cis_rule_3_2_1_d_rc
+          ignore_errors: yes
+        - set_fact:
+            rhel7cis_rule_3_2_1_result: false
+          when: rhel7cis_rule_3_2_1_c_rc.rc != 0 or rhel7cis_rule_3_2_1_d_rc.stdout != ""
+      when: rhel7cis_rule_3_1_1_ipv6_disable == false
+    - set_fact:
+        rhel7cis_rule_3_2_1_result: false
+      when: rhel7cis_rule_3_2_1_a_rc.rc != 0 or rhel7cis_rule_3_2_1_b_rc.stdout != ""
+    - set_fact:
+        all_results: "{{ all_results|combine({'3.2.1':rhel7cis_rule_3_2_1_result|default(true)}) }}"
+
+    when: rhel7cis_rule_3_2_1
+    tags:
+     - level1
+     - scan
+     - rule_3.2.1
+     - rhel7
+
+#####
+  - name: " 3.2.2 | SCAN | Ensure packet redirect sending is disabled "
+    block:
+    - name: " 3.2.2 | SCAN | Ensure packet redirect sending is disabled "
+      shell: sysctl net.ipv4.conf.all.send_redirects | grep -Ei 'net.ipv4.conf.all.send_redirects\s+=\s0'
+      register: rhel7cis_rule_3_2_2_a_rc
+      ignore_errors: yes
+
+    - shell: sysctl net.ipv4.conf.default.send_redirects | grep -Ei 'net.ipv4.conf.default.send_redirects\s+=\s0'
+      register: rhel7cis_rule_3_2_2_b_rc
+      ignore_errors: yes
+
+    - shell:   grep "net\.ipv4\.conf\.all\.send_redirects" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.all.send_redirects\s*+=\s*0'
+      register: rhel7cis_rule_3_2_2_c_rc
+      ignore_errors: yes
+
+    - shell:   grep "net\.ipv4\.conf\.default\.send_redirects" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.default.send_redirects\s*+=\s*0'
+      register: rhel7cis_rule_3_2_2_d_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_3_2_2_result: false
+      when:  rhel7cis_rule_3_2_2_a_rc.rc != 0 or rhel7cis_rule_3_2_2_b_rc.rc != 0 or rhel7cis_rule_3_2_2_c_rc.rc != 0 or rhel7cis_rule_3_2_2_d_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'3.2.2':rhel7cis_rule_3_2_2_result|default(true)}) }}"
+    when: rhel7cis_rule_3_2_2
+    tags:
+     - level1
+     - scan
+     - rule_3.2.2
+     - rhel7
+
+#####
+  - name: " 3.3.1 | SCAN | Ensure source routed packets are not accepted "
+    block:
+    - name: " 3.3.1 | SCAN | Ensure source routed packets are not accepted "
+      shell:   sysctl net.ipv4.conf.all.accept_source_route | grep -Ei 'net.ipv4.conf.all.accept_source_route\s+=\s0'
+      register: rhel7cis_rule_3_3_1_a_rc
+      ignore_errors: yes
+
+    - shell:   sysctl net.ipv4.conf.default.accept_source_route | grep -Ei 'net.ipv4.conf.default.accept_source_route\s+=\s0'
+      register: rhel7cis_rule_3_3_1_b_rc
+      ignore_errors: yes
+
+    - shell:   grep "net\.ipv4\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.all.accept_source_route\s*+=\s*0'
+      register: rhel7cis_rule_3_3_1_c_rc
+      ignore_errors: yes
+
+    - shell:    grep "net\.ipv4\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.default.accept_source_route\s*+=\s*0'
+      register: rhel7cis_rule_3_3_1_d_rc
+      ignore_errors: yes
+
+    - name: " 3.3.1 | SCAN_IPv6 | Ensure source routed packets are not accepted"
+      block:
+        - name: "3.3.1 | SCAN_IPv6_ENABLED | Ensure source routed packets are not accepted"
+          shell:    sysctl net.ipv6.conf.all.accept_source_route | grep -Ei 'net.ipv6.conf.all.accept_source_route\s+=\s0'
+          register: rhel7cis_rule_3_3_1_e_rc
+          ignore_errors: yes
+        - shell:    sysctl net.ipv6.conf.default.accept_source_route | grep -Ei 'net.ipv6.conf.default.accept_source_route\s+=\s0'
+          register: rhel7cis_rule_3_3_1_f_rc
+          ignore_errors: yes
+        - shell: grep "net\.ipv6\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv6.conf.all.accept_source_route\s*+=\s*0'
+          register: rhel7cis_rule_3_3_1_g_rc
+          ignore_errors: yes
+        - shell:  grep "net\.ipv6\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* |  grep -Ei 'net.ipv6.conf.default.accept_source_route\s*+=\s*0'
+          register: rhel7cis_rule_3_3_1_h_rc
+          ignore_errors: yes
+        - set_fact:
+            rhel7cis_rule_3_3_1_result: false
+          when: rhel7cis_rule_3_3_1_e_rc.rc != 0 or rhel7cis_rule_3_3_1_f_rc.rc != 0 or rhel7cis_rule_3_3_1_g_rc.rc != 0 or rhel7cis_rule_3_3_1_h_rc.rc != 0
+      when: rhel7cis_rule_3_1_1_ipv6_disable == false
+    - set_fact:
+        rhel7cis_rule_3_3_1_result: false
+      when: rhel7cis_rule_3_3_1_a_rc.rc != 0 or rhel7cis_rule_3_3_1_b_rc.rc != 0 or rhel7cis_rule_3_3_1_c_rc.rc != 0 or rhel7cis_rule_3_3_1_d_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'3.3.1':rhel7cis_rule_3_3_1_result|default(true)}) }}"
+
+    when: rhel7cis_rule_3_3_1
+    tags:
+     - level1
+     - scan
+     - rule_3.3.1
+     - rhel7
+#####
+
+  - name: " 3.3.2 | SCAN | Ensure ICMP redirects are not accepted"
+    block:
+    - name: " 3.3.2 | SCAN | Ensure ICMP redirects are not accepted"
+      shell:    sysctl net.ipv4.conf.all.accept_redirects | grep -Ei 'net.ipv4.conf.all.accept_redirects\s+=\s0'
+      register: rhel7cis_rule_3_3_2_a_rc
+      ignore_errors: yes
+
+    - shell:   sysctl net.ipv4.conf.default.accept_redirects | grep -Ei 'net.ipv4.conf.default.accept_redirects\s+=\s0'
+      register: rhel7cis_rule_3_3_2_b_rc
+      ignore_errors: yes
+
+    - shell:   grep "net\.ipv4\.conf\.all\.accept_redirects" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.all.accept_redirects\s*+=\s*0'
+      register: rhel7cis_rule_3_3_2_c_rc
+      ignore_errors: yes
+
+    - shell:    grep "net\.ipv4\.conf\.default\.accept_redirects" /etc/sysctl.conf  /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.default.accept_redirects\s*+=\s*0'
+      register: rhel7cis_rule_3_3_2_d_rc
+      ignore_errors: yes
+
+    - name: " 3.3.2 | SCAN_IPv6 | Ensure source routed packets are not accepted"
+      block:
+        - name: "3.3.2 | SCAN_IPv6_ENABLED | Ensure source routed packets are not accepted"
+          shell:   sysctl net.ipv6.conf.all.accept_redirects | grep -Ei 'net.ipv6.conf.all.accept_redirects\s+=\s0'
+          register: rhel7cis_rule_3_3_2_e_rc
+          ignore_errors: yes
+        - shell:   sysctl net.ipv6.conf.default.accept_redirects | grep -Ei 'net.ipv6.conf.default.accept_redirects\s+=\s0'
+          register: rhel7cis_rule_3_3_2_f_rc
+          ignore_errors: yes
+        - shell:  grep -Ei 'net.ipv6.conf.all.accept_redirects' /etc/sysctl.conf  /etc/sysctl.d/* | grep -Ei 'net.ipv6.conf.all.accept_redirects\s*+=\s*0'
+          register: rhel7cis_rule_3_3_2_g_rc
+          ignore_errors: yes
+        - shell:   grep -Ei "net.ipv6.conf.default.accept_redirects" /etc/sysctl.conf  /etc/sysctl.d/* |  grep -Ei 'net.ipv6.conf.default.accept_redirects\s*+=\s*0'
+          register: rhel7cis_rule_3_3_2_h_rc
+          ignore_errors: yes
+        - set_fact:
+            rhel7cis_rule_3_3_2_result: false
+          when: rhel7cis_rule_3_3_2_e_rc.rc != 0 or rhel7cis_rule_3_3_2_f_rc.rc != 0 or rhel7cis_rule_3_3_2_g_rc.rc != 0 or rhel7cis_rule_3_3_2_h_rc.rc != 0
+      when: rhel7cis_rule_3_1_1_ipv6_disable == false
+    - set_fact:
+        rhel7cis_rule_3_3_2_result: false
+      when: rhel7cis_rule_3_3_2_a_rc.rc != 0 or rhel7cis_rule_3_3_2_b_rc.rc != 0 or rhel7cis_rule_3_3_2_c_rc.rc != 0 or rhel7cis_rule_3_3_2_d_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'3.3.2':rhel7cis_rule_3_3_2_result|default(true)}) }}"
+
+    when: rhel7cis_rule_3_3_2
+    tags:
+     - level1
+     - scan
+     - rule_3.3.2
+     - rhel7
+
+#####
+  - name: " 3.3.3 | SCAN | Ensure packet redirect sending is disabled "
+    block:
+    - name: " 3.3.3 | SCAN | Ensure packet redirect sending is disabled "
+      shell:   sysctl net.ipv4.conf.all.secure_redirects | grep -Ei 'net.ipv4.conf.all.secure_redirects\s+=\s0'
+      register: rhel7cis_rule_3_3_3_a_rc
+      ignore_errors: yes
+
+    - shell:  sysctl net.ipv4.conf.default.secure_redirects | grep -Ei 'net.ipv4.conf.default.secure_redirects\s+=\s0'
+      register: rhel7cis_rule_3_3_3_b_rc
+      ignore_errors: yes
+
+    - shell:   grep "net\.ipv4\.conf\.all\.secure_redirects" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.all.secure_redirects\s*+=\s*0'
+      register: rhel7cis_rule_3_3_3_c_rc
+      ignore_errors: yes
+
+    - shell:    grep "net\.ipv4\.conf\.default\.secure_redirects" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.default.secure_redirects\s*+=\s*0'
+      register: rhel7cis_rule_3_3_3_d_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_3_3_3_result: false
+      when: rhel7cis_rule_3_3_3_a_rc.rc != 0 or rhel7cis_rule_3_3_3_b_rc.rc != 0 or rhel7cis_rule_3_3_3_c_rc.rc != 0 or rhel7cis_rule_3_3_3_d_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'3.3.3':rhel7cis_rule_3_3_3_result|default(true)}) }}"
+    when: rhel7cis_rule_3_3_3
+    tags:
+     - level1
+     - scan
+     - rule_3.3.3
+     - rhel7
+
+#####
+  - name: " 3.3.4 | SCAN | Ensure suspicious packets are logged "
+    block:
+      - name: " 3.3.4 | SCAN | Ensure suspicious packets are logged "
+        shell:  sysctl net.ipv4.conf.all.log_martians | grep -Ei 'net.ipv4.conf.all.log_martians\s+=\s1'
+        register: rhel7cis_rule_3_3_4_a_rc
+        ignore_errors: yes
+
+      - shell:   sysctl net.ipv4.conf.default.log_martians | grep -Ei 'net.ipv4.conf.default.log_martians\s+=\s1'
+        register: rhel7cis_rule_3_3_4_b_rc
+        ignore_errors: yes
+
+      - shell:    grep "net\.ipv4\.conf\.all\.log_martians" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.all.log_martians\s*+=\s*1'
+        register: rhel7cis_rule_3_3_4_c_rc
+        ignore_errors: yes
+
+      - shell:     grep "net\.ipv4\.conf\.default\.log_martians" /etc/sysctl.conf   /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.default.log_martians\s*+=\s*1'
+        register: rhel7cis_rule_3_3_4_d_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_3_3_4_result: false
+        when: rhel7cis_rule_3_3_4_a_rc.rc != 0 or rhel7cis_rule_3_3_4_b_rc.rc != 0 or rhel7cis_rule_3_3_4_c_rc.rc != 0 or rhel7cis_rule_3_3_4_d_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.3.4':rhel7cis_rule_3_3_4_result|default(true)}) }}"
+    when: rhel7cis_rule_3_3_4
+    tags:
+     - level1
+     - scan
+     - rule_3.3.4
+     - rhel7
+
+#####
+  - name: " 3.3.5 | SCAN | Ensure broadcast ICMP requests are ignored "
+    block:
+      - name: " 3.3.5 | SCAN | Ensure broadcast ICMP requests are ignored "
+        shell:  sysctl net.ipv4.icmp_echo_ignore_broadcasts | grep -Ei 'net.ipv4.icmp_echo_ignore_broadcasts\s+=\s1'
+        register: rhel7cis_rule_3_3_5_a_rc
+        ignore_errors: yes
+
+      - shell:  grep "net\.ipv4\.icmp_echo_ignore_broadcasts" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.icmp_echo_ignore_broadcasts\s*+=\s*1'
+        register: rhel7cis_rule_3_3_5_b_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_3_3_5_result: false
+        when: rhel7cis_rule_3_3_5_a_rc.rc != 0 or rhel7cis_rule_3_3_5_b_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.3.5':rhel7cis_rule_3_3_5_result|default(true)}) }}"
+    when: rhel7cis_rule_3_3_5
+    tags:
+     - level1
+     - scan
+     - rule_3.3.5
+     - rhel7
+
+#####
+  - name: " 3.3.6 | SCAN | Ensure broadcast ICMP requests are ignored "
+    block:
+      - name: " 3.3.6 | SCAN | Ensure broadcast ICMP requests are ignored "
+        shell:   sysctl net.ipv4.icmp_ignore_bogus_error_responses | grep -Ei 'net.ipv4.icmp_ignore_bogus_error_responses\s+=\s1'
+        register: rhel7cis_rule_3_3_6_a_rc
+        ignore_errors: yes
+
+      - shell:   grep "net.ipv4.icmp_ignore_bogus_error_responses" /etc/sysctl.conf /etc/sysctl.d/*| grep -Ei 'net.ipv4.icmp_ignore_bogus_error_responses\s*+=\s*1'
+        register: rhel7cis_rule_3_3_6_b_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_3_3_6_result: false
+        when: rhel7cis_rule_3_3_6_a_rc.rc != 0 or rhel7cis_rule_3_3_6_b_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.3.6':rhel7cis_rule_3_3_6_result|default(true)}) }}"
+    when: rhel7cis_rule_3_3_6
+    tags:
+     - level1
+     - scan
+     - rule_3.3.6
+     - rhel7
+
+#####
+  - name: " 3.3.7 | SCAN | Ensure Reverse Path Filtering is enabled  "
+    block:
+      - name: " 3.3.7 | SCAN | Ensure Reverse Path Filtering is enabled  "
+        shell: sysctl net.ipv4.conf.all.rp_filter | grep -Ei 'net.ipv4.conf.all.rp_filter\s+=\s1'
+        register: rhel7cis_rule_3_3_7_a_rc
+        ignore_errors: yes
+
+      - shell:   sysctl net.ipv4.conf.default.rp_filter | grep -Ei 'net.ipv4.conf.default.rp_filter\s+=\s1'
+        register: rhel7cis_rule_3_3_7_b_rc
+        ignore_errors: yes
+
+      - shell:    grep "net\.ipv4\.conf\.all\.rp_filter" /etc/sysctl.conf /etc/sysctl.d/* |  grep -Ei 'net.ipv4.conf.all.rp_filter\s*+=\s*1'
+        register: rhel7cis_rule_3_3_7_c_rc
+        ignore_errors: yes
+
+      - shell:    grep "net\.ipv4\.conf\.default\.rp_filter" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.conf.default.rp_filter\s*+=\s*1'
+        register: rhel7cis_rule_3_3_7_d_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_3_3_7_result: false
+        when: rhel7cis_rule_3_3_7_a_rc.rc != 0 or rhel7cis_rule_3_3_7_b_rc.rc != 0 or rhel7cis_rule_3_3_7_c_rc.rc != 0 or rhel7cis_rule_3_3_7_d_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.3.7':rhel7cis_rule_3_3_7_result|default(true)}) }}"
+    when: rhel7cis_rule_3_3_7
+    tags:
+     - level1
+     - scan
+     - rule_3.3.7
+     - rhel7
+
+#####
+
+  - name: " 3.3.8 | SCAN | Ensure TCP SYN Cookies is enabled "
+    block:
+      - name: " 3.3.8 | SCAN | Ensure TCP SYN Cookies is enabled "
+        shell:  sysctl net.ipv4.tcp_syncookies | grep -Ei 'net.ipv4.tcp_syncookies\s+=\s1'
+        register: rhel7cis_rule_3_3_8_a_rc
+        ignore_errors: yes
+
+      - shell:   grep "net\.ipv4\.tcp_syncookies" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv4.tcp_syncookies\s*+=\s*1'
+        register: rhel7cis_rule_3_3_8_b_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_3_3_8_result: false
+        when: rhel7cis_rule_3_3_8_a_rc.rc != 0 or rhel7cis_rule_3_3_8_b_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.3.8':rhel7cis_rule_3_3_8_result|default(true)}) }}"
+    when: rhel7cis_rule_3_3_8
+    tags:
+     - level1
+     - scan
+     - rule_3.3.8
+     - rhel7
+
+#####
+  - name: " 3.3.9 | SCAN_IPv6 | Ensure IPv6 router advertisements are not accepted   "
+    block:
+      - name: " 3.3.9 | SCAN_IPv6_ENABLED | Ensure IPv6 router advertisements are not accepted   "
+        shell: sysctl net.ipv6.conf.all.accept_ra | grep -Ei 'net.ipv6.conf.all.accept_ra\s+=\s0'
+        register: rhel7cis_rule_3_3_9_a_rc
+        ignore_errors: yes
+
+      - shell:   sysctl net.ipv6.conf.default.accept_ra | grep -Ei 'net.ipv6.conf.default.accept_ra\s+=\s0'
+        register: rhel7cis_rule_3_3_9_b_rc
+        ignore_errors: yes
+
+      - shell:   grep "net\.ipv6\.conf\.all\.accept_ra" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv6.conf.all.accept_ra\s*+=\s*0'
+        register: rhel7cis_rule_3_3_9_c_rc
+        ignore_errors: yes
+
+      - shell:  grep "net\.ipv6\.conf\.default\.accept_ra" /etc/sysctl.conf /etc/sysctl.d/* | grep -Ei 'net.ipv6.conf.default.accept_ra\s*+=\s*0'
+        register: rhel7cis_rule_3_3_9_d_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_3_3_9_result: false
+        when: rhel7cis_rule_3_3_9_a_rc.rc != 0 or rhel7cis_rule_3_3_9_b_rc.rc != 0 or rhel7cis_rule_3_3_9_c_rc.rc != 0 or rhel7cis_rule_3_3_9_d_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.3.9':rhel7cis_rule_3_3_9_result|default(true)}) }}"
+    when: rhel7cis_rule_3_1_1_ipv6_disable == false and rhel7cis_rule_3_3_9
+    tags:
+     - level1
+     - scan
+     - rule_3.3.9
+     - rhel7
+
+#####
+  - name: " 3.4.1 | SCAN |  Ensure DCCP is disabled "
+    block:
+      - name: " 3.4.1 | SCAN | Ensure TCP SYN Cookies is enabled "
+        shell:  modprobe -n -v dccp | grep -i 'install /bin/true'
+        register: rhel7cis_rule_3_4_1_a_rc
+        ignore_errors: yes
+
+      - shell:   lsmod | grep dccp
+        register: rhel7cis_rule_3_4_1_b_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_3_4_1_result: false
+        when: rhel7cis_rule_3_4_1_a_rc.rc != 0 or rhel7cis_rule_3_4_1_b_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.4.1':rhel7cis_rule_3_4_1_result|default(true)}) }}"
+    when: rhel7cis_rule_3_4_1
+    tags:
+     - level2
+     - scan
+     - rule_3.4.1
+     - rhel7
+
+#####
+  - name: " 3.4.2 | SCAN |  Ensure DCCP is disabled "
+    block:
+      - name: " 3.4.2 | SCAN | Ensure TCP SYN Cookies is enabled "
+        shell:  modprobe -n -v sctp | grep -i 'install /bin/true'
+        register: rhel7cis_rule_3_4_2_a_rc
+        ignore_errors: yes
+
+      - shell:   lsmod | grep sctp
+        register: rhel7cis_rule_3_4_2_b_rc
+        ignore_errors: yes
+
+      - set_fact:
+          rhel7cis_rule_3_4_2_result: false
+        when: rhel7cis_rule_3_4_2_a_rc.rc != 0 or rhel7cis_rule_3_4_2_b_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.4.2':rhel7cis_rule_3_4_2_result|default(true)}) }}"
+    when: rhel7cis_rule_3_4_2
+    tags:
+     - level2
+     - scan
+     - rule_3.4.2
+     - rhel7
+
+#####
+#  - name: " 3.5.1.1 | SCAN | Ensure FirewallD is installed"
+#    block:
+#    - name: " 3.5.1.1 | SCAN | Ensure FirewallD is installed"
+#      shell:   rpm -q firewalld iptables
+#      register: rhel7cis_rule_3_5_1_1_rc
+#      ignore_errors: yes
+#
+#    - set_fact:
+#        rhel7cis_rule_3_5_1_1_result: false
+#      when: rhel7cis_rule_3_5_1_1_rc.rc != 0
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'3.5.1.1':rhel7cis_rule_3_5_1_1_result|default(true)}) }}"
+#    when: rhel7cis_rule_3_5_1_1
+#    tags:
+#     - level1
+#     - scan
+#     - rule_3.5.1.1
+#     - rhel7
+#
+#####
+  - name: " 3.5.1.2 | SCAN | Ensure iptables-services package is not installed "
+    block:
+      - name: " 3.5.1.2 | SCAN | Ensure iptables-services package is not installed "
+        shell:   rpm -q iptables-services
+        register: rhel7cis_rule_3_5_1_2_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_3_5_1_2_result: false
+        when: rhel7cis_rule_3_5_1_2_rc.rc != 1
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.5.1.2':rhel7cis_rule_3_5_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_3_5_1_2
+    tags:
+     - level1
+     - scan
+     - rule_3.5.1.2
+     - rhel7
+
+#####
+#  - name: " 3.5.1.3 | SCAN | Ensure nftables is not installed or stopped and masked"
+#    block:
+#      - name: " 3.5.1.3 | SCAN | Ensure nftables is not installed or stopped and masked"
+#        shell:   rpm -q nftables
+#        register: rhel7cis_rule_3_5_1_3_a_rc
+#        ignore_errors: yes
+#      - shell:   'systemctl status nftables | grep "Active: " | grep -v "active (running) "'
+#        register: rhel7cis_rule_3_5_1_3_b_rc
+#        ignore_errors: yes
+#      - shell:   systemctl is-enabled nftables
+#        register: rhel7cis_rule_3_5_1_3_c_rc
+#        ignore_errors: yes
+#      - set_fact:
+#          rhel7cis_rule_3_5_1_3_result: false
+#        when: rhel7cis_rule_3_5_1_3_a_rc.rc != 1 and (rhel7cis_rule_3_5_1_3_b_rc.stdout != "" or rhel7cis_rule_3_5_1_3_c_rc.stdout != "masked")
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'3.5.1.3':rhel7cis_rule_3_5_1_3_result|default(true)}) }}"
+#    when: rhel7cis_rule_3_5_1_3
+#    tags:
+#     - level1
+#     - scan
+#     - rule_3.5.1.3
+#     - rhel7
+#
+#####
+  - name: " 3.5.1.4 | SCAN | Ensure firewalld service is enabled and running"
+    block:
+      - name: " 3.5.1.4 | SCAN | Ensure firewalld service is enabled and running"
+        shell:    systemctl is-enabled firewalld
+        register: rhel7cis_rule_3_5_1_4_a_rc
+        ignore_errors: yes
+      - shell:    firewall-cmd --state
+        register: rhel7cis_rule_3_5_1_4_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_3_5_1_4_result: false
+        when: rhel7cis_rule_3_5_1_4_a_rc.stdout != "enabled" or rhel7cis_rule_3_5_1_4_b_rc.stdout != "running"
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.5.1.4':rhel7cis_rule_3_5_1_4_result|default(true)}) }}"
+    when: rhel7cis_rule_3_5_1_4
+    tags:
+     - level1
+     - scan
+     - rule_3.5.1.4
+     - rhel7
+
+#####
+  - name: " 3.5.1.5 | SCAN | Ensure default zone is set "
+    block:
+      - name: " 3.5.1.5 | SCAN | Ensure default zone is set "
+        shell:     firewall-cmd --get-default-zone
+        register: rhel7cis_rule_3_5_1_5_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_3_5_1_5_result: false
+        when: rhel7cis_rule_3_5_1_5_rc.stdout != "{{ default_zone }}"
+      - set_fact:
+          all_results: "{{ all_results|combine({'3.5.1.5':rhel7cis_rule_3_5_1_5_result|default(true)}) }}"
+    when: rhel7cis_rule_3_5_1_5
+    tags:
+     - level1
+     - scan
+     - rule_3.5.1.5
+     - rhel7
+
+#####
+  - name: " 3.5.1.6 | SCAN |  Ensure network interfaces are assigned to appropriate zone "
+    block:
+    - name: " 3.5.1.6 | SCAN |  Ensure network interfaces are assigned to appropriate zone "
+      shell:  " nmcli -t connection show | awk -F: '{if($4){print $4}}' | while read INT; do firewall-cmd --get-active-zones | grep -B1 $INT; done "
+      register: rhel7cis_rule_3_5_1_6_rc
+      ignore_errors: yes
+
+
+    - name: " 3.5.1.6 | MANUAL_CHECK | Ensure network interfaces are assigned to appropriate zone "
+      block:
+      - name: " 3.5.1.6 | MANUAL_CHECK | Ensure network interfaces are assigned to appropriate zone "
+        debug:
+          var: rhel7cis_rule_3_5_1_6_rc.stdout_lines
+#          msg:
+#          - "Please review if the following interface(s) listed are required on the system: {{ rhel7cis_rule_3_5_1_6_rc.stdout_lines | list }}. "
+#          - "Please  verify that the interface(s) follow site policy for zone assignment."
+#          - "Once verified, please set rhel7cis_rule_3_5_1_6 to true in default/main.yml ."
+        register: rhel7cis_rule_3_5_1_6_interface_list
+      when: rhel7cis_rule_3_5_1_6_rc.rc == 0
+    when: rhel7cis_rule_3_5_1_6
+    tags:
+     - level1
+     - scan
+     - rule_3.5.1.6
+     - rhel7
+#####
+  - name: " 3.5.1.7 | SCAN | Ensure unnecessary services and ports are not accepted "
+    block:
+    - name: " 3.5.1.7 | SCAN | Ensure unnecessary services and ports are not accepted "
+      shell:  " firewall-cmd --get-active-zones | awk '!/:/ {print $1}' | while read ZN; do firewall-cmd --list-all --zone=$ZN; done "
+      register: rhel7cis_rule_3_5_1_7_rc
+      ignore_errors: yes
+
+    - name: " 3.5.1.7 | MANUAL_CHECK | Ensure unnecessary services and ports are not accepted "
+      block:
+      - name: " 3.5.1.7 | MANUAL_CHECK | Ensure unnecessary services and ports are not accepted "
+        debug:
+          var: rhel7cis_rule_3_5_1_7_rc.stdout_lines
+#          msg:
+#          - "Please review if the following services and ports listed are required on the system: {{ rhel7cis_rule_3_5_1_7_rc.stdout_lines | list }}. "
+#          - "Please  verify that the services and ports follow site policy."
+#          - "Once verified, please set rhel7cis_rule_3_5_1_7 to true in default/main.yml ."
+        register: rhel7cis_rule_3_5_1_7_svcport_list
+
+      when: rhel7cis_rule_3_5_1_7_rc.rc == 0
+
+    when: rhel7cis_rule_3_5_1_7
+    tags:
+     - level1
+     - scan
+     - rule_3.5.1.7
+     - rhel7
+
+######
+#####
+#####

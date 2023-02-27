@@ -1,0 +1,5 @@
+#!/bin/sh -e
+cat <<EOF
+set superusers="root"
+password_pbkdf2 root {{ result.stdout_lines[2] | regex_search('grub.pbkdf2.sha512.*') }}
+EOF

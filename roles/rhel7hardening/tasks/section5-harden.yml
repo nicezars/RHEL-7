@@ -1,0 +1,1662 @@
+---
+#
+# Copyright 2020
+# This section contains 46 rules
+#
+#####
+  - name: " 5.1.1 | HARDEN |  Ensure cron daemon is enabled and running"
+    block:
+      - name: " 5.1.1 | HARDEN |  Ensure cron daemon is enabled and runnin - before"
+        service_facts:
+        ignore_errors: yes
+      - set_fact:
+          sf: "{{ ansible_facts.services }}"
+        ignore_errors: yes
+      - set_fact:
+          before_5_1_1: "{{ sf['crond']|default({}) }}"
+        ignore_errors: yes
+      - name: " 5.1.1 | HARDEN |  Ensure cron daemon is enabled and running"
+        systemd:
+          name: crond
+          state: started
+          enabled: yes
+        register: result_5_1_1
+        ignore_errors: yes
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.1.1':{'result':result_5_1_1|default({}),'audits':before_5_1_1|default({})}}) }}"
+    when: rhel7cis_rule_5_1_1 and crond_required == true
+    tags:
+     - level1
+     - harden
+     - rule_5.1.1
+     - rhel7
+
+  - name: " 5.1.1 | HARDEN |  Ensure cron daemon is removed"
+    block:
+    - name: " 5.1.1 | HARDEN |  Ensure cron daemon is removed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before: "{{ pf['cronie']|default({}) }}"
+      ignore_errors: yes
+    - name: " 5.1.1 | HARDEN |  Ensure cron daemon is removed"
+      yum:
+        name: cronie
+        state: absent
+      register: result
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.1':{'result':result_5_1_1|default({}),'audits':before_5_1_1|default({})}}) }}"
+    when: rhel7cis_rule_5_1_1 and crond_required == false
+    tags:
+     - level1
+     - harden
+     - rule_5.1.1
+     - rhel7
+
+
+#####
+  - name: " 5.1.2 | HARDEN | Ensure permissions on /etc/crontab are configured"
+    block:
+    - name: " 5.1.2 | HARDEN |  Ensure permissions on /etc/crontab are configured"
+      stat:
+        path: /etc/crontab
+      register: before_5_1_2
+      ignore_errors: yes
+    - name: " 5.1.2 | HARDEN |  Ensure permissions on /etc/crontab are configured  "
+      file:
+        path: /etc/crontab
+        owner: root
+        group: root
+        mode: '0600'
+      register: result_5_1_2
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.2':{'result':result_5_1_2|default({}),'audits':before_5_1_2|default({})}}) }}"
+    when: crond_required == true and rhel7cis_rule_5_1_2
+    tags:
+     - level1
+     - harden
+     - rule_5.1.2
+     - rhel7
+
+#####
+  - name: " 5.1.3 | HARDEN |  Ensure permissions on /etc/cron.hourly are configured "
+    block:
+    - name: " 5.1.3 | HARDEN |  Ensure permissions on /etc/cron.hourly are configured "
+      stat:
+        path: /etc/cron.hourly
+      register: before_5_1_3
+      ignore_errors: yes
+    - name: " 5.1.3 | HARDEN |  Ensure permissions on /etc/cron.hourly are configured  "
+      file:
+        path: /etc/cron.hourly
+        owner: root
+        group: root
+        mode: '0700'
+      register: result_5_1_3
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.3':{'result':result_5_1_3|default({}),'audits':before_5_1_3|default({})}}) }}"
+    when: crond_required == true and rhel7cis_rule_5_1_3
+    tags:
+     - level1
+     - harden
+     - rule_5.1.3
+     - rhel7
+
+#####
+  - name: " 5.1.4 | HARDEN | Ensure permissions on /etc/cron.daily are configured "
+    block:
+    - name: " 5.1.4 | HARDEN | Ensure permissions on /etc/cron.daily are configured "
+      stat:
+        path: /etc/cron.daily
+      register: before_5_1_4
+      ignore_errors: yes
+    - name: " 5.1.4 | HARDEN |  Ensure permissions on /etc/cron.daily are configured  "
+      file:
+        path: /etc/cron.daily
+        owner: root
+        group: root
+        mode: '0700'
+      register: result_5_1_4
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.4':{'result':result_5_1_4|default({}),'audits':before_5_1_4|default({})}}) }}"
+    when: crond_required == true and rhel7cis_rule_5_1_4
+    tags:
+     - level1
+     - harden
+     - rule_5.1.4
+     - rhel7
+
+#####
+  - name: " 5.1.5 | HARDEN |  Ensure permissions on /etc/cron.weekly are configured  "
+    block:
+    - name: " 5.1.5 | HARDEN |  Ensure permissions on /etc/cron.weekly are configured  "
+      stat:
+        path: /etc/cron.weekly
+      register: before_5_1_5
+      ignore_errors: yes
+    - name: " 5.1.5 | HARDEN |  Ensure permissions on /etc/cron.weekly are configured  "
+      file:
+        path: /etc/cron.weekly
+        owner: root
+        group: root
+        mode: '0700'
+      register: result_5_1_5
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.5':{'result':result_5_1_5|default({}),'audits':before_5_1_5|default({})}}) }}"
+    when: crond_required == true and rhel7cis_rule_5_1_5
+    tags:
+     - level1
+     - harden
+     - rule_5.1.5
+     - rhel7
+
+#####
+  - name: " 5.1.6 | HARDEN | Ensure permissions on /etc/cron.monthly are configured  "
+    block:
+    - name: " 5.1.6 | HARDEN |  Ensure permissions on /etc/cron.monthly are configured "
+      stat:
+        path: /etc/cron.monthly
+      register: before_5_1_6
+      ignore_errors: yes
+    - name: " 5.1.6 | HARDEN |  Ensure permissions on /etc/cron.monthly are configured  "
+      file:
+        path: /etc/cron.monthly
+        owner: root
+        group: root
+        mode: '0700'
+      register: result_5_1_6
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.6':{'result':result_5_1_6|default({}),'audits':before_5_1_6|default({})}}) }}"
+    when: crond_required == true and rhel7cis_rule_5_1_6
+    tags:
+     - level1
+     - harden
+     - rule_5.1.6
+     - rhel7
+
+#####
+  - name: " 5.1.7 | HARDEN | Ensure permissions on /etc/cron.d are configured "
+    block:
+    - name: " 5.1.7 | HARDEN | Ensure permissions on /etc/cron.d are configured "
+      stat:
+        path: /etc/cron.d
+      register: before_5_1_7
+      ignore_errors: yes
+    - name: " 5.1.7 | HARDEN |  Ensure permissions on /etc/cron.d are configured  "
+      file:
+        path: /etc/cron.d
+        owner: root
+        group: root
+        mode: '0700'
+      register: result_5_1_7
+      ignore_errors: yes
+
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.7':{'result':result_5_1_7|default({}),'audits':before_5_1_7|default({})}}) }}"
+    when: crond_required == true and rhel7cis_rule_5_1_7
+    tags:
+     - level1
+     - harden
+     - rule_5.1.7
+     - rhel7
+
+#####
+  - name: " 5.1.8 | HARDEN |  Ensure cron is restricted to authorized users "
+    block:
+    - name: " 5.1.8 | HARDEN |  Ensure cron is restricted to authorized users "
+      slurp:
+        src: /etc/cron.deny
+      register: before_deny1
+      ignore_errors: yes
+    - stat:
+        path: /etc/cron.deny
+      register: before_deny2
+      ignore_errors: yes
+    - name: " 5.1.8 | HARDEN |  Ensure permissions on /etc/cron.deny is removed"
+      file:
+        path: /etc/cron.deny
+        state: absent
+      register: result_deny
+      ignore_errors: yes
+      diff: yes
+    - name: " 5.1.8 | HARDEN |  Ensure cron is restricted to authorized users "
+      stat:
+        path: /etc/cron.allow
+      register: before_allow
+      ignore_errors: yes
+    - name: " 5.1.8 | HARDEN |  Ensure permissions on /etc/cron.allow are configured - add cron.allow "
+      file:
+        path: /etc/cron.allow
+        owner: root
+        group: root
+        mode: '0600'
+        state: touch
+      register: result_allow
+      ignore_errors: yes
+      diff: yes
+    - name: "5.1.8 - Setup audit variable"
+      set_fact:
+        before_5_1_8: "{{ before_5_1_8|default([]) + [item] }}"
+      loop:
+      - "{{ before_deny1 }}"
+      - "{{ before_deny2 }}"
+      - "{{ before_allow }}"
+    - name: "5.1.8 - Setup result variable"
+      set_fact:
+        result_5_1_8: "{{ result_5_1_8|default([]) + [item] }}"
+      loop:
+      - "{{ result_deny }}"
+      - "{{ result_allow }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.8':{'result':result_5_1_8|default({}),'audits':before_5_1_8|default({})}}) }}"
+    when: crond_required == true and rhel7cis_rule_5_1_8
+    tags:
+     - level1
+     - harden
+     - rule_5.1.8
+     - rhel7
+
+#####
+
+  - name: " 5.1.9 | HARDEN |  Ensure at is restricted to authorized users "
+    block:
+    - name: " 5.1.9 | HARDEN |  Ensure at is restricted to authorized users "
+      slurp:
+        src: /etc/at.deny
+      register: before_atdeny1
+      ignore_errors: yes
+    - stat:
+        path: /etc/at.deny
+      register: before_atdeny2
+      ignore_errors: yes
+    - name: " 5.1.9 | HARDEN |  Ensure permissions on /etc/cron.deny is removed"
+      file:
+        path: /etc/at.deny
+        state: absent
+      register: result_atdeny
+      ignore_errors: yes
+      diff: yes
+    - name: " 5.1.9 | HARDEN |  Ensure cron is restricted to authorized users "
+      stat:
+        path: /etc/at.allow
+      register: before_atallow
+      ignore_errors: yes
+    - name: " 5.1.9 | HARDEN |  Ensure permissions on /etc/cron.allow are configured - add cron.allow "
+      file:
+        path: /etc/at.allow
+        owner: root
+        group: root
+        mode: '0600'
+        state: touch
+      register: result_atallow
+      ignore_errors: yes
+      diff: yes
+
+    - name: "5.1.9 - Setup audit variable"
+      set_fact:
+        before_5_1_9: "{{ before_5_1_9|default([]) + [item] }}"
+      loop:
+      - "{{ before_atdeny1 }}"
+      - "{{ before_atdeny2 }}"
+      - "{{ before_atallow }}"
+    - name: "5.1.9 - Setup result variable"
+      set_fact:
+        result_5_1_9: "{{ result_5_1_9|default([]) + [item] }}"
+      loop:
+      - "{{ result_atdeny }}"
+      - "{{ result_atallow }}"
+
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.9':{'result':result_5_1_9|default({}),'audits':before_5_1_9|default({})}}) }}"
+    when: at_required == true and rhel7cis_rule_5_1_9
+    tags:
+     - level1
+     - harden
+     - rule_5.1.9
+     - rhel7
+
+  - name: " 5.1.9 | HARDEN |  Ensure at daemon is removed"
+    block:
+    - name: " 5.1.9 | HARDEN |  Ensure at daemon is removed - before"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before: "{{ pf['at']|default({}) }}"
+      ignore_errors: yes
+    - name: " 5.1.9 | HARDEN |  Ensure at daemon is removed"
+      yum:
+        name: at
+        state: absent
+      register: result
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.1.9':{'result':result|default({}),'audits':before|default({})}}) }}"
+    when: rhel7cis_rule_5_1_9 and at_required == false
+    tags:
+     - level1
+     - harden
+     - rule_5.1.9
+     - rhel7
+
+#####
+  - name: " 5.2.1 | HARDEN | Ensure permissions on /etc/ssh/sshd_config are configured "
+    block:
+    - name: " 5.2.1 | HARDEN | Ensure permissions on /etc/ssh/sshd_config are configured "
+      stat:
+        path: /etc/ssh/sshd_config
+      register: before_5_2_1
+      ignore_errors: yes
+    - name: " 5.2.1 | HARDEN | Ensure permissions on /etc/ssh/sshd_config are configured  "
+      file:
+        path: /etc/ssh/sshd_config
+        owner: root
+        group: root
+        mode: '0600'
+      register: result_5_2_1
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.1':{'result':result_5_2_1|default({}),'audits':before_5_2_1|default({})}}) }}"
+    when: rhel7cis_rule_5_2_1
+    tags:
+     - level1
+     - harden
+     - rule_5.2.1
+     - rhel7
+
+#####
+  - name: " 5.2.2 | HARDEN | Ensure permissions on SSH private host key files are configured "
+    block:
+    - name: " 5.2.2 | HARDEN | Ensure permissions on SSH private host key files are configured"
+      stat:
+        path: "{{ item }}"
+      register: before_5_2_2
+      with_fileglob:
+        - "/etc/ssh/ssh_host_*_key"
+      ignore_errors: yes
+    - name: " 5.2.2 | HARDEN | Ensure permissions on bootloader config are configured"
+      file:
+        path: "{{ item }}"
+        owner: root
+        group: ssh_keys
+        mode: '0640'
+      register: result_5_2_2
+      ignore_errors: yes
+      diff: yes
+      with_fileglob:
+        - "/etc/ssh/ssh_host_*_key"
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.2':{'result':result_5_2_2|default({}),'audits':before_5_2_2|default({})}}) }}"
+    when: rhel7cis_rule_5_2_2
+    tags:
+     - level1
+     - harden
+     - rule_5.2.2
+     - rhel7
+
+#####
+  - name: " 5.2.3 | HARDEN | Ensure permissions on SSH public host key files are configured "
+    block:
+    - name: " 5.2.3 | HARDEN | Ensure permissions on SSH public host key files are configured - before "
+      stat:
+        path: "{{ item }}"
+      register: before_5_2_3
+      with_fileglob:
+        - "/etc/ssh/ssh_host_*_key.pub"
+      ignore_errors: yes
+    - name: "  5.2.3 | HARDEN | Ensure permissions on SSH public host key files are configured - modify"
+      file:
+        path: "{{ item }}"
+        owner: root
+        group: root
+        mode: '0644'
+      register: result_5_2_3
+      ignore_errors: yes
+      diff: yes
+      with_fileglob:
+        - "/etc/ssh/ssh_host_*_key.pub"
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.3':{'result':result_5_2_3|default({}),'audits':before_5_2_3|default({})}}) }}"
+    when: rhel7cis_rule_5_2_3
+    tags:
+     - level1
+     - harden
+     - rule_5.2.3
+     - rhel7
+
+#####
+  - name: " 5.2.4 | HARDEN | Ensure SSH access is limited "
+    block:
+    - name: " 5.2.4 | HARDEN | Ensure SSH access is limited - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_4
+    - lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '^AllowUsers', line: 'AllowUsers {{ allow_users }}' }
+        - { regexp: '^AllowGroups', line: 'AllowGroups {{ allow_groups }}' }
+        - { regexp: '^DenyUsers', line: 'DenyUsers {{ deny_users }}' }
+        - { regexp: '^DenyGroups', line: 'DenyGroups {{ deny_groups }}' }
+      register: result_5_2_4
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.4':{'result':result_5_2_4|default({}),'audits':before_5_2_4|default({})}}) }}"
+    when: rhel7cis_rule_5_2_4
+    tags:
+     - level1
+     - harden
+     - rule_5.2.4
+     - rhel7
+
+#####
+  - name: " 5.2.5 | HARDEN | Ensure SSH LogLevel is appropriate "
+    block:
+    - name: " 5.2.5 | HARDEN | Ensure SSH LogLevel is appropriate - before "
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_5
+    - name: " 5.2.5 | HARDEN | Ensure SSH LogLevel is appropriate - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^LogLevel'
+        line: 'LogLevel {{ log_level }}'
+      register: result_5_2_5_5_2_5
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.5':{'result':result_5_2_5|default({}),'audits':before_5_2_5|default({})}}) }}"
+    when: rhel7cis_rule_5_2_5
+    tags:
+     - level1
+     - harden
+     - rule_5.2.5
+     - rhel7
+
+#####
+  - name: " 5.2.6 | HARDEN |  Ensure SSH X11 forwarding is disabled "
+    block:
+    - name: " 5.2.6 | HARDEN |  Ensure SSH X11 forwarding is disabled - before "
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_6
+    - name: " 5.2.6 | HARDEN |  Ensure SSH X11 forwarding is disabled - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^X11Forwarding'
+        line: 'X11Forwarding no'
+      register: result_5_2_6
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.6':{'result':result_5_2_6|default({}),'audits':before_5_2_6|default({})}}) }}"
+    when: rhel7cis_rule_5_2_6
+    tags:
+     - level2
+     - harden
+     - rule_5.2.6
+     - rhel7
+
+#####
+  - name: " 5.2.7 | HARDEN |   Ensure SSH MaxAuthTries is set to 4 or less "
+    block:
+    - name: " 5.2.7 | HARDEN |   Ensure SSH MaxAuthTries is set to 4 or less - before "
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_7
+    - name: " 5.2.7 | HARDEN |   Ensure SSH MaxAuthTries is set to 4 or less - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^MaxAuthTries'
+        line: 'MaxAuthTries 4'
+      register: result_5_2_7
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.7':{'result':result_5_2_7|default({}),'audits':before_5_2_7|default({})}}) }}"
+    when: rhel7cis_rule_5_2_7
+    tags:
+     - level1
+     - harden
+     - rule_5.2.7
+     - rhel7
+
+#####
+  - name: " 5.2.8 | HARDEN |   Ensure SSH IgnoreRhosts is enabled "
+    block:
+    - name: " 5.2.8 | HARDEN |   Ensure SSH IgnoreRhosts is enabled - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_8
+    - name: " 5.2.8 | HARDEN |   Ensure SSH IgnoreRhosts is enabled - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^IgnoreRhosts'
+        line: 'IgnoreRhosts yes'
+      register: result_5_2_8
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.8':{'result':result_5_2_8|default({}),'audits':before_5_2_8|default({})}}) }}"
+    when: rhel7cis_rule_5_2_8
+    tags:
+     - level1
+     - harden
+     - rule_5.2.8
+     - rhel7
+
+#####
+
+  - name: " 5.2.9 | HARDEN | Ensure SSH HostbasedAuthentication is disabled "
+    block:
+    - name: " 5.2.9 | HARDEN | Ensure SSH HostbasedAuthentication is disabled - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_9
+    - name: " 5.2.9 | HARDEN | Ensure SSH HostbasedAuthentication is disabled - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^HostbasedAuthentication'
+        line: 'HostbasedAuthentication no'
+      register: result_5_2_9
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.9':{'result':result_5_2_9|default({}),'audits':before_5_2_9|default({})}}) }}"
+    when: rhel7cis_rule_5_2_9
+    tags:
+     - level1
+     - harden
+     - rule_5.2.9
+     - rhel7
+
+#####
+# As CIS it should be no, but it's TSEL exceptions
+  - name: " 5.2.10 | HARDEN | Ensure SSH root login is disabled "
+    block:
+    - name: " 5.2.10 | HARDEN | Ensure SSH root login is disabled - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_10
+    - name: " 5.2.10 | HARDEN | Ensure SSH root login is disabled - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin yes'
+      register: result_5_2_10
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.10':{'result':result_5_2_10|default({}),'audits':before_5_2_10|default({})}}) }}"
+    when: rhel7cis_rule_5_2_10
+    tags:
+     - level1
+     - harden
+     - rule_5.2.10
+     - rhel7
+
+#####
+  - name: " 5.2.11 | HARDEN | Ensure SSH PermitEmptyPasswords is disabled  "
+    block:
+    - name: " 5.2.11 | HARDEN | Ensure SSH PermitEmptyPasswords is disabled - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_11
+    - name: " 5.2.11 | HARDEN | Ensure SSH PermitEmptyPasswords is disabled - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^PermitEmptyPasswords'
+        line: 'PermitEmptyPasswords no'
+      register: result_5_2_11
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.11':{'result':result_5_2_11|default({}),'audits':before_5_2_11|default({})}}) }}"
+    when: rhel7cis_rule_5_2_11
+    tags:
+     - level1
+     - harden
+     - rule_5.2.11
+     - rhel7
+
+#####
+
+  - name: " 5.2.12 | HARDEN |  Ensure SSH PermitUserEnvironment is disabled  "
+    block:
+    - name: " 5.2.12 | HARDEN |  Ensure SSH PermitUserEnvironment is disabled - before "
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_12
+    - name: " 5.2.12 | HARDEN |  Ensure SSH PermitUserEnvironment is disabled - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^PermitUserEnvironment'
+        line: 'PermitUserEnvironment no'
+      register: result_5_2_12
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.12':{'result':result_5_2_12|default({}),'audits':before_5_2_12|default({})}}) }}"
+    when: rhel7cis_rule_5_2_12
+    tags:
+     - level1
+     - harden
+     - rule_5.2.12
+     - rhel7
+
+#####
+
+  - name: " 5.2.13 | HARDEN |  Ensure only strong Ciphers are used  "
+    block:
+    - name: " 5.2.13 | HARDEN |  Ensure only strong Ciphers are used - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_13
+    - name: " 5.2.13 | HARDEN |  Ensure only strong Ciphers are used - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^Ciphers'
+        line: 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr'
+      register: result_5_2_13
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.13':{'result':result_5_2_13|default({}),'audits':before_5_2_13|default({})}}) }}"
+    when: rhel7cis_rule_5_2_13
+    tags:
+     - level1
+     - harden
+     - rule_5.2.13
+     - rhel7
+
+#####
+  - name: " 5.2.14 | HARDEN |  Ensure only strong MAC algorithms are used "
+    block:
+    - name: " 5.2.14 | HARDEN | Ensure only strong MAC algorithms are used - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_14
+    - name: " 5.2.14 | HARDEN | Ensure only strong MAC algorithms are used - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^MACs'
+        line: 'MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256'
+      register: result_5_2_14
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.14':{'result':result_5_2_14|default({}),'audits':before_5_2_14|default({})}}) }}"
+    when: rhel7cis_rule_5_2_14
+    tags:
+     - level1
+     - harden
+     - rule_5.2.14
+     - rhel7
+
+#####
+  - name: " 5.2.15 | HARDEN |  Ensure only strong Key Exchange algorithms are used "
+    block:
+    - name: " 5.2.15 | HARDEN | Ensure only strong Key Exchange algorithms are used - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_15
+    - package_facts:
+        manager: rpm
+    - name: " 5.2.15 | HARDEN | Ensure only strong Key Exchange algorithms are used - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^KexAlgorithms'
+        line: 'KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256'
+      register: result_5_2_15
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.15':{'result':result_5_2_15|default({}),'audits':before_5_2_15|default({})}}) }}"
+    when: rhel7cis_rule_5_2_15
+    tags:
+     - level1
+     - harden
+     - rule_5.2.15
+     - rhel7
+
+#####
+  - name: " 5.2.16 | HARDEN | Ensure SSH Idle Timeout Interval is configured "
+    block:
+    - name: " 5.2.16 | HARDEN | Ensure SSH Idle Timeout Interval is configured - before "
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_16
+    - name: " 5.2.16 | HARDEN | Ensure SSH Idle Timeout Interval is configured - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '^ClientAliveInterval', line: 'ClientAliveInterval {{ clientaliveinterval }}' }
+        - { regexp: '^ClientAliveCountMax', line: 'ClientAliveCountMax {{ clientalivecountmax }}' }
+      register: result_5_2_16
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.16':{'result':result_5_2_16|default({}),'audits':before_5_2_16|default({})}}) }}"
+    when: rhel7cis_rule_5_2_16
+    tags:
+     - level1
+     - harden
+     - rule_5.2.16
+     - rhel7
+
+#####
+  - name: " 5.2.17 | HARDEN | Ensure SSH LoginGraceTime is set to one minute or less "
+    block:
+    - name: " 5.2.17 | HARDEN | Ensure SSH LoginGraceTime is set to one minute or less - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_17
+    - name: " 5.2.17 | HARDEN | Ensure SSH LoginGraceTime is set to one minute or less - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^LoginGraceTime'
+        line: 'LoginGraceTime 60'
+      register: result_5_2_17
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.17':{'result':result_5_2_17|default({}),'audits':before_5_2_17|default({})}}) }}"
+    when: rhel7cis_rule_5_2_17
+    tags:
+     - level1
+     - harden
+     - rule_5.2.17
+     - rhel7
+
+#####
+
+  - name: " 5.2.18 | HARDEN | Ensure SSH warning banner is configured "
+    block:
+    - name: " 5.2.18 | HARDEN | Ensure SSH warning banner is configured - before "
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_18
+    - name: "5.2.18 | HARDEN | Ensure SSH warning banner is configured - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^Banner'
+        line: 'Banner /etc/issue.net'
+      register: result_5_2_18
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.18':{'result':result_5_2_18|default({}),'audits':before_5_2_18|default({})}}) }}"
+    when: rhel7cis_rule_5_2_18
+    tags:
+     - level1
+     - harden
+     - rule_5.2.18
+     - rhel7
+
+#####
+  - name: " 5.2.19 | HARDEN |  Ensure SSH PAM is enabled "
+    block:
+    - name: " 5.2.19 | HARDEN |  Ensure SSH PAM is enabled - before "
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_19
+    - name: "5.2.19 | HARDEN |  Ensure SSH PAM is enabled - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^UsePAM'
+        line: 'UsePAM yes'
+      register: result_5_2_19
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.19':{'result':result_5_2_19|default({}),'audits':before_5_2_19|default({})}}) }}"
+    when: rhel7cis_rule_5_2_19
+    tags:
+     - level1
+     - harden
+     - rule_5.2.19
+     - rhel7
+#####
+  - name: " 5.2.20 | HARDEN |  Ensure SSH AllowTcpForwarding is disabled  "
+    block:
+    - name: " 5.2.20 | HARDEN | Ensure SSH AllowTcpForwarding is disabled - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_20
+    - name: "5.2.20 | HARDEN | Ensure SSH AllowTcpForwarding is disabled - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^AllowTcpForwarding'
+        line: 'AllowTcpForwarding no'
+      register: result_5_2_20
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.20':{'result':result_5_2_20|default({}),'audits':before_5_2_20|default({})}}) }}"
+    when: rhel7cis_rule_5_2_20
+    tags:
+     - level1
+     - harden
+     - rule_5.2.20
+     - rhel7
+#####
+  - name: " 5.2.21 | HARDEN |  Ensure SSH MaxStartups is configured  "
+    block:
+    - name: " 5.2.21 | HARDEN |  Ensure SSH MaxStartups is configured - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_21
+    - name: "5.2.21 | HARDEN |  Ensure SSH MaxStartups is configured - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^MaxStartups'
+        line: 'MaxStartups 10:30:60'
+      register: result_5_2_21
+      ignore_errors: yes
+      diff: yes
+      notify: 
+        - restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.21':{'result':result_5_2_21|default({}),'audits':before_5_2_21|default({})}}) }}"
+    when: rhel7cis_rule_5_2_21
+    tags:
+     - level1
+     - harden
+     - rule_5.2.21
+     - rhel7
+
+#####
+  - name: " 5.2.22 | HARDEN | Ensure SSH MaxSessions is limited  "
+    block:
+    - name: " 5.2.22 | HARDEN | Ensure SSH MaxSessions is limited - before"
+      slurp:
+        src: /etc/ssh/sshd_config
+      ignore_errors: yes
+      register: before_5_2_22
+    - name: "5.2.22 | HARDEN | Ensure SSH MaxSessions is limited - modify"
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^MaxSessions'
+        line: 'MaxSessions 10'
+      register: result_5_2_22
+      ignore_errors: yes
+      diff: yes
+      notify: restart sshd
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.2.22':{'result':result_5_2_22|default({}),'audits':before_5_2_22|default({})}}) }}"
+    when: rhel7cis_rule_5_2_22
+    tags:
+     - level1
+     - harden
+     - rule_5.2.22
+     - rhel7
+
+#####
+  - name: " 5.3.1 | HARDEN | Ensure password creation requirements are configured  "
+    block:
+    - name: " 5.3.1 | HARDEN |  Ensure password creation requirements are configured "
+      slurp:
+        src:  /etc/security/pwquality.conf
+      ignore_errors: yes
+      register: before_complex
+    - slurp:
+        src:  "{{ item }}"
+      ignore_errors: yes
+      register: before_options
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+    - name: " 5.3.1 | HARDEN |  Ensure password creation requirements are configured - modify"
+      ini_file:
+        path:  /etc/security/pwquality.conf
+        section: null
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+      with_items:
+      - { option: 'minlen', value: '14' }
+      - { option: 'dcredit', value: '{{ dcredit }}' }
+      - { option: 'ucredit', value: '{{ ucredit }}' }
+      - { option: 'lcredit', value: '{{ lcredit }}' }
+      - { option: 'ocredit', value: '{{ ocredit }}' }
+      register: result_complex
+      ignore_errors: yes
+      diff: yes
+    - lineinfile:
+        path: "{{ item }}"
+        regexp: '^password    requisite     pam_pwquality.so'
+        line: "password    requisite     pam_pwquality.so try_first_pass retry=3"
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+      register: result_options
+      ignore_errors: yes
+      diff: yes
+    - name: "5.3.1 - Setup audit variable"
+      set_fact:
+        before_5_3_1: "{{ before_5_3_1|default([]) + [item] }}"
+      loop:
+      - "{{ before_complex }}"
+      - "{{ before_options }}"
+    - name: "5.3.1 - Setup result variable"
+      set_fact:
+        result_5_3_1: "{{ result_5_3_1|default([]) + [item] }}"
+      loop:
+      - "{{ result_complex }}"
+      - "{{ result_options }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.3.1':{'result':result_5_3_1|default({}),'audits':before_5_3_1|default({})}}) }}"
+    when: rhel7cis_rule_5_3_1
+    tags:
+     - level1
+     - harden
+     - rule_5.3.1
+     - rhel7
+
+#####
+  - name: " 5.3.2 | SCAN_faillock | Ensure lockout for failed password attempts is configured "
+    block:
+    - name: " 5.3.2  | SCAN_faillock | Ensure lockout for failed password attempts is configured"
+      slurp:
+        src:  "{{ item }}"
+      ignore_errors: yes
+      register: before_5_3_2
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+    - lineinfile:
+        path: "{{ item.path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        insertafter: "{{ item.after }}"
+      with_items:
+      - { path: '/etc/pam.d/password-auth', regexp: '^auth    required     pam_faillock.so', line: 'auth    required     pam_faillock.so preauth silent audit deny=5 unlock_time=900', after: '^auth        required      pam_env.so' }
+      - { path: '/etc/pam.d/system-auth', regexp: '^auth    required     pam_faillock.so', line: 'auth    required     pam_faillock.so preauth silent audit deny=5 unlock_time=900', after: '^auth        required      pam_env.so' }
+      register: result_1
+      ignore_errors: yes
+      diff: yes
+    - lineinfile:
+        path: "{{ item.path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        insertbefore: "{{ item.before }}"
+      with_items:
+      - { path: '/etc/pam.d/password-auth', regexp: '^auth    [default=die]     pam_faillock.so', line: 'auth    [default=die]     pam_faillock.so authfail audit deny=5 unlock_time=900', before: '^auth        requisite     pam_succeed_if.so' }
+      - { path: '/etc/pam.d/system-auth', regexp: '^auth    [default=die]     pam_faillock.so', line: 'auth    [default=die]     pam_faillock.so authfail audit deny=5 unlock_time=900', before: '^auth        requisite     pam_succeed_if.so' }
+      register: result_2
+      ignore_errors: yes
+      diff: yes
+    - lineinfile:
+        path: "{{ item.path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        insertbefore: "{{ item.before }}"
+      with_items:
+      - { path: '/etc/pam.d/password-auth', regexp: '^account    required     pam_faillock.so', line: 'account    required     pam_faillock.so', before: '^account     required      pam_unix.so' }
+      - { path: '/etc/pam.d/system-auth', regexp: '^account    required     pam_faillock.so', line: 'account    required     pam_faillock.so', before: '^account     required      pam_unix.so' }
+      register: result_3
+      ignore_errors: yes
+      diff: yes
+    - name: "5.3.2 - Setup result variable"
+      set_fact:
+        result_5_3_2: "{{ result_5_3_2|default([]) + [item] }}"
+      loop:
+      - "{{ result_1 }}"
+      - "{{ result_2 }}"
+      - "{{ result_3 }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.3.2':{'result':result_5_3_2|default({}),'audits':before_5_3_2|default({})}}) }}"
+    when: pam_faillock == true and rhel7cis_rule_5_3_2
+    tags:
+     - level1
+     - harden
+     - rule_5.3.2
+     - rhel7
+
+  - name: " 5.3.2  | SCAN_tally2 | Ensure lockout for failed password attempts is configured"
+    block:
+    - name: " 5.3.2  | SCAN_tally2 | Ensure lockout for failed password attempts is configured "
+      slurp:
+        src:  "{{ item }}"
+      ignore_errors: yes
+      register: before
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+    - lineinfile:
+        path: "{{ item.path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        insertafter: "{{ item.after }}"
+      with_items:
+      - { path: '/etc/pam.d/password-auth', regexp: '^auth    required     pam_tally2.so', line: 'auth    required     pam_tally2.so deny=5 onerr=fail unlock_time=900', after: '^auth        required      pam_env.so' }
+      - { path: '/etc/pam.d/system-auth', regexp: '^auth    required     pam_tally2.so', line: 'auth    required     pam_tally2.so deny=5 onerr=fail unlock_time=900', after: '^auth        required      pam_env.so' }
+      register: result_1
+      ignore_errors: yes
+      diff: yes
+    - lineinfile:
+        path: "{{ item.path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        insertbefore: "{{ item.before }}"
+      with_items:
+      - { path: '/etc/pam.d/password-auth', regexp: '^account    required     pam_tally2.so', line: 'account    required     pam_tally2.so', before: '^account     required      pam_unix.so' }
+      - { path: '/etc/pam.d/system-auth', regexp: '^account    required     pam_tally2.so', line: 'account    required     pam_tally2.so', before: '^account     required      pam_unix.so' }
+      register: result_2
+      ignore_errors: yes
+      diff: yes
+    - name: "5.3.2 - Setup result variable"
+      set_fact:
+        result_5_3_2: "{{ result_5_3_2|default([]) + [item] }}"
+      loop:
+      - "{{ result_1 }}"
+      - "{{ result_2 }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.3.2':{'result':result_5_3_2|default({}),'audits':before_5_3_2|default({})}}) }}"
+    when: pam_tally2 == true and rhel7cis_rule_5_3_2
+    tags:
+     - level1
+     - harden
+     - rule_5.3.2
+     - rhel7
+#####
+  - name: " 5.3.3 | HARDEN |  Ensure password hashing algorithm is SHA-512  "
+    block:
+    - name: " 5.3.3 | HARDEN |  Ensure password hashing algorithm is SHA-512 "
+      slurp:
+        src:  "{{ item }}"
+      ignore_errors: yes
+      register: before_5_3_3
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+    - lineinfile:
+        path: "{{ item }}"
+        regexp: '^password    sufficient     pam_unix.so'
+        line: "password    sufficient     pam_unix.so sha512"
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+      register: result_5_3_3
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.3.3':{'result':result_5_3_3|default({}),'audits':before_5_3_3|default({})}}) }}"
+    when: rhel7cis_rule_5_3_3
+    tags:
+     - level1
+     - harden
+     - rule_5.3.3
+     - rhel7
+#####
+  - name: " 5.3.4  | HARDEN | Ensure password reuse is limited"
+    block:
+    - name: " 5.3.4  | HARDEN | Ensure password reuse is limited "
+      slurp:
+        src:  "{{ item }}"
+      ignore_errors: yes
+      register: before_5_3_4
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+    - lineinfile:
+        path: "{{ item }}"
+        regexp: '^password    required     pam_pwhistory.so'
+        line: "password    required     pam_pwhistory.so remember=5"
+        insertafter: '^password    requisite     pam_pwhistory.so'
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+      register: result_5_3_4
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.3.4':{'result':result_5_3_4|default({}),'audits':before_5_3_4|default({})}}) }}"
+    when: pam_pwhistory == true and rhel7cis_rule_5_3_4
+    tags:
+     - level1
+     - harden
+     - rule_5.3.4
+     - rhel7
+
+  - name: " 5.3.4  | HARDEN | Ensure password reuse is limited"
+    block:
+    - name: " 5.3.4  | HARDEN | Ensure password reuse is limited "
+      slurp:
+        src:  "{{ item }}"
+      ignore_errors: yes
+      register: before_5_3_4
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+    - lineinfile:
+        path: "{{ item }}"
+        regexp: '^password    sufficient     pam_unix.so'
+        line: "password    sufficient     pam_unix.so remember=5"
+        insertafter: '^password    requisite     pam_pwquality.so'
+      with_items:
+      - /etc/pam.d/password-auth
+      - /etc/pam.d/system-auth
+      register: result_5_3_4
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.3.4':{'result':result_5_3_4|default({}),'audits':before_5_3_4|default({})}}) }}"
+    when: pam_unix == true and rhel7cis_rule_5_3_4
+    tags:
+     - level1
+     - harden
+     - rule_5.3.4
+     - rhel7
+#####
+  - name: " 5.4.1.1 | HARDEN | Ensure password expiration is 365 days or less"
+    block:
+      - name: " 5.4.1.1 | HARDEN | Ensure password expiration is 365 days or less - before"
+        slurp:
+          src: /etc/login.defs
+        ignore_errors: yes
+        register: before_logindef
+      - name: " 5.4.1.1 | HARDEN | Ensure password expiration is 365 days or less - modify"
+        lineinfile:
+          path: /etc/login.defs
+          regexp: '^PASS_MAX_DAYS'
+          line: 'PASS_MAX_DAYS   365'
+        register: result_logindef
+        ignore_errors: yes
+        diff: yes
+      - shell:  'grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1,5 '
+        register: before_chage
+        ignore_errors: yes
+      - shell:  'grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1 '
+        register: users_maxdays
+        ignore_errors: yes
+      - shell: chage --maxdays 365 {{ item }}
+        register: result_chage
+        ignore_errors: yes
+        with_items: "{{ users_maxdays.stdout_lines | default([]) }}"
+
+      - name: "5.4.1.1 - Setup audit variable"
+        set_fact:
+          before_5_4_1_1: "{{ before_5_4_1_1|default([]) + [item] }}"
+        loop:
+        - "{{ before_logindef }}"
+        - "{{ before_chage }}"
+
+      - name: "5.4.1.1 - Setup result variable"
+        set_fact:
+          result_5_4_1_1: "{{ result_5_4_1_1|default([]) + [item] }}"
+        loop:
+        - "{{ result_logindef }}"
+        - "{{ result_chage }}"
+
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.1.1':{'result':result_5_4_1_1|default({}),'audits':before_5_4_1_1|default({})}}) }}"
+    when: rhel7cis_rule_5_4_1_1
+    tags:
+     - level1
+     - harden
+     - rule_5.4.1.1
+     - rhel7
+
+#####
+  - name: " 5.4.1.2 | HARDEN |  Ensure minimum days between password changes is configured"
+    block:
+      - name: " 5.4.1.2 | HARDEN |  Ensure minimum days between password changes is configured - before"
+        slurp:
+          src: /etc/login.defs
+        ignore_errors: yes
+        register: before_logindef
+      - name: " 5.4.1.2 | HARDEN |  Ensure minimum days between password changes is configured - modify"
+        lineinfile:
+          path: /etc/login.defs
+          regexp: '^PASS_MIN_DAYS'
+          line: 'PASS_MIN_DAYS   15'
+        register: result_logindef
+        ignore_errors: yes
+        diff: yes
+      - shell:  'grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1,4 '
+        register: before_chage
+        ignore_errors: yes
+      - shell:  'grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1 '
+        register: users_mindays
+        ignore_errors: yes
+      - shell: chage --mindays 15 {{ item }}
+        register: result_chage
+        ignore_errors: yes
+        with_items: "{{ users_mindays.stdout_lines | default([]) }}"
+
+      - name: "5.4.1.2 - Setup audit variable"
+        set_fact:
+          before_5_4_1_2: "{{ before_5_4_1_2|default([]) + [item] }}"
+        loop:
+        - "{{ before_logindef }}"
+        - "{{ before_chage }}"
+
+      - name: "5.4.1.2 - Setup result variable"
+        set_fact:
+          result_5_4_1_2: "{{ result_5_4_1_2|default([]) + [item] }}"
+        loop:
+        - "{{ result_logindef }}"
+        - "{{ result_chage }}"
+
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.1.2':{'result':result_5_4_1_2|default({}),'audits':before_5_4_1_2|default({})}}) }}"
+    when: rhel7cis_rule_5_4_1_2
+    tags:
+     - level1
+     - harden
+     - rule_5.4.1.2
+     - rhel7
+
+#####
+  - name: " 5.4.1.3 | HARDEN |   Ensure password expiration warning days is 7 or more"
+    block:
+      - name: " 5.4.1.3 | HARDEN |   Ensure password expiration warning days is 7 or more - before"
+        slurp:
+          src: /etc/login.defs
+        ignore_errors: yes
+        register: before_logindef
+      - name: " 5.4.1.3 | HARDEN | Ensure password expiration warning days is 7 or more - modify"
+        lineinfile:
+          path: /etc/login.defs
+          regexp: '^PASS_WARN_AGE'
+          line: 'PASS_WARN_AGE   30'
+        register: result_logindef
+        ignore_errors: yes
+        diff: yes
+      - shell:  'grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1,6 '
+        register: before_chage
+        ignore_errors: yes
+      - shell:  'grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1 '
+        register: users_warndays
+        ignore_errors: yes
+      - shell: chage --warndays 30 {{ item }}
+        register: result_chage
+        ignore_errors: yes
+        with_items: "{{ users_warndays.stdout_lines | default([]) }}"
+
+      - name: "5.4.1.3 - Setup audit variable"
+        set_fact:
+          before_5_4_1_3: "{{ before_5_4_1_3|default([]) + [item] }}"
+        loop:
+        - "{{ before_logindef }}"
+        - "{{ before_chage }}"
+
+      - name: "5.4.1.3 - Setup result variable"
+        set_fact:
+          result_5_4_1_3: "{{ result_5_4_1_3|default([]) + [item] }}"
+        loop:
+        - "{{ result_logindef }}"
+        - "{{ result_chage }}"
+
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.1.3':{'result':result_5_4_1_3|default({}),'audits':before_5_4_1_3|default({})}}) }}"
+    when: rhel7cis_rule_5_4_1_3
+    tags:
+     - level1
+     - harden
+     - rule_5.4.1.3
+     - rhel7
+
+#####
+  - name: " 5.4.1.4 | HARDEN |  Ensure inactive password lock is 30 days or less "
+    block:
+      - name: " 5.4.1.4 | HARDEN |   Ensure inactive password lock is 30 days or less - before"
+        slurp:
+          src: /etc/default/useradd
+        ignore_errors: yes
+        register: before_useradd
+      - name: " 5.4.1.4 | HARDEN |   Ensure inactive password lock is 30 days or less  "
+        lineinfile:
+          create: true
+          dest: /etc/default/useradd
+          regexp: ^INACTIVE
+          line: INACTIVE={{ var_account_disable_post_pw_expiration }}
+        register: result_useradd
+        ignore_errors: yes
+        diff: yes
+      - shell:  ' grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1,7'
+        register: before_chage
+        ignore_errors: yes
+      - shell:  'grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1 '
+        register: users_inactive
+        ignore_errors: yes
+      - shell: chage --inactive 30 {{ item }}
+        register: result_chage
+        ignore_errors: yes
+        with_items: "{{ users_inactive.stdout_lines | default([]) }}"
+
+      - name: "5.4.1.4 - Setup audit variable"
+        set_fact:
+          before_5_4_1_4: "{{ before_5_4_1_4|default([]) + [item] }}"
+        loop:
+        - "{{ before_useradd }}"
+        - "{{ before_chage }}"
+
+      - name: "5.4.1.4 - Setup result variable"
+        set_fact:
+          result_5_4_1_4: "{{ result_5_4_1_4|default([]) + [item] }}"
+        loop:
+        - "{{ result_useradd }}"
+        - "{{ result_chage }}"
+
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.1.4':{'result':result_5_4_1_4|default({}),'audits':before_5_4_1_4|default({})}}) }}"
+    when: rhel7cis_rule_5_4_1_4
+    tags:
+     - level1
+     - harden
+     - rule_5.4.1.4
+     - rhel7
+
+#####
+  - name: " 5.4.1.5 | HARDEN | Ensure all users last password change date is in the past    "
+    block:
+      - name: " 5.4.1.5 | HARDEN | Ensure all users last password change date is in the past  "
+        shell: |
+          for usr in $(cut -d: -f1 /etc/shadow)
+            do
+              [[ $(chage --list $usr | grep '^Last password change' | cut -d: -f2) > $(date) ]] && echo "$usr :$(chage --list $usr | grep '^Last password change' | cut -d: -f2)"
+            done
+        register: rhel7cis_rule_5_4_1_5_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_4_1_5_result: false
+        when: rhel7cis_rule_5_4_1_5_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.1.5':rhel7cis_rule_5_4_1_5_result|default(true)}) }}"
+    when: rhel7cis_rule_5_4_1_5
+    tags:
+     - level1
+     - harden
+     - rule_5.4.1.5
+     - rhel7
+
+#####
+  - name: " 5.4.2 | HARDEN | Ensure system accounts are secured "
+    block:
+      - name: " 5.4.2 | HARDEN | Ensure system accounts are secured  "
+        command: |
+          awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $1!~/^\+/ && $3<'"$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)"' && $7!="'"$(which nologin)"'" && $7!="/bin/false") {print}' /etc/passwd
+        register: rhel7cis_rule_5_4_2_a_rc
+        ignore_errors: yes
+      - command: |
+          awk -F: '($1!="root" && $1!~/^\+/ && $3<'"$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)"') {print $1}' /etc/passwd | xargs -I '{}' passwd -S '{}' | awk '($2!="L" && $2!="LK") {print $1}'
+        register: rhel7cis_rule_5_4_2_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_5_4_2_result: false
+        when: rhel7cis_rule_5_4_2_a_rc.stdout != ""  or rhel7cis_rule_5_4_2_b_rc.stdout != ""
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.2':rhel7cis_rule_5_4_2_result|default(true)}) }}"
+    when: rhel7cis_rule_5_4_2
+    tags:
+     - level1
+     - harden
+     - rule_5.4.2
+     - rhel7
+#####
+  - name: " 5.4.3 | HARDEN |  Ensure default group for the root account is GID 0"
+    block:
+      - name: " 5.4.3 | HARDEN |  Ensure default group for the root account is GID 0 - before"
+        shell: groups root
+        register: before_5_4_3
+        ignore_errors: yes
+      - name: " 5.4.3 | HARDEN |  Ensure default group for the root account is GID 0 - modify"
+        user:
+          name: root
+          group: root
+        register: result_5_4_3
+        ignore_errors: yes
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.4.3':{'result':result_5_4_3|default({}),'audits':before_5_4_3|default({})}}) }}"
+    when: rhel7cis_rule_5_4_3
+    tags:
+     - level1
+     - harden
+     - rule_5.4.3
+     - rhel7
+#####
+
+  - name: " 5.4.4 | HARDEN | Ensure default user shell timeout is configured"
+    block:
+    - name: " 5.4.4 | HARDEN | Ensure default user shell timeout is configured"
+      slurp:
+        src: "{{ item }}"
+      loop:
+        - /etc/bashrc
+        - /etc/profile
+      ignore_errors: yes
+      register: before_profile
+    - name: Deduplicate values from /etc/profile
+      lineinfile:
+        path: "{{ item }}"
+        create: false
+        regexp: ^\s*TMOUT=
+        state: absent
+      loop:
+        - /etc/bashrc
+        - /etc/profile
+      ignore_errors: yes
+      register: result_profile
+    - name: Check if /etc/profile.d exists
+      stat:
+        path: /etc/profile.d
+      register: _etc_profile_d_exists
+      ignore_errors: yes
+    - name: Check if the parameter TMOUT is present in /etc/profile.d
+      find:
+        paths: /etc/profile.d
+        recurse: 'yes'
+        follow: 'no'
+        contains: ^\s*TMOUT=
+      register: _etc_profile_d_has_parameter
+      ignore_errors: yes
+      when: _etc_profile_d_exists.stat.isdir is defined and _etc_profile_d_exists.stat.isdir
+    - name: " 5.4.4 | HARDEN | Ensure default user shell timeout is configured"
+      slurp:
+        src: '{{ item.path }}'
+      ignore_errors: yes
+      register: before_files
+      with_items: '{{ _etc_profile_d_has_parameter.files }}'
+      when: _etc_profile_d_has_parameter.matched
+    - name: Remove parameter from files in /etc/profile.d
+      lineinfile:
+        path: '{{ item.path }}'
+        create: false
+        regexp: ^\s*TMOUT=
+        state: absent
+      with_items: '{{ _etc_profile_d_has_parameter.files }}'
+      when: _etc_profile_d_has_parameter.matched
+      ignore_errors: yes
+      register: result_remove
+    - name: Insert correct line to /etc/profile
+      lineinfile:
+        path: "{{ item }}"
+        create: true
+        line: 'TMOUT=900 ; export TMOUT'
+        state: present
+        validate: bash -n %s
+      loop:
+        - /etc/bashrc
+        - /etc/profile
+      ignore_errors: yes
+      register: result_insert
+    - name: "5.4.4 - Setup audit variable"
+      set_fact:
+        before_5_4_4: "{{ before_5_4_4|default([]) + [item] }}"
+      loop:
+      - "{{ before_profile }}"
+      - "{{ before_files }}"
+    - name: "5.4.4 - Setup result variable"
+      set_fact:
+        result_5_4_4: "{{ result_5_4_4|default([]) + [item] }}"
+      loop:
+      - "{{ result_profile }}"
+      - "{{ result_remove }}"
+      - "{{ result_insert }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.4.4':{'result':result_5_4_4|default({}),'audits':before_5_4_4|default({})}}) }}"
+    when: rhel7cis_rule_5_4_4
+    tags:
+     - level1
+     - harden
+     - rule_5.4.4
+     - rhel7
+#####
+  - name: " 5.4.5 | HARDEN |  Ensure default user umask is configured "
+    block:
+    - name: " 5.4.5 | HARDEN |  Ensure default user umask is configured  "
+      slurp:
+        src: "{{ item }}"
+      ignore_errors: yes
+      register: before_5_4_5
+      loop:
+        - /etc/bashrc
+        - /etc/profile
+    - name: Set user umask in /etc/profile
+      lineinfile:
+        path: "{{ item }}"
+        create: true
+        regexp: umask.*
+        line: umask 027
+      loop:
+        - /etc/bashrc
+        - /etc/profile
+      ignore_errors: yes
+      register: result_5_4_5
+    - set_fact:
+        all_results: "{{ all_results|combine({'5.4.4':{'result':result_5_4_5|default({}),'audits':before_5_4_5|default({})}}) }}"
+    when: rhel7cis_rule_5_4_5
+    tags:
+     - level1
+     - harden
+     - rule_5.4.5
+     - rhel7
+
+#####
+#  - name: " 5.5 | HARDEN | Ensure root login is restricted to system console "
+#    block:
+#    - name: " 5.5 | HARDEN | Ensure root login is restricted to system console "
+#      shell:  cat /etc/securetty
+#      register: rhel7cis_rule_5_5_rc
+#      ignore_errors: yes
+
+
+#    - name: " 5.5 | MANUAL_CHECK | Ensure root login is restricted to system console"
+#      block:
+#      - name: " 5.5 | MANUAL_CHECK | Ensure root login is restricted to system console"
+#        debug:
+#          var: rhel7cis_rule_5_5_rc.stdout_lines
+#          msg:
+#          - "The following contains a list of terminals that may be logged in directly as root: {{ rhel7cis_rule_5_5_rc.stdout_lines | list }}. "
+#          - "The file /etc/securetty contains a list of valid terminals that may be logged in directly as root. Please review them."
+#          - "Once verified, please set rhel7cis_rule_5_5 to true in default/main.yml ."
+#        register: rhel7cis_rule_5_5_console_list
+#      - set_fact:
+#          rhel7cis_rule_5_5_result: false
+#      when: rhel7cis_rule_5_5_rc.rc == 0
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'5.5':rhel7cis_rule_5_5_result|default(true)}) }}"
+#    when: rhel7cis_rule_5_5
+#    tags:
+#     - level1
+#     - harden
+#     - rule_5.5
+#     - rhel7
+#####
+  - name: " 5.6 | HARDEN | Ensure access to the su command is restricted  "
+    block:
+      - name: " 5.6 | HARDEN | Ensure access to the su command is restricted  "
+        slurp:
+          src: /etc/pam.d/su
+        ignore_errors: yes
+        register: before_5_6
+      - name: " 5.6 | HARDEN | Ensure access to the su command is restricted - before "
+        shell: grep {{ groupname_for_su }} /etc/group
+        ignore_errors: yes
+      - name: " 5.6 | HARDEN | Ensure access to the su command is restricted - create group"
+        group:
+          name: "{{ groupname_for_su }}"
+          state: present
+        register: result_5_6
+        ignore_errors: yes
+      - lineinfile:
+          dest: /etc/pam.d/su
+          insertafter: EOF
+          line: 'auth required pam_wheel.so use_uid group=sugroup'
+        ignore_errors: yes
+      - set_fact:
+          all_results: "{{ all_results|combine({'5.6':{'result':result_5_6|default({}),'audits':before_5_6|default({})}}) }}"
+    when: rhel7cis_rule_5_6
+    tags:
+     - level1
+     - harden
+     - rule_5.6
+     - rhel7
+
+#####
+#####

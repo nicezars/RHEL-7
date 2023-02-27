@@ -1,0 +1,1462 @@
+---
+# Copyright 2020
+# This section contains 33 rules
+#####
+  - name: " 4.0 | HARDEN | Identify system_bit"
+    block:
+    - shell:   uname -m
+      register: uname_output
+      ignore_errors: yes
+    - set_fact:
+        system_bit: 64
+      when: uname_output.stdout == "x86_64"
+    - set_fact:
+        system_bit: 32
+      when: uname_output.stdout == "i686" or uname_output.stdout == "i386"
+    tags:
+     - level2
+     - harden
+     - rhel7
+     - rule_4.1.3
+     - rule_4.1.5
+     - rule_4.1.9
+     - rule_4.1.10
+     - rule_4.1.12
+     - rule_4.1.13
+     - rule_4.1.16
+
+#####
+# Install and uninstall rpms is exclusion recommended
+#
+  - name: " 4.1.1.1 | HARDEN | Ensure auditd is installed"
+    block:
+    - name: " 4.1.1.1 | HARDEN | Ensure auditd is installed"
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_adt: "{{ pf['audit']|default([]) }}"
+        before_adtlb: "{{ pf['audit-libs']|default([]) }}"
+      ignore_errors: yes
+    - package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+      - audit
+      - audit-libs
+      register: result_4_1_1_1
+      diff: yes
+      ignore_errors: yes
+    - set_fact:
+        before_4_1_1_1: "{{ before_4_1_1_1|default([]) + [item] }}"
+      loop:
+        - "{{ before_adt|default([]) }}"
+        - "{{ before_adtlb|default([]) }}"
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.1.1':{'result':result_4_1_1_1|default({}),'audits':before_4_1_1_1|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_1
+    tags:
+     - level2
+     - harden
+     - rule_4.1.1.1
+     - rhel7
+
+#####
+  - name: " 4.1.1.2 | HARDEN |  Ensure auditd service is enabled and running"
+    block:
+    - name: " 4.1.1.2 | HARDEN |  Ensure auditd service is enabled and running - before"
+      service_facts:
+      ignore_errors: yes
+    - set_fact:
+        sf: "{{ ansible_facts.services }}"
+      ignore_errors: yes
+    - set_fact:
+        before_4_1_1_2: "{{ sf['auditd.service']|default({}) }}"
+      ignore_errors: yes
+    - name: " 4.1.1.2 | HARDEN |  Ensure auditd service is enabled and running"
+      systemd:
+        name: auditd
+        state: started
+        enabled: yes
+      register: result_4_1_1_2
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.1.2':{'result':result_4_1_1_2|default({}),'audits':before_4_1_1_2|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2
+    tags:
+     - level2
+     - harden
+     - rule_4.1.1.2
+     - rhel7
+
+#####
+  - name: " 4.1.1.3 | HARDEN | Ensure auditing for processes that start prior to auditd is enabled "
+    block:
+    - name: " 4.1.1.3 | HARDEN | Ensure auditing for processes that start prior to auditd is enabled"
+      slurp:
+        src: /etc/default/grub
+      ignore_errors: yes
+      register: before_4_1_1_3
+    - shell: |
+         grep "^\s*linux" /boot/grub2/grub.cfg | grep -v "audit="
+      register: rhel7cis_rule_4_1_1_3_a_rc
+      ignore_errors: yes
+    - shell: |
+         grep "^\s*linux" /boot/grub2/grub.cfg | grep "audit=0"
+      register: rhel7cis_rule_4_1_1_3_b_rc
+      ignore_errors: yes
+    - name: " 4.1.1.3 | HARDEN | Ensure auditing for processes that start prior to auditd is enabled - modify"
+      lineinfile:
+        path: /etc/default/grub
+        backrefs: yes
+        regexp: '^(.*GRUB_CMDLINE_LINUX=.*)"'
+        line: '\1 audit=1"'
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+      when: rhel7cis_rule_4_1_1_3_a_rc.rc == 0
+    - replace:
+        path: /etc/default/grub
+        regexp: 'audit=0'
+        replace: "audit=1"
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+      when: rhel7cis_rule_4_1_1_3_b_rc.rc == 0
+    - shell:  grub2-mkconfig -o /boot/grub2/grub.cfg
+      ignore_errors: yes
+      register: result_update
+    - name: "4.1.1.3 - Setup result variable"
+      set_fact:
+        result_4_1_1_3: "{{ result_4_1_1_3|default([]) + [item] }}"
+      loop:
+      - "{{ result_conf }}"
+      - "{{ result_update }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.1.3':{'result':result_4_1_1_3|default({}),'audits':before_4_1_1_3|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_1_3
+    tags:
+     - level2
+     - harden
+     - rule_4.1.1.3
+     - rhel7
+
+
+#####
+  - name: " 4.1.2.1 | HARDEN | Ensure audit log storage size is configured"
+    block:
+    - name: " 4.1.2.1 | HARDEN | Ensure audit log storage size is configured"
+      slurp:
+        src: /etc/audit/auditd.conf
+      ignore_errors: yes
+      register: before_4_1_2_1
+    - name: " 4.1.2.1 | HARDEN | Ensure audit log storage size is configured - modify"
+      ini_file:
+        path: /etc/audit/auditd.conf
+        section: null
+        option: max_log_file
+        value: '{{ log_storage_size }}'
+      register: result_4_1_2_1
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.2.1':{'result':result_4_1_2_1|default({}),'audits':before_4_1_2_1|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_2_1
+    tags:
+     - level2
+     - harden
+     - rule_4.1.2.1
+     - rhel7
+
+#####
+  - name: " 4.1.2.2 | HARDEN | Ensure audit logs are not automatically deleted"
+    block:
+    - name: " 4.1.2.2 | HARDEN | Ensure audit logs are not automatically deleted"
+      slurp:
+        src: /etc/audit/auditd.conf
+      ignore_errors: yes
+      register: before_4_1_2_2
+    - name: " 4.1.2.2 | HARDEN | Ensure audit logs are not automatically deleted - modify"
+      ini_file:
+        path: /etc/audit/auditd.conf
+        section: null
+        option: max_log_file_action
+        value: "keep_logs"
+      register: result_4_1_2_2
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.2.2':{'result':result_4_1_2_2|default({}),'audits':before_4_1_2_2|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_2_2
+    tags:
+     - level2
+     - harden
+     - rule_4.1.2.2
+     - rhel7
+
+#####
+#  - name: " 4.1.2.3 | HARDEN | Ensure system is disabled when audit logs are full"
+#    block:
+#    - name: " 4.1.2.3 | HARDEN | Ensure system is disabled when audit logs are full"
+#      slurp:
+#        src: /etc/audit/auditd.conf
+#      ignore_errors: yes
+#      register: before_4_1_2_3
+#    - name: " 4.1.2.3 | HARDEN | Ensure system is disabled when audit logs are full - modify"
+#      ini_file:
+#        path: /etc/audit/auditd.conf
+#        section: null
+#        option: "{{ item.option }}"
+#        value: "{{ item.value }}"
+#      with_items:
+#        - { option: 'space_left_action', value: 'syslog' }
+#        - { option: 'action_mail_acct', value: 'root' }
+#        - { option: 'admin_space_left_action', value: 'suspend' }
+#      register: result_4_1_2_3
+#      ignore_errors: yes
+#      diff: yes
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'4.1.2.3':{'result':result_4_1_2_3|default({}),'audits':before_4_1_2_3|default({})}}) }}"
+#    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_2_3
+#    tags:
+#     - level2
+#     - harden
+#     - rule_4.1.2.3
+#     - rhel7
+#
+#####
+  - name: " 4.1.2.4 | HARDEN |  Ensure audit_backlog_limit is sufficient "
+    block:
+    - name: " 4.1.2.4  | HARDEN |  Ensure audit_backlog_limit is sufficient"
+      slurp:
+        src: /etc/default/grub
+      ignore_errors: yes
+      register: before_4_1_2_4
+    - shell: |
+         grep "^\s*linux" /boot/grub2/grub.cfg | grep -v "audit_backlog_limit"
+      register: rhel7cis_rule_4_1_2_4_a_rc
+      ignore_errors: yes
+    - shell: |
+         grep "^\s*linux" /boot/grub2/grub.cfg | grep -v "audit_backlog_limit=2048"
+      register: rhel7cis_rule_4_1_2_4_b_rc
+      ignore_errors: yes
+    - name: " 4.1.2.4 | HARDEN | Ensure audit_backlog_limit is sufficient - modify"
+      lineinfile:
+        path: /etc/default/grub
+        backrefs: yes
+        regexp: '^(.*GRUB_CMDLINE_LINUX=.*)"'
+        line: '\1 audit_backlog_limit=2048"'
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+      when: rhel7cis_rule_4_1_2_4_a_rc.rc == 0
+    - replace:
+        path: /etc/default/grub
+        regexp: 'audit_backlog_limit=[0-9]+'
+        replace: "audit_backlog_limit=2048"
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+      when: rhel7cis_rule_4_1_2_4_b_rc.rc == 0
+    - shell:  grub2-mkconfig -o /boot/grub2/grub.cfg
+      ignore_errors: yes
+      register: result_update
+    - name: "4.1.2.4 - Setup result variable"
+      set_fact:
+        result_4_1_2_4: "{{ result_4_1_2_4|default([]) + [item] }}"
+      loop:
+      - "{{ result_conf }}"
+      - "{{ result_update }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.2.4':{'result':result_4_1_2_4|default({}),'audits':before_4_1_2_4|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_2_4
+    tags:
+     - level2
+     - harden
+     - rule_4.1.2.4
+     - rhel7
+
+#####
+  - name: " 4.1.3  | HARDEN |  Ensure events that modify date and time information are collected "
+    block:
+    - name: " 4.1.3  | HARDEN_32 |  Ensure events that modify date and time information are collected"
+      slurp:
+        src: /etc/audit/rules.d/time_change.rules
+      ignore_errors: yes
+      register: before_4_1_3
+    - name: " 4.1.3  | HARDEN_32 |  Ensure events that modify date and time information are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/time_change.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b32 -S adjtimex', line: '-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change' }
+        - { regexp: '^-a always,exit -F arch=b32 -S clock_settime', line: '-a always,exit -F arch=b32 -S clock_settime -k time-change' }
+        - { regexp: '^-w /etc/localtime -p', line: '-w /etc/localtime -p wa -k time-change' }
+
+      register: result_4_1_3
+      ignore_errors: yes
+      diff: yes
+    - shell: auditctl -R /etc/audit/rules.d/time_change.rules
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.3':{'result':result_4_1_3|default({}),'audits':before_4_1_3|default({})}}) }}"
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_3
+    tags:
+     - level2
+     - harden
+     - rule_4.1.3
+     - rhel7
+
+  - name: " 4.1.3  | HARDEN |  Ensure events that modify date and time information are collected "
+    block:
+    - name: " 4.1.3  | HARDEN_64 |  Ensure events that modify date and time information are collected"
+      slurp:
+        src: /etc/audit/rules.d/time_change.rules
+      ignore_errors: yes
+      register: before_4_1_3
+    - name: " 4.1.3  | HARDEN_32 |  Ensure events that modify date and time information are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/time_change.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b64 -S adjtimex', line: '-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change' }
+        - { regexp: '^-a always,exit -F arch=b32 -S adjtimex', line: '-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change' }
+        - { regexp: '^-a always,exit -F arch=b64 -S clock_settime', line: '-a always,exit -F arch=b64 -S clock_settime -k time-change' }
+        - { regexp: '^-a always,exit -F arch=b32 -S clock_settime', line: '-a always,exit -F arch=b32 -S clock_settime -k time-change' }
+        - { regexp: '^-w /etc/localtime -p', line: '-w /etc/localtime -p wa -k time-change' }
+      register: result_4_1_3
+      ignore_errors: yes
+      diff: yes
+    - shell: auditctl -R /etc/audit/rules.d/time_change.rules
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.3':{'result':result_4_1_3|default({}),'audits':before_4_1_3|default({})}}) }}"
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_3
+    tags:
+     - level2
+     - harden
+     - rule_4.1.3
+     - rhel7
+
+#####
+  - name: " 4.1.4  | HARDEN | Ensure events that modify user/group information are collected  "
+    block:
+    - name: " 4.1.4  | HARDEN | Ensure events that modify user/group information are collected "
+      slurp:
+        src: /etc/audit/rules.d/identity.rules
+      ignore_errors: yes
+      register: before_4_1_4
+    - name: " 4.1.4  | HARDEN | Ensure events that modify user/group information are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/identity.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-w /etc/group -p wa -k identity', line: '-w /etc/group -p wa -k identity' }
+        - { regexp: '^-w /etc/passwd -p wa -k identity', line: '-w /etc/passwd -p wa -k identity' }
+        - { regexp: '^-w /etc/gshadow -p wa -k identity', line: '-w /etc/gshadow -p wa -k identity' }
+        - { regexp: '^-w /etc/shadow -p wa -k identity', line: '-w /etc/shadow -p wa -k identity' }
+        - { regexp: '^-w /etc/security/opasswd -p wa -k identity', line: '-w /etc/security/opasswd -p wa -k identity' }
+
+      register: result_4_1_4
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.4':{'result':result_4_1_4|default({}),'audits':before_4_1_4|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_4
+    tags:
+     - level2
+     - harden
+     - rule_4.1.4
+     - rhel7
+
+#####
+  - name: " 4.1.5  | HARDEN | Ensure events that modify the system's network environment are collected "
+    block:
+    - name: " 4.1.5  | HARDEN | Ensure events that modify the system's network environment are collected "
+      slurp:
+        src: /etc/audit/rules.d/system_local.rules
+      ignore_errors: yes
+      register: before_4_1_5
+    - name: " 4.1.5  | HARDEN | Ensure events that modify the system's network environment are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/system_local.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b32 -S sethostname', line: '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale' }
+        - { regexp: '^-w /etc/issue -p wa -k system-locale', line: '-w /etc/issue -p wa -k system-locale' }
+        - { regexp: '^-w /etc/issue.net -p wa -k system-locale', line: '-w /etc/issue.net -p wa -k system-locale' }
+        - { regexp: '^-w /etc/hosts -p wa -k system-locale', line: '-w /etc/hosts -p wa -k system-locale' }
+        - { regexp: '^-w /etc/sysconfig/network -p wa -k system-locale', line: '-w /etc/sysconfig/network -p wa -k system-locale' }
+      register: result_4_1_5
+      ignore_errors: yes
+      diff: yes
+    - shell: auditctl -R /etc/audit/rules.d/system_local.rules
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.5':{'result':result_4_1_5|default({}),'audits':before_4_1_5|default({})}}) }}"
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_5
+    tags:
+     - level2
+     - harden
+     - rule_4.1.5
+     - rhel7
+
+  - name: " 4.1.5  | HARDEN | Ensure events that modify the system's network environment are collected  "
+    block:
+    - name: " 4.1.5  | HARDEN | Ensure events that modify the system's network environment are collected "
+      slurp:
+        src: /etc/audit/rules.d/system_local.rules
+      ignore_errors: yes
+      register: before_4_1_5
+    - name: " 4.1.5  | HARDEN | Ensure events that modify the system's network environment are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/system_local.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b64 -S sethostname', line: '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale' }
+        - { regexp: '^-a always,exit -F arch=b32 -S sethostname', line: '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale' }
+        - { regexp: '^-w /etc/issue -p wa -k system-locale', line: '-w /etc/issue -p wa -k system-locale' }
+        - { regexp: '^-w /etc/issue.net -p wa -k system-locale', line: '-w /etc/issue.net -p wa -k system-locale' }
+        - { regexp: '^-w /etc/hosts -p wa -k system-locale', line: '-w /etc/hosts -p wa -k system-locale' }
+        - { regexp: '^-w /etc/sysconfig/network -p wa -k system-locale', line: '-w /etc/sysconfig/network -p wa -k system-locale' }
+      register: result_4_1_5
+      ignore_errors: yes
+      diff: yes
+    - shell: auditctl -R /etc/audit/rules.d/system_local.rules
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.5':{'result':result_4_1_5|default({}),'audits':before_4_1_5|default({})}}) }}"
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_5
+    tags:
+     - level2
+     - harden
+     - rule_4.1.5
+     - rhel7
+
+#####
+  - name: " 4.1.6  | HARDEN | Ensure events that modify the system's Mandatory Access Controls are collected "
+    block:
+    - name: " 4.1.6  | HARDEN | Ensure events that modify the system's Mandatory Access Controls are collected "
+      slurp:
+        src: /etc/audit/rules.d/MAC_policy.rules
+      ignore_errors: yes
+      register: before_4_1_6
+    - name: " 4.1.6  | HARDEN | Ensure events that modify the system's Mandatory Access Controls are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/MAC_policy.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-w /etc/selinux/ -p wa -k MAC-policy', line: '-w /etc/selinux/ -p wa -k MAC-policy' }
+        - { regexp: '^-w /usr/share/selinux/ -p wa -k MAC-policy', line: '-w /usr/share/selinux/ -p wa -k MAC-policy' }
+      register: result_4_1_6
+      ignore_errors: yes
+      diff: yes
+    - shell: auditctl -R /etc/audit/rules.d/MAC_policy.rules
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.6':{'result':result_4_1_6|default({}),'audits':before_4_1_6|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_6
+    tags:
+     - level2
+     - harden
+     - rule_4.1.6
+     - rhel7
+
+#####
+
+  - name: " 4.1.7  | HARDEN | Ensure login and logout events are collected "
+    block:
+    - name: " 4.1.7  | HARDEN | Ensure login and logout events are collected "
+      slurp:
+        src: /etc/audit/rules.d/logins.rules
+      ignore_errors: yes
+      register: before_4_1_7
+    - name: " 4.1.7  | HARDEN | Ensure login and logout events are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/logins.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-w /var/log/faillog -p wa -k logins', line: '-w /var/log/faillog -p wa -k logins' }
+        - { regexp: '^-w /var/log/lastlog -p wa -k logins', line: '-w /var/log/lastlog -p wa -k logins' }
+      register: result_logins
+      ignore_errors: yes
+      diff: yes
+    - block:
+      - name: 4.1.7  | HARDEN_faillock | Ensure login and logout events are collected
+        lineinfile:
+          path: /etc/audit/rules.d/logins.rules
+          regexp: "{{ item.regexp }}"
+          line: "{{ item.line }}"
+          create: yes
+        with_items:
+          - { regexp: '^-w /var/run/faillock/ -p wa -k logins', line: '-w /var/run/faillock/ -p wa -k logins' }
+        register: result_faillock
+        ignore_errors: yes
+        diff: yes
+      when: pam_faillock == true
+    - block:
+      - name: 4.1.7  | HARDEN_tally2 | Ensure login and logout events are collected
+        lineinfile:
+          path: /etc/audit/rules.d/logins.rules
+          regexp: "{{ item.regexp }}"
+          line: "{{ item.line }}"
+          create: yes
+        with_items:
+          - { regexp: '^-w /var/log/tallylog -p wa -k logins', line: '-w /var/log/tallylog -p wa -k logins' }
+        register: result_tally2
+        ignore_errors: yes
+        diff: yes
+      when: pam_tally2 == true
+    - shell: auditctl -R /etc/audit/rules.d/logins.rules.rules
+      ignore_errors: yes
+    - name: "4.1.7 - Setup result variable"
+      set_fact:
+        result_4_1_7: "{{ result_4_1_7|default([]) + [item] }}"
+      loop:
+      - "{{ result_logins |default([]) }}"
+      - "{{ result_faillock |default([]) }}"
+      - "{{ result_tally2 |default([]) }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.7':{'result':result_4_1_7|default({}),'audits':before_4_1_7|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_7
+    tags:
+     - level2
+     - harden
+     - rule_4.1.7
+     - rhel7
+
+#####
+
+  - name: " 4.1.8  | HARDEN | Ensure session initiation information is collected "
+    block:
+    - name: " 4.1.8  | HARDEN | Ensure session initiation information is collected "
+      slurp:
+        src: /etc/audit/rules.d/session.rules
+      ignore_errors: yes
+      register: before_4_1_8
+    - name: " 4.1.8  | HARDEN | Ensure session initiation information is collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/session.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-w /var/run/utmp -p wa -k session', line: '-w /var/run/utmp -p wa -k session' }
+        - { regexp: '^-w /var/log/wtmp -p wa -k logins', line: '-w /var/log/wtmp -p wa -k logins' }
+        - { regexp: '^-w /var/log/btmp -p wa -k logins', line: '-w /var/log/btmp -p wa -k logins' }
+      register: result_4_1_8
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.8':{'result':result_4_1_8|default({}),'audits':before_4_1_8|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_8
+    tags:
+     - level2
+     - harden
+     - rule_4.1.8
+     - rhel7
+
+#####
+  - name: " 4.1.9  | HARDEN | Ensure discretionary access control permission modification events are collected"
+    block:
+    - name: " 4.1.9  | HARDEN_32 | Ensure discretionary access control permission modification events are collected"
+      slurp:
+        src: /etc/audit/rules.d/perm_mod.rules
+      ignore_errors: yes
+      register: before_4_1_9
+    - name: "4.1.9  | HARDEN_32 | Ensure discretionary access control permission modification events are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/perm_mod.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b32 -S chmod', line: '-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' }
+        - { regexp: '^-a always,exit -F arch=b32 -S chown', line: '-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' }
+        - { regexp: '^-a always,exit -F arch=b32 -S setxattr', line: '-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' }
+      register: result_4_1_9
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.9':{'result':result_4_1_9|default({}),'audits':before_4_1_9|default({})}}) }}"
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_9
+    tags:
+     - level2
+     - harden
+     - rule_4.1.9
+     - rhel7
+
+  - name: " 4.1.9  | HARDEN | Ensure discretionary access control permission modification events are collected"
+    block:
+    - name: " 4.1.9  | HARDEN_64 | Ensure discretionary access control permission modification events are collected"
+      slurp:
+        src: /etc/audit/rules.d/perm_mod.rules
+      ignore_errors: yes
+      register: before_4_1_9
+    - name: "4.1.9  | HARDEN_64 | Ensure discretionary access control permission modification events are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/perm_mod.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b64 -S chmod', line: '-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' }
+        - { regexp: '^-a always,exit -F arch=b32 -S chmod', line: '-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' }
+        - { regexp: '^-a always,exit -F arch=b64 -S chown', line: '-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' }
+        - { regexp: '^-a always,exit -F arch=b32 -S chown', line: '-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' }
+        - { regexp: '^-a always,exit -F arch=b64 -S setxattr', line: '-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' }
+        - { regexp: '^-a always,exit -F arch=b32 -S setxattr', line: '-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' }
+      register: result_4_1_9
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.9':{'result':result_4_1_9|default({}),'audits':before_4_1_9|default({})}}) }}"
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_9
+    tags:
+     - level2
+     - harden
+     - rule_4.1.9
+     - rhel7
+
+#####
+  - name: " 4.1.10  | HARDEN |  Ensure unsuccessful unauthorized file access attempts are collected"
+    block:
+    - name: " 4.1.10  | HARDEN_32 |  Ensure unsuccessful unauthorized file access attempts are collected"
+      slurp:
+        src: /etc/audit/rules.d/access.rules
+      ignore_errors: yes
+      register: before_4_1_10
+    - name: "4.1.10  | HARDEN_32 |  Ensure unsuccessful unauthorized file access attempts are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/access.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES', line: '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' }
+        - { regexp: '^-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM', line: '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' }
+      register: result_4_1_10
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.10':{'result':result_4_1_10|default({}),'audits':before_4_1_10|default({})}}) }}"
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_10
+    tags:
+     - level2
+     - harden
+     - rule_4.1.10
+     - rhel7
+
+  - name: " 4.1.10  | HARDEN | Ensure unsuccessful unauthorized file access attempts are collected"
+    block:
+    - name: " 4.1.10  | HARDEN_64 |  Ensure unsuccessful unauthorized file access attempts are collected"
+      slurp:
+        src: /etc/audit/rules.d/access.rules
+      ignore_errors: yes
+      register: before_4_1_10
+    - name: "4.1.10  | HARDEN_64 |  Ensure unsuccessful unauthorized file access attempts are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/access.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES', line: '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' }
+        - { regexp: '^-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES', line: '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' }
+        - { regexp: '^-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM', line: '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' }
+        - { regexp: '^-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM', line: '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' }
+      register: result_4_1_10
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.10':{'result':result_4_1_10|default({}),'audits':before_4_1_10|default({})}}) }}"
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_10
+    tags:
+     - level2
+     - harden
+     - rule_4.1.10
+     - rhel7
+
+#####
+  - name: " 4.1.11 | HARDEN |   Ensure use of privileged commands is collected "
+    block:
+      - name: " 4.1.11  | HARDEN |   Ensure use of privileged commands is collected"
+        shell: |
+            df --local -P | grep -v tmpfs | awk 'NR!=1{print $6}' | xargs -I '/' find '/' -xdev \( -perm -4000 -o -perm -2000 \) -type f
+        args:
+          warn: false
+          executable: /bin/bash
+        check_mode: false
+        register: find_result
+        changed_when: false
+        ignore_errors: yes
+      - name: Search /etc/audit/rules.d for audit rule entries
+        find:
+          paths: /etc/audit/rules.d
+          recurse: false
+          contains: ^.*path={{ item }} .*$
+          patterns: '*.rules'
+        with_items:
+          - '{{ find_result.stdout_lines }}'
+        register: files_result
+        ignore_errors: yes
+      - name: Overwrites the rule in rules.d
+        lineinfile:
+          path: '{{ item.1.path }}'
+          line: '-a always,exit -F path={{ item.0.item }} -F perm=x -F auid>=1000 -F auid!=4294967295 -F key=privileged'
+          create: false
+          regexp: ^.*path={{ item.0.item }} .*$
+          backrefs: True
+        with_subelements:
+          - '{{ files_result.results }}'
+          - files
+        ignore_errors: yes
+        register: result_1
+##
+      - name: Adds the rule in rules.d
+        block:
+        - slurp:
+            src: /etc/audit/rules.d/privileged.rules
+          ignore_errors: yes
+          register: before_1
+        - lineinfile:
+            path: /etc/audit/rules.d/privileged.rules
+            line: '-a always,exit -F path={{ item.item }} -F perm=x -F auid>=1000 -F auid!=4294967295 -F key=special-config-changes'
+            create: true
+          with_items:
+            - '{{ files_result.results }}'
+          ignore_errors: yes
+          register: result_2
+        when: files_result.results is defined
+      - name: Inserts/replaces the rule in audit.rules
+        slurp:
+          src: /etc/audit/audit.rules
+        ignore_errors: yes
+        register: before_2
+      - lineinfile:
+          path: /etc/audit/audit.rules
+          line: '-a always,exit -F path={{ item.item }} -F perm=x -F auid>=1000 -F auid!=4294967295 -F key=privileged'
+          create: False
+          regexp: ^.*path={{ item.item }} .*$
+          backrefs: True
+        with_items:
+          - '{{ files_result.results }}'
+        ignore_errors: yes
+        register: result_3
+      - name: "4.1.11 - Setup audit variable"
+        set_fact:
+          before_4_1_11: "{{ before_4_1_11|default([]) + [item] }}"
+        loop:
+        - "{{ before_1 }}"
+        - "{{ before_2 }}"
+      - name: "4.1.11 - Setup result variable"
+        set_fact:
+          result_4_1_11: "{{ result_4_1_11|default([]) + [item] }}"
+        loop:
+        - "{{ result_1 |default([]) }}"
+        - "{{ result_2 |default([]) }}"
+        - "{{ result_3 |default([]) }}"
+
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.1.11':{'result':result_4_1_11|default({}),'audits':before_4_1_11|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 == true and rhel7cis_rule_4_1_11
+    tags:
+     - level2
+     - harden
+     - rule_4.1.11
+     - rhel7
+
+#####
+  - name: " 4.1.12  | HARDEN |  Ensure successful file system mounts are collected "
+    block:
+    - name: " 4.1.12  | HARDEN_32 |  Ensure successful file system mounts are collected "
+      slurp:
+        src: /etc/audit/rules.d/mounts.rules
+      ignore_errors: yes
+      register: before_4_1_12
+    - name: "4.1.12  | HARDEN_32 |  Ensure successful file system mounts are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/mounts.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts', line: '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' }
+        - { regexp: '^-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts', line: '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' }
+      register: result_4_1_12
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.12':{'result':result_4_1_12|default({}),'audits':before_4_1_12|default({})}}) }}"
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_12
+    tags:
+     - level2
+     - harden
+     - rule_4.1.12
+     - rhel7
+
+  - name: " 4.1.12  | HARDEN |  Ensure successful file system mounts are collected "
+    block:
+    - name: " 4.1.12  | HARDEN_64 |  Ensure successful file system mounts are collected "
+      slurp:
+        src: /etc/audit/rules.d/mounts.rules
+      ignore_errors: yes
+      register: before_4_1_12
+    - name: "4.1.12  | HARDEN_64 |  Ensure successful file system mounts are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/mounts.rules
+  #      regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { line: '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' }
+        - { line: '-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' }
+      register: result_4_1_12
+      ignore_errors: yes
+      diff: yes
+    - shell: auditctl -R /etc/audit/rules.d/mounts.rules
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.12':{'result':result_4_1_12|default({}),'audits':before_4_1_12|default({})}}) }}"
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 == true and rhel7cis_rule_4_1_12
+    tags:
+     - level2
+     - harden
+     - rule_4.1.12
+     - rhel7
+
+#####
+  - name: " 4.1.13  | HARDEN | Ensure file deletion events by users are collected "
+    block:
+    - name: " 4.1.13  | HARDEN_32 | Ensure file deletion events by users are collected "
+      slurp:
+        src: /etc/audit/rules.d/deletion.rules
+      ignore_errors: yes
+      register: before_4_1_13
+    - name: "4.1.13  | HARDEN_32 | Ensure file deletion events by users are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/deletion.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete', line: '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete' }
+      register: result_4_1_13
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.13':{'result':result_4_1_13|default({}),'audits':before_4_1_13|default({})}}) }}"
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_13
+    tags:
+     - level2
+     - harden
+     - rule_4.1.13
+     - rhel7
+
+  - name: " 4.1.13  | HARDEN | Ensure file deletion events by users are collected "
+    block:
+    - name: " 4.1.13  | HARDEN_64 | Ensure file deletion events by users are collected "
+      slurp:
+        src: /etc/audit/rules.d/deletion.rules
+      ignore_errors: yes
+      register: before_4_1_13
+    - name: "4.1.13  | HARDEN_64 | Ensure file deletion events by users are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/deletion.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete', line: '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete' }
+        - { regexp: '^-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete', line: '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete' }
+      register: result_4_1_13
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.13':{'result':result_4_1_13|default({}),'audits':before_4_1_13|default({})}}) }}"
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_13
+    tags:
+     - level2
+     - harden
+     - rule_4.1.13
+     - rhel7
+
+#####
+  - name: " 4.1.14  | HARDEN |  Ensure changes to system administration scope (sudoers) is collected "
+    block:
+    - name: " 4.1.14  | HARDEN | Ensure changes to system administration scope (sudoers) is collected"
+      slurp:
+        src: /etc/audit/rules.d/scope.rules
+      ignore_errors: yes
+      register: before_4_1_14
+    - name: "4.1.14  | HARDEN | Ensure changes to system administration scope (sudoers) is collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/scope.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-w /etc/sudoers -p wa -k scope', line: '-w /etc/sudoers -p wa -k scope' }
+        - { regexp: '^-w /etc/sudoers.d/ -p wa -k scope', line: '-w /etc/sudoers.d/ -p wa -k scope' }
+      register: result_4_1_14
+      ignore_errors: yes
+      diff: yes
+    - shell: auditctl -R /etc/audit/rules.d/scope.rules
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.14':{'result':result_4_1_14|default({}),'audits':before_4_1_14|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_14
+    tags:
+     - level2
+     - harden
+     - rule_4.1.14
+     - rhel7
+
+#####
+
+  - name: " 4.1.15  | HARDEN |  Ensure system administrator actions (sudolog) are collected "
+    block:
+    - name: " 4.1.15  | HARDEN |  Ensure system administrator actions (sudolog) are collected"
+      slurp:
+        src: /etc/audit/rules.d/actions.rules
+      ignore_errors: yes
+      register: before_4_1_15
+    - name: "4.1.15  | HARDEN |  Ensure system administrator actions (sudolog) are collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/actions.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-w /var/log/sudo.log -p wa -k actions', line: '-w /var/log/sudo.log -p wa -k actions' }
+      register: result_4_1_15
+      ignore_errors: yes
+      diff: yes
+    - shell: auditctl -R /etc/audit/rules.d/actions.rules
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.15':{'result':result_4_1_15|default({}),'audits':before_4_1_15|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_15
+    tags:
+     - level2
+     - harden
+     - rule_4.1.15
+     - rhel7
+
+
+#####
+  - name: " 4.1.16  | HARDEN | Ensure kernel module loading and unloading is collected  "
+    block:
+    - name: " 4.1.16  | HARDEN_32 | Ensure kernel module loading and unloading is collected  "
+      slurp:
+        src: /etc/audit/rules.d/modules.rules
+      ignore_errors: yes
+      register: before_4_1_16
+    - name: "4.1.16  | HARDEN_32 | Ensure kernel module loading and unloading is collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/modules.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-w /sbin/insmod -p x -k modules', line: '-w /sbin/insmod -p x -k modules' }
+        - { regexp: '^-w /sbin/rmmod -p x -k modules', line: '-w /sbin/rmmod -p x -k modules' }
+        - { regexp: '^-w /sbin/modprobe -p x -k modules', line: '-w /sbin/modprobe -p x -k modules' }
+        - { regexp: '^-a always,exit -F arch=b32 -S init_module -S delete_module -k modules', line: '-a always,exit -F arch=b32 -S init_module -S delete_module -k modules' }
+      register: result_4_1_16
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.16':{'result':result_4_1_16|default({}),'audits':before_4_1_16|default({})}}) }}"
+    when: system_bit == 32 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_16
+    tags:
+     - level2
+     - harden
+     - rule_4.1.16
+     - rhel7
+
+  - name: " 4.1.16  | HARDEN |  Ensure kernel module loading and unloading is collected  "
+    block:
+    - name: " 4.1.16  | HARDEN_64 |  Ensure kernel module loading and unloading is collected  "
+      slurp:
+        src: /etc/audit/rules.d/modules.rules
+      ignore_errors: yes
+      register: before_4_1_16
+    - name: "4.1.16  | HARDEN_64 | Ensure kernel module loading and unloading is collected - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/modules.rules
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        create: yes
+      with_items:
+        - { regexp: '^-w /sbin/insmod -p x -k modules', line: '-w /sbin/insmod -p x -k modules' }
+        - { regexp: '^-w /sbin/rmmod -p x -k modules', line: '-w /sbin/rmmod -p x -k modules' }
+        - { regexp: '^-w /sbin/modprobe -p x -k modules', line: '-w /sbin/modprobe -p x -k modules' }
+        - { regexp: '^-a always,exit -F arch=b64 -S init_module -S delete_module -k modules', line: '-a always,exit -F arch=b64 -S init_module -S delete_module -k modules' }
+      register: result_4_1_16
+      ignore_errors: yes
+      diff: yes
+    - shell: auditctl -R /etc/audit/rules.d/modules.rules
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.16':{'result':result_4_1_16|default({}),'audits':before_4_1_16|default({})}}) }}"
+    when: system_bit == 64 and rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_16
+    tags:
+     - level2
+     - harden
+     - rule_4.1.16
+     - rhel7
+
+
+#####
+  - name: " 4.1.17  | HARDEN |  Ensure the audit configuration is immutable"
+    block:
+    - name: " 4.1.17  | HARDEN | Ensure the audit configuration is immutable"
+      slurp:
+        src: /etc/audit/rules.d/99-finalize.rules
+      ignore_errors: yes
+      register: before_4_1_17
+    - name: "4.1.17  | HARDEN | Ensure the audit configuration is immutable - modify"
+      lineinfile:
+        path: /etc/audit/rules.d/99-finalize.rules
+        line: "-e 2"
+        create: yes
+      register: result_4_1_17
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.1.17':{'result':result_4_1_17|default({}),'audits':before_4_1_17|default({})}}) }}"
+    when: rhel7cis_rule_4_1_1_2 and rhel7cis_rule_4_1_17
+    tags:
+     - level2
+     - harden
+     - rule_4.1.17
+     - rhel7
+
+#####
+# Install and uninstall rpms is exclusion recommended
+#
+  - name: " 4.2.1.1 | HARDEN | Ensure rsyslog is installed "
+    block:
+    - name: " 4.2.1.1 | HARDEN | Ensure rsyslog is installed "
+      package_facts:
+      ignore_errors: yes
+    - set_fact:
+        pf: "{{ ansible_facts.packages }}"
+      ignore_errors: yes
+    - set_fact:
+        before_4_2_1_1: "{{ pf['rsyslog']|default([]) }}"
+      ignore_errors: yes
+    - package:
+        name: rsyslog
+        state: present
+      register: result_4_2_1_1
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.2.1.1':{'result':result_4_2_1_1|default({}),'audits':before_4_2_1_1|default({})}}) }}"
+    when: rhel7cis_rule_4_2_1_1
+    tags:
+     - level1
+     - harden
+     - rule_4.2.1.1
+     - rhel7
+
+#####
+  - name: " 4.2.1.2 | HARDEN |  Ensure rsyslog Service is enabled and running "
+    block:
+      - name: " 4.2.1.2 | HARDEN |  Ensure rsyslog Service is enabled and running - before"
+        service_facts:
+        ignore_errors: yes
+      - set_fact:
+          sf: "{{ ansible_facts.services }}"
+        ignore_errors: yes
+      - set_fact:
+          before_4_2_1_2: "{{ sf['rsyslog.service']|default({}) }}"
+        ignore_errors: yes
+      - name: " 4.2.1.2 | HARDEN |  Ensure rsyslog Service is enabled and running "
+        systemd:
+          name: rsyslog
+          enabled: yes
+        register: result_4_2_1_2
+        ignore_errors: yes
+      - set_fact:
+          all_results: "{{ all_results|combine({'4.2.1.2':{'result':result_4_2_1_2|default({}),'audits':before_4_2_1_2|default({})}}) }}"
+    when: rhel7cis_rule_4_2_1_2
+    tags:
+     - level1
+     - harden
+     - rule_4.2.1.2
+     - rhel7
+
+
+#####
+  - name: " 4.2.1.3 | HARDEN | Ensure rsyslog default file permissions configured "
+    block:
+    - name: " 4.2.1.3 | HARDEN | Ensure rsyslog default file permissions configured - before "
+      slurp:
+        src: /etc/rsyslog.conf
+      ignore_errors: yes
+      register: before_conf
+    - shell: ls /etc/rsyslog.d/*.conf
+      ignore_errors: yes
+      register: d_conf
+    - slurp:
+        src: "{{ item }}"
+      ignore_errors: yes
+      register: before_d_conf
+      with_items:
+        - "{{ d_conf.stdout_lines | default([]) }}"
+    - name: "4.2.1.3 | HARDEN | Ensure rsyslog default file permissions configured - modify"
+      lineinfile:
+        path: /etc/rsyslog.conf
+        regexp: '^$FileCreateMode'
+        line: '$FileCreateMode 0640'
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+    - lineinfile:
+        path: "{{ item }}"
+        regexp: '^$FileCreateMode'
+        line: '$FileCreateMode 0640'
+      register: result_d_conf
+      ignore_errors: yes
+      diff: yes
+      with_items:
+        - "{{ d_conf.stdout_lines | default([]) }}"
+    - name: "4.2.1.3 - Setup audit variable"
+      set_fact:
+        before_4_2_1_3: "{{ before_4_2_1_3|default([]) + [item] }}"
+      loop:
+      - "{{ before_conf }}"
+      - "{{ before_d_conf }}"
+    - name: "4.2.1.3 - Setup result variable"
+      set_fact:
+        result_4_2_1_3: "{{ result_4_2_1_3|default([]) + [item] }}"
+      loop:
+      - "{{ result_conf }}"
+      - "{{ result_d_conf }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.2.1.3':{'result':result_4_2_1_3|default({}),'audits':before_4_2_1_3|default({})}}) }}"
+    when: rhel7cis_rule_4_2_1_3
+    tags:
+     - level1
+     - harden
+     - rule_4.2.1.3
+     - rhel7
+
+#####
+#  - name: " 4.2.1.4 | HARDEN | Ensure logging is configured (Manual)"
+#    block:
+#      - name: " 4.2.1.4 | HARDEN | Ensure logging is configured "
+#        shell:    ls -l /var/log/
+#        register: rhel7cis_rule_4_2_1_4_rc
+#        ignore_errors: yes
+#      - debug:
+#          var: rhel7cis_rule_4_2_1_4_rc.stdout_lines
+#          msg:
+#          - "Please verify that the log files are logging information: {{ rhel7cis_rule_4_2_1_4_rc.stdout_lines | list }}. "
+#         - "Please review the contents of the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files to ensure appropriate logging is set."
+#         - "Once verified, please set rhel7cis_rule_4_2_1_4 to true in default/main.yml ."
+#        register: rhel7cis_rule_4_2_1_4_logfiles_list
+#      - set_fact:
+#          rhel7cis_rule_4_2_1_4_result: false
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'4.2.1.4':rhel7cis_rule_4_2_1_4_result|default(true)}) }}"
+#    when: rhel7cis_rule_4_2_1_4
+#    tags:
+#     - level1
+#     - harden
+#     - rule_4.2.1.4
+#     - rhel7
+#
+#####
+  - name: " 4.2.1.5 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host  "
+    block:
+    - name: "4.2.1.5 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host - before"
+      slurp:
+        src: /etc/rsyslog.conf
+      ignore_errors: yes
+      register: before_conf
+    - shell: ls /etc/rsyslog.d/*.conf
+      ignore_errors: yes
+      register: d_conf
+    - slurp:
+        src: "{{ item }}"
+      ignore_errors: yes
+      register: before_d_conf
+      with_items:
+        - "{{ d_conf.stdout_lines | default([]) }}"
+    - name: "4.2.1.5 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host - modify"
+      lineinfile:
+        path: /etc/rsyslog.conf
+        regexp: '^\*.\*'
+        line: "*.* @@{{ central_loghost }}"
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+    - lineinfile:
+        path: "{{ item }}"
+        regexp: '^\*.\*'
+        line: "*.* @@{{ central_loghost }}"
+      register: result_d_conf
+      ignore_errors: yes
+      diff: yes
+      with_items:
+        - "{{ d_conf.stdout_lines | default([]) }}"
+    - systemd:
+        state: restarted
+        name: rsyslog
+      register: result_restart
+      ignore_errors: yes
+    - name: "4.2.1.5 - Setup audit variable"
+      set_fact:
+        before_4_2_1_5: "{{ before_4_2_1_5|default([]) + [item] }}"
+      loop:
+      - "{{ before_conf }}"
+      - "{{ before_d_conf }}"
+    - name: "4.2.1.5 - Setup result variable"
+      set_fact:
+        result_4_2_1_5: "{{ result_4_2_1_5|default([]) + [item] }}"
+      loop:
+      - "{{ result_conf }}"
+      - "{{ result_d_conf }}"
+      - "{{ result_restart }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.2.1.5':{'result':result_4_2_1_5|default({}),'audits':before_4_2_1_5|default({})}}) }}"
+    when: rhel7cis_rule_4_2_1_5
+    tags:
+     - level1
+     - harden
+     - rule_4.2.1.5
+     - rhel7
+
+#####
+  - name: " 4.2.1.6 | HARDEN | Ensure remote rsyslog messages are only accepted on designated log hosts.   "
+    block:
+    - name: " 4.2.1.6 | HARDEN | Ensure remote rsyslog messages are only accepted on designated log hosts. "
+      slurp:
+        src: /etc/rsyslog.conf
+      ignore_errors: yes
+      register: before_4_2_1_6
+    - name: "4.2.1.6 | HARDEN | Ensure remote rsyslog messages are only accepted on designated log hosts. - modify"
+      lineinfile:
+        path: /etc/rsyslog.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '^$ModLoad', line: '$ModLoad imtcp' }
+        - { regexp: '^$InputTCPServerRun', line: '$InputTCPServerRun 514' }
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+    - systemd:
+        state: restarted
+        name: rsyslog
+      register: result_restart
+      ignore_errors: yes
+    - name: "4.2.1.6 - Setup result variable"
+      set_fact:
+        result_4_2_1_6: "{{ result_4_2_1_6|default([]) + [item] }}"
+      loop:
+      - "{{ result_conf }}"
+      - "{{ result_restart }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.2.1.6':{'result':result_4_2_1_6|default({}),'audits':before_4_2_1_6|default({})}}) }}"
+    when: rhel7cis_rule_4_2_1_6 and designated_log_host == true
+    tags:
+     - level1
+     - harden
+     - rule_4.2.1.6
+     - rhel7
+
+  - name: " 4.2.1.6 | HARDEN | Ensure remote rsyslog messages are only accepted on designated log hosts.   "
+    block:
+    - name: " 4.2.1.6 | HARDEN | Ensure remote rsyslog messages are only accepted on designated log hosts. "
+      slurp:
+        src: /etc/rsyslog.conf
+      ignore_errors: yes
+      register: before_4_2_1_6
+    - name: "4.2.1.6 | HARDEN | Ensure remote rsyslog messages are only accepted on designated log hosts. - modify"
+      lineinfile:
+        path: /etc/rsyslog.conf
+        state: absent
+        regexp: "{{ item }}"
+      with_items:
+        -  '^\$ModLoad'
+        -  '^\$InputTCPServerRun'
+      register: result_conf
+      ignore_errors: yes
+      diff: yes
+    - systemd:
+        state: restarted
+        name: rsyslog
+      register: result_restart
+      ignore_errors: yes
+    - name: "4.2.1.6 - Setup result variable"
+      set_fact:
+        result_4_2_1_6: "{{ result_4_2_1_6|default([]) + [item] }}"
+      loop:
+      - "{{ result_conf }}"
+      - "{{ result_restart }}"
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.2.1.6':{'result':result_4_2_1_6|default({}),'audits':before_4_2_1_6|default({})}}) }}"
+    when: rhel7cis_rule_4_2_1_6 and designated_log_host == false
+    tags:
+     - level1
+     - harden
+     - rule_4.2.1.6
+     - rhel7
+
+#####
+  - name: " 4.2.2.1 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host  "
+    block:
+    - name: " 4.2.2.1 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host - before "
+      slurp:
+        src: /etc/systemd/journald.conf
+      ignore_errors: yes
+      register: before_4_2_2_1
+    - name: " 4.2.2.1 | HARDEN | Ensure rsyslog is configured to send logs to a remote log host - modify"
+      ini_file:
+        path: /etc/systemd/journald.conf
+        section: Journal
+        option: ForwardToSyslog
+        value: 'yes'
+        no_extra_spaces: yes
+      register: result_4_2_2_1
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.2.2.1':{'result':result_4_2_2_1|default({}),'audits':before_4_2_2_1|default({})}}) }}"
+    when: rhel7cis_rule_4_2_2_1
+    tags:
+     - level1
+     - harden
+     - rule_4.2.2.1
+     - rhel7
+
+#####
+  - name: " 4.2.2.2 | HARDEN | Ensure journald is configured to compress large log files   "
+    block:
+    - name: " 4.2.2.2 | HARDEN | Ensure journald is configured to compress large log files - before"
+      slurp:
+        src: /etc/systemd/journald.conf
+      ignore_errors: yes
+      register: before_4_2_2_2
+    - name: " 4.2.2.2 | HARDEN | Ensure journald is configured to compress large log files - modify"
+      ini_file:
+        path: /etc/systemd/journald.conf
+        section: Journal
+        option: Compress
+        value: 'yes'
+        no_extra_spaces: yes
+      register: result_4_2_2_2
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.2.2.2':{'result':result_4_2_2_2|default({}),'audits':before_4_2_2_2|default({})}}) }}"
+    when: rhel7cis_rule_4_2_2_2
+    tags:
+     - level1
+     - harden
+     - rule_4.2.2.2
+     - rhel7
+
+#####
+  - name: " 4.2.2.3 | HARDEN |  Ensure journald is configured to write logfiles to persistent disk   "
+    block:
+    - name: " 4.2.2.3 | HARDEN |  Ensure journald is configured to write logfiles to persistent disk - before "
+      slurp:
+        src: /etc/systemd/journald.conf
+      ignore_errors: yes
+      register: before_4_2_2_3
+    - name: " 4.2.2.3 | HARDEN |  Ensure journald is configured to write logfiles to persistent disk - modify"
+      ini_file:
+        path: /etc/systemd/journald.conf
+        section: Journal
+        option: Storage
+        value: 'persistent'
+        no_extra_spaces: yes
+      register: result_4_2_2_3
+      ignore_errors: yes
+      diff: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.2.2.3':{'result':result_4_2_2_3|default({}),'audits':before_4_2_2_3|default({})}}) }}"
+    when: rhel7cis_rule_4_2_2_3
+    tags:
+     - level1
+     - harden
+     - rule_4.2.2.3
+     - rhel7
+
+#####
+  - name: " 4.2.3 | HARDEN | Ensure permissions on all logfiles are configured "
+    block:
+    - name: " 4.2.3 | HARDEN | Ensure permissions on all logfiles are configured - before"
+      shell: find /var/log -type f -ls|awk '{print $11}'
+      register: logslist_file
+      ignore_errors: yes
+    - stat:
+        path: "{{ item }}"
+      register: before_4_2_3
+      with_items:
+        - '{{ logslist_file.stdout_lines }}'
+    - name: " 4.2.3 | HARDEN | Ensure permissions on all logfiles are configured - modify"
+      file:
+        path: "{{ item }}"
+        mode: '0640'
+      register: result_file
+      ignore_errors: yes
+      diff: yes
+      with_items:
+        - '{{ logslist_file.stdout_lines }}'
+    - set_fact:
+        result_4_2_3: "{{ result_4_2_3|default([]) + [item] }}"
+      loop:
+        - "{{ result_file }}"
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'4.2.3':{'result':result_4_2_3|default({}),'audits':before_4_2_3|default({})}}) }}"
+    when: rhel7cis_rule_4_2_3
+    tags:
+     - level1
+     - harden
+     - rule_4.2.3
+     - rhel7
+
+#  - name: " 4.2.4 | HARDEN | Ensure logrotate is configured (Manual)"
+#    block:
+#      - name: " 4.2.4 | HARDEN | Ensure logrotate is configured "
+#        debug:
+#         msg:
+#         - "Review /etc/logrotate.conf and /etc/logrotate.d/* and verify logs are rotated according to site policy."
+#         - "Once verified, please set rhel7cis_rule_4_2_4 to true in default/main.yml ."
+#        register: rhel7cis_rule_4_2_4_logrotate_review_msg
+#      - set_fact:
+#          rhel7cis_rule_4_2_4_result: false
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'4.2.4':rhel7cis_rule_4_2_4_result|default(true)}) }}"
+#    when: rhel7cis_rule_4_2_4
+#    tags:
+#     - level1
+#     - harden
+#     - rule_4.2.4
+#     - rhel7
+#
+#####

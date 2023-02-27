@@ -1,0 +1,668 @@
+---
+#
+# Copyright 2020
+# This section contains 28 rules
+# Has Hash-out all the rules apart From Mandatory Checklist
+#
+#####
+  - name: " 2.1.1 | SCAN | Ensure xinetd is not installed "
+    block:
+    - name: " 2.1.1 | SCAN | Ensure xinetd is not installed "
+      shell:   rpm -q xinetd
+      register: rhel7cis_rule_2_1_1_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_1_1_result: false
+      when: rhel7cis_rule_2_1_1_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.1.1':rhel7cis_rule_2_1_1_result|default(true)}) }}"
+    when: rhel7cis_rule_2_1_1
+    tags:
+     - level1
+     - scan
+     - rule_2.1.1
+     - rhel7
+
+#####
+  - name: " 2.2.1.1 | SCAN | Ensure time synchronization is in use "
+    block:
+    - name: " 2.2.1.1 | SCAN | Ensure time synchronization is in use "
+      shell:  rpm -q chrony
+      register: rhel7cis_rule_2_2_1_1_a_rc
+      ignore_errors: yes
+
+    - shell:  rpm -q ntp
+      register: rhel7cis_rule_2_2_1_1_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_1_1_result: false
+      when: rhel7cis_rule_2_2_1_1_a_rc.rc != 0 or rhel7cis_rule_2_2_1_1_b_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.1.1':rhel7cis_rule_2_2_1_1_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_1_1
+    tags:
+     - level1
+     - scan
+     - rule_2.2.1.1
+     - rhel7
+
+#####
+  - name: " 2.2.1.2 | SCAN | Ensure chrony is configured "
+    block:
+      - name: " 2.2.1.2 | SCAN | Ensure chrony is configured "
+        shell:  grep -E "^(server|pool)" /etc/chrony.conf
+        register: rhel7cis_rule_2_2_1_2_a_rc
+        ignore_errors: yes
+      - shell:  grep ^OPTIONS /etc/sysconfig/chronyd | grep -Ei '\-u\s+chrony'
+        register: rhel7cis_rule_2_2_1_2_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_2_2_1_2_result: false
+        when: rhel7cis_rule_2_2_1_2_a_rc.rc != 0 or rhel7cis_rule_2_2_1_2_b_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'2.2.1.2':rhel7cis_rule_2_2_1_2_result|default(true)}) }}"
+    when: synchronize_service_name == "chrony" and rhel7cis_rule_2_2_1_2
+    tags:
+     - level1
+     - scan
+     - rule_2.2.1.2
+     - rhel7
+
+#####
+#####
+  - name: " 2.2.1.3 | SCAN | Ensure ntp is configured "
+    block:
+      - name: " 2.2.1.3 | SCAN | Ensure ntp is configured "
+        shell:  grep "^restrict" /etc/ntp.conf | grep -i '\-4 default kod nomodify notrap nopeer noquery'
+        register: rhel7cis_rule_2_2_1_3_a_rc
+        ignore_errors: yes
+      - shell:  grep "^restrict" /etc/ntp.conf | grep -i '\-6 default kod nomodify notrap nopeer noquery'
+        register: rhel7cis_rule_2_2_1_3_b_rc
+        ignore_errors: yes
+      - shell:  grep -E "^(server|pool)" /etc/ntp.conf | grep -E '{{ ntp_servers }}'
+        register: rhel7cis_rule_2_2_1_3_c_rc
+        ignore_errors: yes
+      - shell:  grep  "^OPTIONS" /etc/sysconfig/ntpd | grep -i '\-u ntp:ntp'
+        register: rhel7cis_rule_2_2_1_3_d_rc
+        ignore_errors: yes
+      - shell:  grep "^ExecStart" /usr/lib/systemd/system/ntpd.service | grep -i '\-u ntp:ntp'
+        register: rhel7cis_rule_2_2_1_3_e_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_2_2_1_3_result: false
+        when: rhel7cis_rule_2_2_1_3_a_rc.rc != 0 or rhel7cis_rule_2_2_1_3_b_rc.rc != 0 or rhel7cis_rule_2_2_1_3_c_rc.rc != 0 or (rhel7cis_rule_2_2_1_3_d_rc.rc != 0 and rhel7cis_rule_2_2_1_3_e_rc.rc != 0)
+      - set_fact:
+          all_results: "{{ all_results|combine({'2.2.1.3':rhel7cis_rule_2_2_1_3_result|default(true)}) }}"
+    when: synchronize_service_name == "ntp" and rhel7cis_rule_2_2_1_3
+    tags:
+     - level1
+     - scan
+     - rule_2.2.1.3
+     - rhel7
+
+#####
+  - name: " 2.2.2 | SCAN | Ensure X11 Server components are not installed"
+    block:
+    - name: " 2.2.2 | SCAN | Ensure X11 Server components are not installed"
+      shell:  |
+        rpm -qa xorg-x11-server*  2> /dev/null | wc -l | sed "s: ::g"
+      register: rhel7cis_rule_2_2_2_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_2_result: false
+      when: rhel7cis_rule_2_2_2_rc.stdout != "0"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.2':rhel7cis_rule_2_2_2_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_2
+    tags:
+     - level1
+     - scan
+     - rule_2.2.2
+     - rhel7
+
+#####
+  - name: " 2.2.3 | SCAN |  Ensure Avahi Server is not installed"
+    block:
+    - name: " 2.2.3 | SCAN |  Ensure Avahi Server is not installed"
+      shell:   rpm -q avahi-autoipd avahi
+      register: rhel7cis_rule_2_2_3_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_3_result: false
+      when: rhel7cis_rule_2_2_3_rc.rc != 2
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.3':rhel7cis_rule_2_2_3_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_3
+    tags:
+     - level1
+     - scan
+     - rule_2.2.3
+     - rhel7
+
+#####
+  - name: " 2.2.4 | SCAN |  Ensure CUPS is not installed "
+    block:
+    - name: " 2.2.4 | SCAN |  Ensure CUPS is not installed "
+      shell:   rpm -q cups
+      register: rhel7cis_rule_2_2_4_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_4_result: false
+      when: rhel7cis_rule_2_2_4_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.4':rhel7cis_rule_2_2_4_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_4
+    tags:
+     - level1
+     - scan
+     - rule_2.2.4
+     - rhel7
+
+#####
+  - name: " 2.2.5 | SCAN | Ensure DHCP Server is not installed "
+    block:
+    - name: " 2.2.5 | SCAN | Ensure DHCP Server is not installed "
+      shell:   rpm -q dhcp
+      register: rhel7cis_rule_2_2_5_rc
+      ignore_errors: yes
+
+    - name: " 2.2.5 | SCAN | Ensure dhcpd service is masked"
+      shell:   systemctl is-enabled dhcpd.service
+      register: rhel7cis_rule_2_2_5_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_5_result: false
+      when: rhel7cis_rule_2_2_5_rc.rc == 0 and rhel7cis_rule_2_2_5_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.5':rhel7cis_rule_2_2_5_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_5
+    tags:
+     - level1
+     - scan
+     - rule_2.2.5
+     - rhel7
+
+#####
+  - name: " 2.2.6 | SCAN | Ensure LDAP server is not installed "
+    block:
+    - name: " 2.2.6 | SCAN | Ensure LDAP server is not installed "
+      shell:   rpm -q openldap-servers
+      register: rhel7cis_rule_2_2_6_rc
+      ignore_errors: yes
+
+    - name: " 2.2.6 | SCAN | Ensure LDAP server (slapd) service is masked"
+      shell:   systemctl is-enabled slapd.service
+      register: rhel7cis_rule_2_2_6_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_6_result: false
+      when: rhel7cis_rule_2_2_6_rc.rc == 0 and rhel7cis_rule_2_2_6_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.6':rhel7cis_rule_2_2_6_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_6
+    tags:
+     - level1
+     - scan
+     - rule_2.2.6
+     - rhel7
+
+#####
+  - name: " 2.2.7 | SCAN | Ensure nfs-utils is not installed or the nfs-server service is masked"
+    block:
+    - name: " 2.2.7 | SCAN | Ensure nfs-utils is not installed or the nfs-server service is masked"
+      shell:   rpm -q nfs-utils
+      register: rhel7cis_rule_2_2_7_a_rc
+      ignore_errors: yes
+
+    - name: " 2.2.7 | SCAN | Ensure nfs-utils is not installed or the nfs-server service is masked"
+      shell:   systemctl is-enabled nfs-server
+      register: rhel7cis_rule_2_2_7_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_7_result: false
+      when: rhel7cis_rule_2_2_7_a_rc.rc == 0 and rhel7cis_rule_2_2_7_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.7':rhel7cis_rule_2_2_7_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_7
+    tags:
+     - level1
+     - scan
+     - rule_2.2.7
+     - rhel7
+
+#####
+  - name: " 2.2.8 | SCAN |  Ensure rpcbind is not installed or the rpcbind services are masked "
+    block:
+    - name: " 2.2.8 | SCAN |  Ensure rpcbind is not installed or the rpcbind services are masked "
+      shell:    rpm -q rpcbind
+      register: rhel7cis_rule_2_2_8_a_rc
+      ignore_errors: yes
+
+    - name: " 2.2.8 | SCAN |  Ensure rpcbind is not installed or the rpcbind services are masked "
+      shell:   systemctl is-enabled rpcbind
+      register: rhel7cis_rule_2_2_8_b_rc
+      ignore_errors: yes
+
+    - name: " 2.2.8 | SCAN |  Ensure rpcbind is not installed or the rpcbind services are masked "
+      shell:   systemctl is-enabled rpcbind.socket
+      register: rhel7cis_rule_2_2_8_c_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_8_result: false
+      when: rhel7cis_rule_2_2_8_a_rc.rc == 0 and (rhel7cis_rule_2_2_8_b_rc.stdout != "masked" or rhel7cis_rule_2_2_8_c_rc.stdout != "masked")
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.8':rhel7cis_rule_2_2_8_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_8
+    tags:
+     - level1
+     - scan
+     - rule_2.2.8
+     - rhel7
+
+#####
+  - name: " 2.2.9 | SCAN | Ensure DNS server is not installed "
+    block:
+    - name: " 2.2.9 | SCAN | Ensure DNS server is not installed "
+      shell:   rpm -q bind
+      register: rhel7cis_rule_2_2_9_rc
+      ignore_errors: yes
+
+    - name: " 2.2.9 | SCAN | Ensure DNS server (named) service is masked"
+      shell:   systemctl is-enabled named.service
+      register: rhel7cis_rule_2_2_9_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_9_result: false
+      when: rhel7cis_rule_2_2_9_rc.rc == 0 and rhel7cis_rule_2_2_9_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.9':rhel7cis_rule_2_2_9_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_9
+    tags:
+     - level1
+     - scan
+     - rule_2.2.9
+     - rhel7
+
+#####
+  - name: " 2.2.10 | SCAN | Ensure FTP Server is not installed  "
+    block:
+    - name: " 2.2.10 | SCAN | Ensure FTP Server is not installed  "
+      shell:   rpm -q vsftpd
+      register: rhel7cis_rule_2_2_10_rc
+      ignore_errors: yes
+
+    - name: " 2.2.10 | SCAN | Ensure FTP server (vsftpd) service is masked"
+      shell:   systemctl is-enabled vsftpd.service
+      register: rhel7cis_rule_2_2_10_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_10_result: false
+      when: rhel7cis_rule_2_2_10_rc.rc == 0 and rhel7cis_rule_2_2_10_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.10':rhel7cis_rule_2_2_10_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_10
+    tags:
+     - level1
+     - scan
+     - rule_2.2.10
+     - rhel7
+
+#####
+  - name: " 2.2.11 | SCAN | Ensure HTTP Server is not installed  "
+    block:
+    - name: " 2.2.11 | SCAN | Ensure HTTP Server is not installed  "
+      shell:   rpm -q httpd
+      register: rhel7cis_rule_2_2_11_rc
+      ignore_errors: yes
+
+    - name: " 2.2.11 | SCAN | Ensure HTTP server (httpd) service is masked"
+      shell:   systemctl is-enabled httpd.service
+      register: rhel7cis_rule_2_2_11_b_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_2_2_11_result: false
+      when: rhel7cis_rule_2_2_11_rc.rc == 0 and rhel7cis_rule_2_2_11_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.11':rhel7cis_rule_2_2_11_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_11
+    tags:
+     - level1
+     - scan
+     - rule_2.2.11
+     - rhel7
+
+#####
+  - name: " 2.2.12 | SCAN | Ensure IMAP and POP3 server is not installed  "
+    block:
+    - name: " 2.2.12 | SCAN | Ensure IMAP and POP3 server is not installed  "
+      shell:   rpm -q dovecot
+      register: rhel7cis_rule_2_2_12_rc
+      ignore_errors: yes
+
+    - name: " 2.2.12 | SCAN | Ensure IMAP and POP3 server (dovecot) service is masked"
+      shell:   systemctl is-enabled dovecot.service
+      register: rhel7cis_rule_2_2_12_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_12_result: false
+      when: rhel7cis_rule_2_2_12_rc.rc == 0 and rhel7cis_rule_2_2_12_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.12':rhel7cis_rule_2_2_12_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_12
+    tags:
+     - level1
+     - scan
+     - rule_2.2.12
+     - rhel7
+
+#####
+  - name: " 2.2.13 | SCAN | Ensure Samba is not installed  "
+    block:
+    - name: " 2.2.13 | SCAN | Ensure Samba is not installed  "
+      shell:   rpm -q samba
+      register: rhel7cis_rule_2_2_13_rc
+      ignore_errors: yes
+
+    - name: " 2.2.13 | SCAN | Ensure Samba server (smb) service is masked"
+      shell:   systemctl is-enabled smb.service
+      register: rhel7cis_rule_2_2_13_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_13_result: false
+      when: rhel7cis_rule_2_2_13_rc.rc == 0 and rhel7cis_rule_2_2_13_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.13':rhel7cis_rule_2_2_13_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_13
+    tags:
+     - level1
+     - scan
+     - rule_2.2.13
+     - rhel7
+
+#####
+  - name: " 2.2.14 | SCAN | Ensure HTTP Proxy Server is not installed "
+    block:
+    - name: " 2.2.14 | SCAN | Ensure HTTP Proxy Server is not installed "
+      shell:   rpm -q squid
+      register: rhel7cis_rule_2_2_14_rc
+      ignore_errors: yes
+
+    - name: " 2.2.14 | SCAN | Ensure HTTP Proxy server (squid) service is masked"
+      shell:   systemctl is-enabled squid.service
+      register: rhel7cis_rule_2_2_14_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_14_result: false
+      when: rhel7cis_rule_2_2_14_rc.rc == 0 and rhel7cis_rule_2_2_14_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.14':rhel7cis_rule_2_2_14_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_14
+    tags:
+     - level1
+     - scan
+     - rule_2.2.14
+     - rhel7
+
+#####
+  - name: " 2.2.15 | SCAN | Ensure net-snmp is not installed"
+    block:
+    - name: " 2.2.15 | SCAN | Ensure net-snmp is not installed"
+      shell:   rpm -q net-snmp
+      register: rhel7cis_rule_2_2_15_rc
+      ignore_errors: yes
+
+    - name: " 2.2.15 | SCAN | Ensure net-snmp server (snmpd) service is masked"
+      shell:   systemctl is-enabled snmpd.service
+      register: rhel7cis_rule_2_2_15_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_15_result: false
+      when: rhel7cis_rule_2_2_15_rc.rc == 0 and rhel7cis_rule_2_2_15_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.15':rhel7cis_rule_2_2_15_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_15
+    tags:
+     - level1
+     - scan
+     - rule_2.2.15
+     - rhel7
+
+#####
+  - name: " 2.2.16 | SCAN | Ensure mail transfer agent is configured for local-only mode "
+    block:
+    - name: " 2.2.16 | SCAN | Ensure mail transfer agent is configured for local-only mode "
+      shell:    ss -lntu | grep -E ':25\s' | grep -E -v '\s(127.0.0.1|\[?::1\]?):25\s'
+      register: rhel7cis_rule_2_2_16_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_16_result: false
+      when: rhel7cis_rule_2_2_16_rc.stdout != ""
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.16':rhel7cis_rule_2_2_16_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_16
+    tags:
+     - level1
+     - scan
+     - rule_2.2.16
+     - rhel7
+
+#####
+  - name: " 2.2.17 | SCAN | Ensure rsync is not installed or the rsyncd service is masked"
+    block:
+    - name: " 2.2.17 | SCAN | Ensure rsync is not installed"
+      shell:   rpm -q rsync
+      register: rhel7cis_rule_2_2_17_a_rc
+      ignore_errors: yes
+
+    - name: " 2.2.17 | SCAN | Ensure rsyncd service is masked"
+      shell:   systemctl is-enabled rsyncd
+      register: rhel7cis_rule_2_2_17_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_17_result: false
+      when: rhel7cis_rule_2_2_17_a_rc.rc == 0 and rhel7cis_rule_2_2_17_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.17':rhel7cis_rule_2_2_17_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_17
+    tags:
+     - level1
+     - scan
+     - rule_2.2.17
+     - rhel7
+
+#####
+  - name: " 2.2.18 | SCAN | Ensure NIS server is not installed "
+    block:
+    - name: " 2.2.18 | SCAN | Ensure NIS server is not installed "
+      shell:   rpm -q ypserv
+      register: rhel7cis_rule_2_2_18_rc
+      ignore_errors: yes
+
+    - name: " 2.2.18 | SCAN | Ensure rsyncd service is masked"
+      shell:   systemctl is-enabled ypserv.service
+      register: rhel7cis_rule_2_2_18_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_18_result: false
+      when: rhel7cis_rule_2_2_18_rc.rc == 0 and rhel7cis_rule_2_2_18_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.18':rhel7cis_rule_2_2_18_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_18
+    tags:
+     - level1
+     - scan
+     - rule_2.2.18
+     - rhel7
+
+#####
+  - name: " 2.2.19 | SCAN |  Ensure telnet-server is not installed  "
+    block:
+    - name: " 2.2.19 | SCAN |  Ensure telnet-server is not installed  "
+      shell:   rpm -q telnet-server
+      register: rhel7cis_rule_2_2_19_rc
+      ignore_errors: yes
+
+    - name: " 2.2.19 | SCAN | Ensure telnet-server service is masked"
+      shell:   systemctl is-enabled telnet.socket
+      register: rhel7cis_rule_2_2_19_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_2_19_result: false
+      when: rhel7cis_rule_2_2_19_rc.rc == 0 and rhel7cis_rule_2_2_19_b_rc.stdout != "masked"
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.2.19':rhel7cis_rule_2_2_19_result|default(true)}) }}"
+    when: rhel7cis_rule_2_2_19
+    tags:
+     - level1
+     - scan
+     - rule_2.2.19
+     - rhel7
+
+#####
+  - name: " 2.3.1 | SCAN |  Ensure NIS Client is not installed "
+    block:
+    - name: " 2.3.1 | SCAN |  Ensure NIS Client is not installed "
+      shell:   rpm -q ypbind
+      register: rhel7cis_rule_2_3_1_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_3_1_result: false
+      when: rhel7cis_rule_2_3_1_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.1':rhel7cis_rule_2_3_1_result|default(true)}) }}"
+    when: rhel7cis_rule_2_3_1
+    tags:
+     - level1
+     - scan
+     - rule_2.3.1
+     - rhel7
+
+#####
+  - name: " 2.3.2 | SCAN |  Ensure rsh client is not installed "
+    block:
+    - name: " 2.3.2 | SCAN |  Ensure rsh client is not installed "
+      shell:   rpm -q rsh
+      register: rhel7cis_rule_2_3_2_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_3_2_result: false
+      when: rhel7cis_rule_2_3_2_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.2':rhel7cis_rule_2_3_2_result|default(true)}) }}"
+    when: rhel7cis_rule_2_3_2
+    tags:
+     - level1
+     - scan
+     - rule_2.3.2
+     - rhel7
+
+#####
+  - name: " 2.3.3 | SCAN |  Ensure talk client is not installed "
+    block:
+    - name: " 2.3.3 | SCAN |  Ensure talk client is not installed "
+      shell:   rpm -q talk
+      register: rhel7cis_rule_2_3_3_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_3_3_result: false
+      when: rhel7cis_rule_2_3_3_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.3':rhel7cis_rule_2_3_3_result|default(true)}) }}"
+    when: rhel7cis_rule_2_3_3
+    tags:
+     - level1
+     - scan
+     - rule_2.3.3
+     - rhel7
+
+#####
+  - name: " 2.3.4 | SCAN |  Ensure telnet client is not installed "
+    block:
+    - name: " 2.3.4 | SCAN |  Ensure telnet client is not installed "
+      shell:   rpm -q telnet
+      register: rhel7cis_rule_2_3_4_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_3_4_result: false
+      when: rhel7cis_rule_2_3_4_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.4':rhel7cis_rule_2_3_4_result|default(true)}) }}"
+    when: rhel7cis_rule_2_3_4
+    tags:
+     - level1
+     - scan
+     - rule_2.3.4
+     - rhel7
+
+#####
+  - name: " 2.3.5 | SCAN |  Ensure LDAP client is not installed "
+    block:
+    - name: " 2.3.5 | SCAN |  Ensure LDAP client is not installed "
+      shell:   rpm -q openldap-clients
+      register: rhel7cis_rule_2_3_5_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_2_3_5_result: false
+      when: rhel7cis_rule_2_3_5_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'2.3.5':rhel7cis_rule_2_3_5_result|default(true)}) }}"
+    when: rhel7cis_rule_2_3_5
+    tags:
+     - level1
+     - scan
+     - rule_2.3.5
+     - rhel7
+
+#####
+  - name: " 2.4 | SCAN |  Ensure nonessential services are removed or masked "
+    block:
+    - name: " 2.4 | SCAN |  Ensure nonessential services are removed or masked "
+      shell: |
+       [[ -f /sbin/lsof ]] && lsof -i -P -n | grep -v "(ESTABLISHED)"
+       [[ ! -f /sbin/lsof ]] && [[ -f /bin/netstat ]] && netstat -atnp | grep -v "(ESTABLISHED)"
+       exit 0
+      register: rhel7cis_rule_2_4_rc
+      ignore_errors: yes
+
+    - name: " 2.4 | MANUAL_CHECK | Ensure nonessential services are removed or masked "
+      debug:
+        var: rhel7cis_rule_2_4_rc.stdout_lines
+#          msg:
+#          - "Please review if the following services listed are required on the system: {{ rhel7cis_rule_2_4_rc.stdout_lines | list }}. "
+#          - "Services listening on the system pose a potential risk as an attack vector. These services should be reviewed, and if not required, the service should be stopped, and the package containing the service should be removed. If required packages have a dependency, the service should be stopped and masked to reduce the attack surface of the system."
+#          - "Once verified, please set rhel7cis_rule_2_4 to true in default/main.yml ."
+      register: rhel7cis_rule_2_4_nonessential_services_list
+      ignore_errors: yes
+      when: rhel7cis_rule_2_4_rc.rc == 0
+    when: rhel7cis_rule_2_4
+    tags:
+     - level1
+     - scan
+     - rule_2.4
+     - rhel7
+######
+######

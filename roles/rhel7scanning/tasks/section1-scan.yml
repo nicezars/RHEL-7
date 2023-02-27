@@ -1,0 +1,1457 @@
+---
+#
+# Copyright 2020
+# This section contains 60 rules
+# Has Hash-out all the rules apart From Mandatory Checklist
+#####
+  - name: " 1.1.1.1 | SCAN | Ensure mounting of cramfs filesystems is disabled"
+    block:
+    - name: " 1.1.1.1 | SCAN | Ensure mounting of cramfs filesystems is disabled"
+      shell: modprobe -n -v cramfs | grep -E '(cramfs|install)'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_1_1_a_rc
+    - shell: lsmod | grep cramfs
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_1_1_b_rc
+    - set_fact:
+        rhel7cis_rule_1_1_1_1_result: false
+      when: rhel7cis_rule_1_1_1_1_b_rc.rc != 1 or rhel7cis_rule_1_1_1_1_a_rc.stdout != "install /bin/true "
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.1.1':rhel7cis_rule_1_1_1_1_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_1_1
+    tags:
+     - level1
+     - scan
+     - rule_1.1.1.1
+     - cramfs
+     - rhel7
+
+#####
+  - name: " 1.1.1.2 | SCAN | Ensure mounting of squashfs filesystems is disabled"
+    block:
+    - name: " 1.1.1.2 | SCAN | Ensure mounting of squashfs filesystems is disabled"
+      shell: modprobe -n -v squashfs | grep -E '(squashfs|install)'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_1_2_a_rc
+    - name: " 1.1.1.2 | SCAN | Ensure mounting of squashfs filesystems is disabled"
+      shell: lsmod | grep squashfs
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_1_2_b_rc
+    - set_fact:
+        rhel7cis_rule_1_1_1_2_result: false
+      when: rhel7cis_rule_1_1_1_2_b_rc.rc != 1 or rhel7cis_rule_1_1_1_2_a_rc.stdout != "install /bin/true "
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.1.2':rhel7cis_rule_1_1_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_1_2
+    tags:
+     - level2
+     - scan
+     - rule_1.1.1.2
+     - squashfs
+     - rhel7
+#####
+  - name: " 1.1.1.3 | SCAN | Ensure mounting of udf filesystems is disabled"
+    block:
+    - name: " 1.1.1.3 | SCAN | Ensure mounting of udf filesystems is disabled"
+      shell: modprobe -n -v udf | grep -E '(udf|install)'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_1_3_a_rc
+    - shell: lsmod | grep udf
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_1_3_b_rc
+    - set_fact:
+        rhel7cis_rule_1_1_1_3_result: false
+      when: rhel7cis_rule_1_1_1_3_b_rc.rc != 1 or rhel7cis_rule_1_1_1_3_a_rc.stdout != "install /bin/true "
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.1.3':rhel7cis_rule_1_1_1_3_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_1_3
+    tags:
+     - level1
+     - scan
+     - rule_1.1.1.3
+     - udf
+     - rhel7
+#####
+#  - name: " 1.1.1.4 | SCAN | Ensure mounting of FAT filesystems is limited"
+#    block:
+#      - name: " 1.1.1.4 | SCAN_UEFI | Ensure mounting of FAT filesystems is limited"
+#        shell: grep -E -i '\svfat\s' /etc/fstab
+#        ignore_errors: yes
+#        register: rhel7cis_rule_1_1_1_4_a_rc
+#      - name: " 1.1.1.4 | MANUAL_CHECK_UEFI | Ensure mounting of FAT filesystems is limited"
+#        debug:
+#          msg:
+#          - "The following FAT filesystem is in used: {{ rhel7cis_rule_1_1_1_4_a_rc.stdout }}. "
+#          - "Please ensure that the FAT filesystem is only used where appropriate."
+#          - "If FAT filesystems listed are appropriate, please set rhel7cis_rule_1_1_1_4 to true in default/main.yml ."
+#        register: rhel7cis_rule_1_1_1_4_uefi_list
+#    when: rhel7cis_rule_1_1_1_4_uefi == true and rhel7cis_rule_1_1_1_4
+#    tags:
+#     - level2
+#     - scan
+#     - rule_1.1.1.4
+#     - fat
+#     - uefi
+#     - rhel7
+#
+#  - name: " 1.1.1.4 | SCAN | Ensure mounting of FAT filesystems is limited"
+#    block:
+#      - name: " 1.1.1.4 | SCAN_NON_UEFI | Ensure mounting of FAT filesystems is limited"
+#        shell: |
+#          modprobe -n -v fat | grep -E '(fat|install)' 2> /dev/null | wc -l | sed "s: ::g"
+#          modprobe -n -v vfat | grep -E '(vfat|install)' 2> /dev/null | wc -l | sed "s: ::g"
+#          modprobe -n -v msdos | grep -E '(msdos|install)' 2> /dev/null | wc -l | sed "s: ::g"
+#        ignore_errors: yes
+#        register: rhel7cis_rule_1_1_1_4_b_rc
+#
+#      - name: " 1.1.1.4 | SCAN_NON_UEFI | Ensure mounting of FAT filesystems is limited"
+#        shell: |
+#          lsmod | grep -E '(fat|vfat|msdos)' 2> /dev/null | wc -l | sed "s: ::g"
+#        ignore_errors: yes
+#        register: rhel7cis_rule_1_1_1_4_c_rc
+#
+#      - set_fact:
+#          rhel7cis_rule_1_1_1_4_result: false
+#        when: >
+#          ('0' in rhel7cis_rule_1_1_1_4_b_rc.stdout) or
+#          (rhel7cis_rule_1_1_1_4_c_rc.stdout != "0")
+#      - set_fact:
+#          all_results: "{{ all_results|combine({'1.1.1.4':rhel7cis_rule_1_1_1_4_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_1_1_4_uefi == false and rhel7cis_rule_1_1_1_4
+#    tags:
+#     - level2
+#     - scan
+#     - rule_1.1.1.4
+#     - fat
+#     - non_uefi
+#     - rhel7
+#
+#####
+  - name: " 1.1.2 | SCAN | Ensure /tmp is configured"
+    block:
+    - name: " 1.1.2 | SCAN | Ensure /tmp is configured"
+      shell: mount | grep -E '\s/tmp\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_2_rc
+    - set_fact:
+        rhel7cis_rule_1_1_2_result: false
+      when: rhel7cis_rule_1_1_2_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.2':rhel7cis_rule_1_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_2
+    tags:
+     - level1
+     - scan
+     - rule_1.1.2
+     - tmp
+     - rhel7
+
+#####
+  - name: " 1.1.3 | SCAN | Ensure noexec option set on /tmp partition"
+    block:
+    - name: " 1.1.3 | SCAN | Ensure noexec option set on /tmp partition"
+      shell: mount | grep -E '\s/tmp\s' | grep -v noexec
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_3_rc
+    - set_fact:
+        rhel7cis_rule_1_1_3_result: false
+      when: rhel7cis_rule_1_1_3_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.3':rhel7cis_rule_1_1_3_result|default(true)}) }}"
+    when: >-
+      rhel7cis_rule_1_1_3
+    tags:
+     - level1
+     - scan
+     - rule_1.1.3
+     - tmp
+     - rhel7
+
+#####
+  - name: " 1.1.4 | SCAN | Ensure nodev option set on /tmp partition"
+    block:
+    - name: " 1.1.4 | SCAN | Ensure nodev option set on /tmp partition"
+      shell: mount | grep -E '\s/tmp\s' | grep -v nodev
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_4_rc
+    - set_fact:
+        rhel7cis_rule_1_1_4_result: false
+      when: rhel7cis_rule_1_1_4_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.4':rhel7cis_rule_1_1_4_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_4
+    tags:
+     - level1
+     - scan
+     - rule_1.1.4
+     - tmp
+     - rhel7
+
+#####
+  - name: " 1.1.5 | SCAN | Ensure nosuid option set on /tmp partition"
+    block:
+    - name: " 1.1.5 | SCAN | Ensure nosuid option set on /tmp partition"
+      shell: mount | grep -E '\s/tmp\s' | grep -v nosuid
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_5_rc
+    - set_fact:
+        rhel7cis_rule_1_1_5_result: false
+      when: rhel7cis_rule_1_1_5_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.5':rhel7cis_rule_1_1_5_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_5
+    tags:
+     - level1
+     - scan
+     - rule_1.1.5
+     - tmp
+     - rhel7
+
+#####
+  - name: " 1.1.6 | SCAN | Ensure /dev/shm is configured"
+    block:
+    - name: " 1.1.6 | SCAN | Ensure /dev/shm is configured"
+      shell: mount | grep -E '\s/dev/shm\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_6_a_rc
+    - name: " 1.1.6 | SCAN | Ensure /dev/shm is configured"
+      shell: grep -E '\s/dev/shm\s' /etc/fstab
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_6_b_rc
+    - set_fact:
+        rhel7cis_rule_1_1_6_result: false
+      when: rhel7cis_rule_1_1_6_a_rc.rc != 0 or rhel7cis_rule_1_1_6_b_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.6':rhel7cis_rule_1_1_6_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_6
+    tags:
+     - level1
+     - scan
+     - rule_1.1.6
+     - dev_shm
+     - rhel7
+
+#####
+  - name: " 1.1.7 | SCAN | Ensure noexec option set on /dev/shm partition"
+    block:
+    - name: " 1.1.7 | SCAN | Ensure noexec option set on /dev/shm partition"
+      shell: mount | grep -E '\s/dev/shm\s' | grep -v noexec
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_7_rc
+    - set_fact:
+        rhel7cis_rule_1_1_7_result: false
+      when: rhel7cis_rule_1_1_7_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.7':rhel7cis_rule_1_1_7_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_7
+    tags:
+     - level1
+     - scan
+     - rule_1.1.7
+     - dev_shm
+     - rhel7
+
+#####
+  - name: " 1.1.8 | SCAN | Ensure nodev option set on /dev/shm partition"
+    block:
+    - name: " 1.1.8 | SCAN | Ensure nodev option set on /dev/shm partition"
+      shell: mount | grep -E '\s/dev/shm\s' | grep -v nodev
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_8_rc
+    - set_fact:
+        rhel7cis_rule_1_1_8_result: false
+      when: rhel7cis_rule_1_1_8_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.8':rhel7cis_rule_1_1_8_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_8
+    tags:
+     - level1
+     - scan
+     - rule_1.1.8
+     - dev_shm
+     - rhel7
+
+#####
+  - name: " 1.1.9 | SCAN | Ensure nosuid option set on /dev/shm partition"
+    block:
+    - name: " 1.1.9 | SCAN | Ensure nosuid option set on /dev/shm partition"
+      shell: mount | grep -E '\s/dev/shm\s' | grep -v nosuid
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_9_rc
+    - set_fact:
+        rhel7cis_rule_1_1_9_result: false
+      when: rhel7cis_rule_1_1_9_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.9':rhel7cis_rule_1_1_9_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_9
+    tags:
+     - level1
+     - scan
+     - rule_1.1.9
+     - dev_shm
+     - rhel7
+
+#####
+  - name: " 1.1.10 | SCAN | Ensure separate partition exists for /var"
+    block:
+    - name: " 1.1.10 | SCAN | Ensure separate partition exists for /var"
+      shell: mount | grep -E '\s/var\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_10_rc
+    - set_fact:
+        rhel7cis_rule_1_1_10_result: false
+      when: rhel7cis_rule_1_1_10_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.10':rhel7cis_rule_1_1_10_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_10
+    tags:
+     - level2
+     - scan
+     - rule_1.1.10
+     - var
+     - rhel7
+
+#####
+  - name: " 1.1.11 | SCAN | Ensure separate partition exists for /var/tmp"
+    block:
+    - name: " 1.1.11 | SCAN | Ensure separate partition exists for /var/tmp"
+      shell: mount | grep -E '\s/var/tmp\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_11_rc
+    - set_fact:
+        rhel7cis_rule_1_1_11_result: false
+      when: rhel7cis_rule_1_1_11_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.11':rhel7cis_rule_1_1_11_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_11
+    tags:
+     - level2
+     - scan
+     - rule_1.1.11
+     - var_tmp
+     - rhel7
+
+#####
+  - name: " 1.1.12 | SCAN | Ensure noexec option set on /var/tmp partition"
+    block:
+    - name: " 1.1.12 | SCAN | Ensure noexec option set on /var/tmp partition"
+      shell: mount | grep -E '\s/var/tmp\s' | grep -v noexec
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_12_rc
+    - set_fact:
+        rhel7cis_rule_1_1_12_result: false
+      when: rhel7cis_rule_1_1_12_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.12':rhel7cis_rule_1_1_12_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_12
+    tags:
+     - level1
+     - scan
+     - rule_1.1.12
+     - var_tmp
+     - rhel7
+
+#####
+  - name: " 1.1.13 | SCAN | Ensure nodev option set on /var/tmp partition"
+    block:
+    - name: " 1.1.13 | SCAN | Ensure nodev option set on /var/tmp partition"
+      shell: mount | grep -E '\s/var/tmp\s' | grep -v nodev
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_13_rc
+    - set_fact:
+        rhel7cis_rule_1_1_13_result: false
+      when: rhel7cis_rule_1_1_13_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.13':rhel7cis_rule_1_1_13_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_13
+    tags:
+     - level1
+     - scan
+     - rule_1.1.13
+     - var_tmp
+     - rhel7
+
+#####
+  - name: " 1.1.14 | SCAN | Ensure nosuid option set on /var/tmp partition"
+    block:
+    - name: " 1.1.14 | SCAN | Ensure nosuid option set on /var/tmp partition"
+      shell: mount | grep -E '\s/var/tmp\s' | grep -v nosuid
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_14_rc
+    - set_fact:
+        rhel7cis_rule_1_1_14_result: false
+      when: rhel7cis_rule_1_1_14_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.14':rhel7cis_rule_1_1_14_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_14
+    tags:
+     - level1
+     - scan
+     - rule_1.1.14
+     - var_tmp
+     - rhel7
+
+#####
+  - name: " 1.1.15 | SCAN | Ensure separate partition exists for /var/log"
+    block:
+    - name: " 1.1.15 | SCAN | Ensure separate partition exists for /var/log"
+      shell: mount | grep -E '\s/var/log\s'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_15_rc
+    - set_fact:
+        rhel7cis_rule_1_1_15_result: false
+      when: rhel7cis_rule_1_1_15_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.15':rhel7cis_rule_1_1_15_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_15
+    tags:
+     - level2
+     - scan
+     - rule_1.1.15
+     - var_log
+     - rhel7
+
+#####
+  - name: " 1.1.16 | SCAN | Ensure separate partition exists for /var/log/audit"
+    block:
+    - name: " 1.1.16 | SCAN | Ensure separate partition exists for /var/log/audit"
+      shell: mount | grep /var/log/audit
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_16_rc
+    - set_fact:
+        rhel7cis_rule_1_1_16_result: false
+      when: rhel7cis_rule_1_1_16_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.16':rhel7cis_rule_1_1_16_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_16
+    tags:
+     - level2
+     - scan
+     - rule_1.1.16
+     - var_log_audit
+     - rhel7
+
+#####
+  - name: " 1.1.17 | SCAN | Ensure separate partition exists for /home"
+    block:
+    - name: " 1.1.17 | SCAN | Ensure separate partition exists for /home"
+      shell: mount | grep /home
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_17_rc
+    - set_fact:
+        rhel7cis_rule_1_1_17_result: false
+      when: rhel7cis_rule_1_1_17_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.17':rhel7cis_rule_1_1_17_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_17
+    tags:
+     - level2
+     - scan
+     - rule_1.1.17
+     - home
+     - rhel7
+
+#####
+  - name: " 1.1.18 | SCAN | Ensure nodev option set on /home partition"
+    block:
+    - name: " 1.1.18 | SCAN | Ensure nodev option set on /home partition"
+      shell: mount | grep -E '\s/home\s' | grep -v nodev
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_18_rc
+    - set_fact:
+        rhel7cis_rule_1_1_18_result: false
+      when: rhel7cis_rule_1_1_17_result is defined or rhel7cis_rule_1_1_18_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.18':rhel7cis_rule_1_1_18_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_18
+    tags:
+     - level1
+     - scan
+     - rule_1.1.18
+     - home
+     - rhel7
+
+
+#####
+  - name: " 1.1.19 | SCAN | Ensure noexec option set on removable media partitions"
+    block:
+    - name: " 1.1.19 | SCAN | Ensure noexec option set on removable media partitions"
+      shell: mount | grep -v ^[a-z,A-Z]| grep -v noexec| awk '{print $1"\t"$3"\t"$5"\t"$6}'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_19_rc
+
+    - name: " 1.1.19 | MANUAL_CHECK_NOEXEC | Ensure noexec option set on removable media partitions"
+      block:
+      - debug:
+          msg:
+          - "The following removable media does not have noexec option set: {{ rhel7cis_rule_1_1_19_rc.stdout }}. "
+          - "Please ensure that the noexec option is set for the above partition(s) in /etc/fstab."
+          - "Once updated, verify with 'mount | grep -v noexec' and ensure that all removable media partition(s) have noexec option set."
+          - "Please set rhel7cis_rule_1_1_19 to true in default/main.yml ."
+        register: rhel7cis_rule_1_1_19_removable_media_noexec_list
+      when: rhel7cis_rule_1_1_19_rc.rc == 0
+    when: rhel7cis_rule_1_1_19
+    tags:
+     - level1
+     - scan
+     - rule_1.1.19
+     - removable_media
+     - noexec
+     - rhel7
+
+#####
+  - name: " 1.1.20 | SCAN | Ensure nodev option set on removable media partitions"
+    block:
+    - name: " 1.1.20 | SCAN | Ensure nodev option set on removable media partitions"
+      shell: mount | grep -v ^[a-z,A-Z]| grep -v nodev| awk '{print $1"\t"$3"\t"$5"\t"$6}'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_20_rc
+
+    - name: " 1.1.20 | MANUAL_CHECK_NODEV | Ensure nodev option set on removable media partitions"
+      block:
+      - debug:
+          msg:
+          - "The following removable media does not have nodev option set: {{ rhel7cis_rule_1_1_20_rc.stdout }}. "
+          - "Please ensure that the nodev option is set for the above partition(s) in /etc/fstab."
+          - "Once updated, verify with 'mount | grep -v nodev' and ensure that all removable media partition(s) have nodev option set."
+          - "Please set rhel7cis_rule_1_1_20 to true in default/main.yml ."
+        register: rhel7cis_rule_1_1_20_removable_media_nodev_list
+      when: rhel7cis_rule_1_1_20_rc.rc == 0
+    when: rhel7cis_rule_1_1_20
+    tags:
+     - level1
+     - scan
+     - rule_1.1.20
+     - removable_media
+     - nodev
+     - rhel7
+
+#####
+  - name: " 1.1.21 | SCAN | Ensure nosuid option set on removable media partitions"
+    block:
+    - name: " 1.1.21 | SCAN | Ensure nosuid option set on removable media partitions"
+      shell: mount | grep -v ^[a-z,A-Z]| grep -v nosuid| awk '{print $1"\t"$3"\t"$5"\t"$6}'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_21_rc
+
+    - name: " 1.1.21 | MANUAL_CHECK_NOSUID | Ensure nosuid option set on removable media partitions"
+      block:
+      - debug:
+          msg:
+          - "The following removable media does not have nosuid option set: {{ rhel7cis_rule_1_1_21_rc.stdout }}. "
+          - "Please ensure that the nosuid option is set for the above partition(s) in /etc/fstab."
+          - "Once updated, verify with 'mount | grep -v nosuid' and ensure that all removable media partition(s) have nosuid option set."
+          - "Please set rhel7cis_rule_1_1_21 to true in default/main.yml ."
+        register: rhel7cis_rule_1_1_21_removable_media_nosuid_list
+      when: rhel7cis_rule_1_1_21_rc.rc == 0
+    when: rhel7cis_rule_1_1_21
+    tags:
+     - level1
+     - scan
+     - rule_1.1.21
+     - removable_media
+     - nosuid
+     - rhel7
+
+#####
+  - name: " 1.1.22 | SCAN | Ensure sticky bit is set on all world-writable directories"
+    block:
+    - name: " 1.1.22 | SCAN | Ensure sticky bit is set on all world-writable directories"
+      shell: df --local -P 2> /dev/null | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_22_rc
+    - set_fact:
+        rhel7cis_rule_1_1_22_result: false
+      when: rhel7cis_rule_1_1_22_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.22':rhel7cis_rule_1_1_22_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_22
+    tags:
+     - level1
+     - scan
+     - rule_1.1.22
+     - sticky_bit
+     - rhel7
+
+#####
+  - name: " 1.1.23 | SCAN | Disable Automounting"
+    block:
+    - name: " 1.1.23 | SCAN | Disable Automounting"
+      shell: systemctl is-enabled autofs
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_23_rc
+    - set_fact:
+        rhel7cis_rule_1_1_23_result: false
+      when: rhel7cis_rule_1_1_23_rc.stdout == "enabled" and rhel7cis_rule_1_1_23_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.23':rhel7cis_rule_1_1_23_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_23
+    tags:
+     - level1
+     - scan
+     - rule_1.1.23
+     - disable_automounting
+     - rhel7
+
+#####
+  - name: " 1.1.24 | SCAN | Disable USB Storage"
+    block:
+    - name: " 1.1.24 | SCAN | Disable USB Storage"
+      shell: modprobe -n -v usb-storage
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_24_a_rc
+    - name: " 1.1.24 | SCAN | Disable USB Storage"
+      shell: lsmod | grep usb-storage
+      ignore_errors: yes
+      register: rhel7cis_rule_1_1_24_b_rc
+    - set_fact:
+        rhel7cis_rule_1_1_24_result: false
+      when: rhel7cis_rule_1_1_24_a_rc.stdout != "install /bin/true " or rhel7cis_rule_1_1_24_b_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.1.24':rhel7cis_rule_1_1_24_result|default(true)}) }}"
+    when: rhel7cis_rule_1_1_24
+    tags:
+     - level1
+     - scan
+     - rule_1.1.24
+     - usb
+     - rhel7
+
+#####
+  - name: " 1.2.1 | SCAN | Ensure GPG keys are configured"
+    block:
+    - name: " 1.2.1 | SCAN | Ensure GPG keys are configured"
+      shell: rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n'
+      ignore_errors: yes
+      register: rhel7cis_rule_1_2_1_rc
+    - name: " 1.2.1 | MANUAL_CHECK_GPGKEYS | Ensure GPG keys are configured"
+      debug:
+        msg:
+          - "The following lists the GPG Key(s) configured: {{ rhel7cis_rule_1_2_1_rc.stdout }}. "
+          - "Please verify that the GPG Key(s) configured are correct."
+          - "Once verified, please set rhel7cis_rule_1_2_1 to true in default/main.yml ."
+      register: rhel7cis_rule_1_2_1_gpgkeys_list
+      when: rhel7cis_rule_1_2_1_rc.rc == 0 and rhel7cis_rule_1_2_1_rc.stdout != "package gpg-pubkey is not installed"
+    - name: " 1.2.1 | MANUAL_CHECK_NO_GPGKEYS | Ensure GPG keys are configured"
+      debug:
+        msg:
+          - " {{ rhel7cis_rule_1_2_1_rc.stdout }}. "
+          - "Please verify."
+      register: rhel7cis_rule_1_2_1_gpgkeys_list
+      when: rhel7cis_rule_1_2_1_rc.rc == 0 and rhel7cis_rule_1_2_1_rc.stdout == "package gpg-pubkey is not installed"
+    - name: " 1.2.1 | MANUAL_CHECK_ERR_GPGKEYS | Ensure GPG keys are configured"
+      debug:
+        msg:
+          - "Please verify GPG Keys configuration. Run the following command to verify: rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n' "
+      register: rhel7cis_rule_1_2_1_gpgkeys_list
+      when: rhel7cis_rule_1_2_1_rc.rc != 0
+    when: rhel7cis_rule_1_2_1
+    tags:
+     - level1
+     - scan
+     - rule_1.2.1
+     - gpg
+     - rhel7
+
+#####
+  - name: " 1.2.2 | SCAN | Ensure package manager repositories are configured"
+    block:
+    - name: " 1.2.2 | SCAN | Ensure package manager repositories are configured"
+      shell: yum repolist 2> /dev/null
+      ignore_errors: yes
+      register: rhel7cis_rule_1_2_2_rc
+    - name: " 1.2.2 | MANUAL_CHECK_REPOSITORIES | Ensure package manager repositories are configured"
+      debug:
+        msg:
+          - "The following lists the repositories configured: {{ rhel7cis_rule_1_2_2_rc.stdout }}. "
+          - "Please verify the configured repositories are correct."
+          - "Once verified, please set rhel7cis_rule_1_2_2 to true in default/main.yml ."
+      register: rhel7cis_rule_1_2_2_repolist
+      when: rhel7cis_rule_1_2_2_rc.rc == 0
+    - name: " 1.2.2 | MANUAL_CHECK_ERR_REPOSITORIES | Ensure package manager repositories are configured"
+      debug:
+        msg:
+          - "Please verify GPG Keys configuration. Run the following command to verify: yum repolist "
+      register: rhel7cis_rule_1_2_2_repolist
+      when: rhel7cis_rule_1_2_2_rc.rc == 1
+    when: rhel7cis_rule_1_2_2
+    tags:
+     - level1
+     - scan
+     - rule_1.2.2
+     - yum
+     - rhel7
+
+#####
+  - name: " 1.2.3 | SCAN | Ensure gpgcheck is globally activated"
+    block:
+    - name: " 1.2.3 | SCAN | Ensure gpgcheck is globally activated"
+      shell: grep ^\s*gpgcheck /etc/yum.conf
+      register: rhel7cis_rule_1_2_3_a_rc
+      ignore_errors: yes
+    - name: " 1.2.3 | SCAN | Ensure gpgcheck is globally activated"
+      shell: |
+        awk -v 'RS=[' -F '\n' '/\n\s*enabled\s*=\s*1(\W.*)?$/ && ! /\n\s*gpgcheck\s*=\s*1(\W.*)?$/ { t=substr($1, 1, index($1, "]")-1); print t, "does not have gpgcheck enabled." }' /etc/yum.repos.d/*.repo | wc -l | sed "s: ::g"
+      ignore_errors: yes
+      register: rhel7cis_rule_1_2_3_b_rc
+    - set_fact:
+        rhel7cis_rule_1_2_3_result: false
+      when: rhel7cis_rule_1_2_3_a_rc.stdout != "gpgcheck=1" or rhel7cis_rule_1_2_3_b_rc.stdout != "0"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.2.3':rhel7cis_rule_1_2_3_result|default(true)}) }}"
+    when: rhel7cis_rule_1_2_3
+    tags:
+     - level1
+     - scan
+     - rule_1.2.3
+     - gpgcheck
+     - rhel7
+
+#####
+  - name: " 1.2.4 | SCAN | Ensure Red Hat Subscription Manager connection is configured"
+    block:
+    - name: " 1.2.4 | SCAN | Ensure Red Hat Subscription Manager connection is configured"
+      shell: subscription-manager identity  2> /dev/null
+      register: rhel7cis_rule_1_2_4_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_1_2_4_result: false
+      when: rhel7cis_rule_1_2_4_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.2.4':rhel7cis_rule_1_2_4_result|default(true)}) }}"
+    when: rhel7cis_rule_1_2_4
+    tags:
+     - level1
+     - scan
+     - rule_1.2.4
+     - rhm
+     - rhel7
+
+#####
+  - name: " 1.2.5 | SCAN |  Disable the rhnsd Daemon"
+    block:
+    - name: " 1.2.5 | SCAN |  Disable the rhnsd Daemon"
+      shell: systemctl is-enabled rhnsd 2> /dev/null
+      register: rhel7cis_rule_1_2_5_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_1_2_5_result: false
+      when: rhel7cis_rule_1_2_5_rc.stdout == "enabled"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.2.5':rhel7cis_rule_1_2_5_result|default(true)}) }}"
+    when: rhel7cis_rule_1_2_5
+    tags:
+     - level2
+     - scan
+     - rule_1.2.5
+     - rhnsd
+     - rhel7
+
+#####
+  - name: " 1.3.1 | SCAN |  Ensure sudo is installed"
+    block:
+    - name: " 1.3.1 | SCAN |  Ensure sudo is installed"
+      shell: rpm -q sudo
+      register: rhel7cis_rule_1_3_1_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_1_3_1_result: false
+      when: rhel7cis_rule_1_3_1_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.3.1':rhel7cis_rule_1_3_1_result|default(true)}) }}"
+    when: rhel7cis_rule_1_3_1
+    tags:
+     - level1
+     - scan
+     - rule_1.3.1
+     - sudo
+     - rhel7
+
+#####
+  - name: " 1.3.2 | SCAN | Ensure sudo commands use pty"
+    block:
+    - name: " 1.3.2 | SCAN | Ensure sudo commands use pty"
+      shell: |
+        grep -Ei '^\s*Defaults\s+([^#]\S+,\s*)?use_pty\b' /etc/sudoers /etc/sudoers.d/* 2> /dev/null | wc -l | sed "s: ::g"
+      register: rhel7cis_rule_1_3_2_a_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_1_3_2_result: false
+      when: rhel7cis_rule_1_3_2_a_rc.stdout == "0"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.3.2':rhel7cis_rule_1_3_2_result|default(true)}) }}"
+    when: rhel7cis_rule_1_3_2
+    tags:
+     - level1
+     - scan
+     - rule_1.3.2
+     - pseudo-pty
+     - rhel7
+
+#####
+  - name: " 1.3.3 | SCAN | Ensure sudo log file exists"
+    block:
+    - name: " 1.3.3 | SCAN | Ensure sudo log file exists"
+      shell: |
+        grep -Ei '^\s*Defaults\s+([^#;]+,\s*)?logfile\s*=\s*(")?[^#;]+(")?' /etc/sudoers /etc/sudoers.d/* 2> /dev/null | wc -l | sed "s: ::g"
+      register: rhel7cis_rule_1_3_3_a_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_1_3_3_result: false
+      when: rhel7cis_rule_1_3_3_a_rc.stdout == "0"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.3.3':rhel7cis_rule_1_3_3_result|default(true)}) }}"
+    when:  rhel7cis_rule_1_3_3
+    tags:
+     - level1
+     - scan
+     - rule_1.3.3
+     - pseudo-log
+     - rhel7
+
+#####
+  - name: " 1.4.1 | SCAN |  Ensure AIDE is installed"
+    block:
+    - name: " 1.4.1 | SCAN |  Ensure AIDE is installed"
+      shell: rpm -q aide
+      register: rhel7cis_rule_1_4_1_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_1_4_1_result: false
+        rhel7cis_rule_1_4_2: false
+      when: rhel7cis_rule_1_4_1_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.4.1':rhel7cis_rule_1_4_1_result|default(true)}) }}"
+    when: rhel7cis_rule_1_4_1
+    tags:
+     - level1
+     - scan
+     - rule_1.4.1
+     - aide
+     - rhel7
+
+#####
+  - name: " 1.4.2 | SCAN | Ensure filesystem integrity is regularly checked"
+    block:
+    - name: " 1.4.2 | SCAN | Ensure filesystem integrity is regularly checked"
+      shell: crontab -u root -l | grep aide
+      register: rhel7cis_rule_1_4_2_a_rc
+      ignore_errors: yes
+
+    - name: " 1.4.2 | SCAN | Ensure filesystem integrity is regularly checked"
+      shell: |
+        grep -r aide /etc/cron.* /etc/crontab 2> /dev/null | wc -l | sed "s: ::g"
+      register: rhel7cis_rule_1_4_2_b_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_1_4_2_result: false
+      when: rhel7cis_rule_1_4_2_a_rc.rc != 0 and rhel7cis_rule_1_4_2_b_rc.stdout == "0"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.4.2':rhel7cis_rule_1_4_2_result|default(true)}) }}"
+    when: rhel7cis_rule_1_4_2
+    tags:
+     - level1
+     - scan
+     - rule_1.4.2
+     - aide_cron
+     - rhel7
+
+#####
+  - name: " 1.5.1 | SCAN | Ensure bootloader password is set"
+    block:
+    - name: " 1.5.1 | SCAN | Ensure bootloader password is set"
+      shell: grep -i release /etc/redhat-release|sed 's/[^0-9]*//g' 2> /dev/null
+      register: rhel7cis_rule_1_5_1_o_rc
+      ignore_errors: yes
+    - name: " 1.5.1 | SCAN | Ensure bootloader password is set"
+      block:
+      - shell: grep "^\s*GRUB2_PASSWORD" /boot/grub2/user.cfg  2> /dev/null
+        register: rhel7cis_rule_1_5_1_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_1_5_1_result: false
+        when: rhel7cis_rule_1_5_1_rc.rc != 0
+        ignore_errors: yes
+      when: rhel7cis_rule_1_5_1_o_rc.stdout != "71"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.5.1':rhel7cis_rule_1_5_1_result|default(true)}) }}"
+    when: rhel7cis_rule_1_5_1
+    tags:
+     - scan
+     - rule_1.5.1
+     - grub2_password
+     - rhel7
+
+  - name: " 1.5.1 | SCAN | Ensure bootloader password is set"
+    block:
+    - name: " 1.5.1 | SCAN | Ensure bootloader password is set"
+      shell: grep -i release /etc/redhat-release|sed 's/[^0-9]*//g' 2> /dev/null
+      register: rhel7cis_rule_1_5_1_o_rc
+    - name: " 1.5.1 | SCAN | Ensure bootloader password is set"
+      block:
+      - shell: grep "^\s*set superusers" /boot/grub2/grub.cfg
+        register: rhel7cis_rule_1_5_1_a_rc
+        ignore_errors: yes
+      - shell: grep "^\s*password" /boot/grub2/grub.cfg
+        register: rhel7cis_rule_1_5_1_b_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_1_5_1_result: false
+        when: rhel7cis_rule_1_5_1_a_rc.rc != 0 or rhel7cis_rule_1_5_1_b_rc.rc !=0
+        ignore_errors: yes
+      when: rhel7cis_rule_1_5_1_o_rc.stdout == "71"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.5.1':rhel7cis_rule_1_5_1_result|default(true)}) }}"
+    when: rhel7cis_rule_1_5_1
+    tags:
+     - level1
+     - scan
+     - rule_1.5.1
+     - grub2_password
+     - rhel7
+
+#####
+  - name: " 1.5.2 | SCAN | Ensure permissions on bootloader config are configured"
+    block:
+    - name: " 1.5.2 | SCAN | Ensure permissions on bootloader config are configured"
+      shell:  stat /boot/grub2/grub.cfg | grep 0600 2> /dev/null
+      register: rhel7cis_rule_1_5_2_a_rc
+      ignore_errors: yes
+
+    - name: " 1.5.2 | SCAN | Ensure permissions on bootloader config are configured"
+      shell:  stat /boot/grub2/user.cfg | grep 0600 2> /dev/null
+      register: rhel7cis_rule_1_5_2_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_5_2_result: false
+      when: rhel7cis_rule_1_5_2_a_rc.rc != 0 or rhel7cis_rule_1_5_2_b_rc.rc != 0
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.5.2':rhel7cis_rule_1_5_2_result|default(true)}) }}"
+    when: rhel7cis_rule_1_5_2
+    tags:
+     - level1
+     - scan
+     - rule_1.5.2
+     - rhel7
+
+#####
+  - name: " 1.5.3 | SCAN | Ensure authentication required for single user mode"
+    block:
+    - name: " 1.5.3 | SCAN | Ensure authentication required for single user mode"
+      shell: |
+        grep /sbin/sulogin /usr/lib/systemd/system/rescue.service 2> /dev/null | wc -l | sed "s: ::g"
+      register: rhel7cis_rule_1_5_3_a_rc
+      ignore_errors: yes
+
+    - name: " 1.5.3 | SCAN | Ensure authentication required for single user mode"
+      shell: |
+        grep /sbin/sulogin /usr/lib/systemd/system/emergency.service 2> /dev/null | wc -l | sed "s: ::g"
+      register: rhel7cis_rule_1_5_3_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_5_3_result: false
+      when: rhel7cis_rule_1_5_3_a_rc.stdout == "0" or rhel7cis_rule_1_5_3_b_rc.stdout == "0"
+      ignore_errors: yes
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.5.3':rhel7cis_rule_1_5_3_result|default(true)}) }}"
+    when: rhel7cis_rule_1_5_3
+    tags:
+     - level1
+     - scan
+     - rule_1.5.3
+     - rhel7
+
+#####
+  - name: " 1.6.1 | SCAN | Ensure core dumps are restricted"
+    block:
+    - name: " 1.6.1 | SCAN | Ensure core dumps are restricted"
+      shell: |
+        grep -E "^\s*\*\s+hard\s+core\s+0" /etc/security/limits.conf /etc/security/limits.d/* 2> /dev/null | wc -l | sed "s: ::g"
+      register: rhel7cis_rule_1_6_1_a_rc
+      ignore_errors: yes
+
+    - name: " 1.6.1 | SCAN | Ensure core dumps are restricted"
+      shell: |
+        sysctl fs.suid_dumpable|awk '{print $3}' 2> /dev/null | sed "s: ::g"
+      register: rhel7cis_rule_1_6_1_b_rc
+      ignore_errors: yes
+
+
+    - name: " 1.6.1 | SCAN | Ensure core dumps are restricted"
+      shell:  |
+        grep -E "fs\.suid_dumpable\s+=\s+0" /etc/sysctl.conf /etc/sysctl.d/* 2> /dev/null | wc -l | sed "s: ::g"
+      register: rhel7cis_rule_1_6_1_c_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_6_1_result: false
+      when: rhel7cis_rule_1_6_1_a_rc.stdout == "0" or rhel7cis_rule_1_6_1_b_rc.stdout != "0" or rhel7cis_rule_1_6_1_c_rc.stdout != "0"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.6.1':rhel7cis_rule_1_6_1_result|default(true)}) }}"
+    when: rhel7cis_rule_1_6_1
+    tags:
+     - level1
+     - scan
+     - rule_1.6.1
+     - rhel7
+
+#####
+  - name: " 1.6.2 | SCAN | Ensure XD/NX support is enabled"
+    block:
+    - name: " 1.6.2 | SCAN | Ensure XD/NX support is enabled"
+      shell: |
+        journalctl | grep 'protection: active' |grep " NX " 2> /dev/null
+      register: rhel7cis_rule_1_6_2_a_rc
+      ignore_errors: yes
+
+    - name: " 1.6.2 | SCAN | Ensure XD/NX support is enabled"
+      shell: |
+        [[ -n $(grep noexec[0-9]*=off /proc/cmdline) ]] || [[ -z $(grep -E -i ' (pae|nx) ' /proc/cpuinfo) ]] || [[ -n $(grep '\sNX\s.*\sprotection:\s' /var/log/dmesg | grep -v active) ]] && echo "NX Protection is not active"
+        exit $?
+      register: rhel7cis_rule_1_6_2_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_6_2_result: false
+      when: rhel7cis_rule_1_6_2_a_rc.rc != 0 and rhel7cis_rule_1_6_2_b_rc.rc == 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.6.2':rhel7cis_rule_1_6_2_result|default(true)}) }}"
+    when: rhel7cis_rule_1_6_2
+    tags:
+     - level1
+     - scan
+     - rule_1.6.2
+     - rhel7
+
+#####
+# Exception adopt option 1 (CIS recommends 2 causes issue with Trend)
+  - name: " 1.6.3 | SCAN | Ensure address space layout randomization (ASLR) is enabled "
+    block:
+    - name: " 1.6.3 | SCAN | Ensure address space layout randomization (ASLR) is enabled "
+      shell: |
+        sysctl kernel.randomize_va_space | awk '{print $3}' 2> /dev/null | sed "s: ::g"
+      register: rhel7cis_rule_1_6_3_a_rc
+      ignore_errors: yes
+
+    - shell: |
+        grep "kernel\.randomize_va_space" /etc/sysctl.conf /etc/sysctl.d/* 2> /dev/null | wc -l | sed "s: ::g"
+      register: rhel7cis_rule_1_6_3_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_6_3_result: false
+      when: rhel7cis_rule_1_6_3_a_rc.stdout != "1" or rhel7cis_rule_1_6_3_b_rc.stdout == "0"
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.6.3':rhel7cis_rule_1_6_3_result|default(true)}) }}"
+    when: rhel7cis_rule_1_6_3
+    tags:
+     - level1
+     - scan
+     - rule_1.6.3
+     - rhel7
+
+#####
+  - name: " 1.6.4 | SCAN |  Ensure prelink is disabled"
+    block:
+    - name: " 1.6.4 | SCAN |  Ensure prelink is disabled"
+      shell: rpm -q prelink
+      register: rhel7cis_rule_1_6_4_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_6_4_result: false
+      when: rhel7cis_rule_1_6_4_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.6.4':rhel7cis_rule_1_6_4_result|default(true)}) }}"
+    when: rhel7cis_rule_1_6_4
+    tags:
+     - level1
+     - scan
+     - rule_1.6.4
+     - rhel7
+
+######
+#  - name: " 1.7.1.1 | SCAN |  Ensure SELinux is installed"
+#    block:
+#    - name: " 1.7.1.1 | SCAN |  Ensure SELinux is installed"
+#      shell: rpm -q libselinux
+#      register: rhel7cis_rule_1_7_1_1_rc
+#      ignore_errors: yes
+#
+#    - set_fact:
+#        rhel7cis_rule_1_7_1_1_result: false
+#      when: rhel7cis_rule_1_7_1_1_rc.rc != 0
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.7.1.1':rhel7cis_rule_1_7_1_1_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_7_1_1
+#    tags:
+#     - level1
+#     - scan
+#     - rule_1.7.1.1
+#     - rhel7
+#
+######
+#  - name: " 1.7.1.2 | SCAN |  Ensure SELinux is not disabled in bootloader configuration"
+#    block:
+#    - name: " 1.7.1.2 | SCAN |  Ensure SELinux is not disabled in bootloader configuration"
+#      shell:  grep "^\s*linux" /boot/grub2/grub.cfg | grep -E "(selinux=0|enforcing=0)"
+#      register: rhel7cis_rule_1_7_1_2_rc
+#      ignore_errors: yes
+#
+#    - set_fact:
+#        rhel7cis_rule_1_7_1_2_result: false
+#      when: rhel7cis_rule_1_7_1_2_rc.rc != 1
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.7.1.2':rhel7cis_rule_1_7_1_2_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_7_1_2
+#    tags:
+#     - level1
+#     - scan
+#     - rule_1.7.1.2
+#     - rhel7
+#
+######
+#
+#  - name: " 1.7.1.3 | SCAN |  Ensure SELinux policy is configured "
+#    block:
+#    - name: " 1.7.1.3 | SCAN |  Ensure SELinux policy is configured "
+#      shell:   grep SELINUXTYPE= /etc/selinux/config | grep -Ei 'targeted|mls'
+#      register: rhel7cis_rule_1_7_1_3_a_rc
+#      ignore_errors: yes
+#
+#    - shell: sestatus | grep 'Loaded policy' |grep -Ei 'targeted|mls'
+#      register: rhel7cis_rule_1_7_1_3_b_rc
+#      ignore_errors: yes
+#
+#    - set_fact:
+#        rhel7cis_rule_1_7_1_3_result: false
+#      when: rhel7cis_rule_1_7_1_3_a_rc.rc != 0 or rhel7cis_rule_1_7_1_3_b_rc.rc != 0
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.7.1.3':rhel7cis_rule_1_7_1_3_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_7_1_3
+#    tags:
+#     - level1
+#     - scan
+#     - rule_1.7.1.3
+#     - rhel7
+#
+#####
+#  - name: " 1.7.1.4 | SCAN |  Ensure the SELinux mode is enforcing or permissive "
+#    block:
+#    - name: " 1.7.1.4 | SCAN |  Ensure the SELinux mode is enforcing or permissive "
+#      shell:   getenforce | grep -Ei 'Enforcing|Permissive'
+#      register: rhel7cis_rule_1_7_1_4_a_rc
+#      ignore_errors: yes
+#
+#    - name: " 1.7.1.4 | SCAN |  Ensure the SELinux mode is enforcing or permissive "
+#      shell:   grep -Ei '^\s*SELINUX=(enforcing|permissive)' /etc/selinux/config
+#      register: rhel7cis_rule_1_7_1_4_b_rc
+#      ignore_errors: yes
+#
+#    - set_fact:
+#        rhel7cis_rule_1_7_1_4_result: false
+#      when: rhel7cis_rule_1_7_1_4_a_rc.rc != 0 or rhel7cis_rule_1_7_1_4_b_rc.rc != 0
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.7.1.4':rhel7cis_rule_1_7_1_4_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_7_1_4
+#    tags:
+#     - level1
+#     - scan
+#     - rule_1.7.1.4
+#     - rhel7
+#####
+#  - name: " 1.7.1.5 | SCAN |  Ensure the SELinux mode is enforcing "
+#    block:
+#    - name: " 1.7.1.5 | SCAN |  Ensure the SELinux mode is enforcing "
+#      shell:   getenforce | grep -Ei 'Enforcing'
+#      register: rhel7cis_rule_1_7_1_5_a_rc
+#      ignore_errors: yes
+#
+#    - shell:   grep -Ei '^\s*SELINUX=(enforcing)' /etc/selinux/config
+#      register: rhel7cis_rule_1_7_1_5_b_rc
+#      ignore_errors: yes
+#
+#    - set_fact:
+#        rhel7cis_rule_1_7_1_5_result: false
+#      when: rhel7cis_rule_1_7_1_5_a_rc.rc != 0 or rhel7cis_rule_1_7_1_5_b_rc.rc != 0
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.7.1.5':rhel7cis_rule_1_7_1_5_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_7_1_5
+#    tags:
+#     - level2
+#     - scan
+#     - rule_1.7.1.5
+#     - rhel7
+#####
+#  - name: " 1.7.1.6 | SCAN |   Ensure no unconfined services exist "
+#    block:
+#    - name: " 1.7.1.6 | SCAN |   Ensure no unconfined services exist "
+#      shell:   ps -eZ | grep unconfined_service_t
+#      register: rhel7cis_rule_1_7_1_6_rc
+#      ignore_errors: yes
+#
+#    - set_fact:
+#        rhel7cis_rule_1_7_1_6_result: false
+#      when: rhel7cis_rule_1_7_1_6_rc.stdout != ""
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.7.1.6':rhel7cis_rule_1_7_1_6_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_7_1_6
+#    tags:
+#     - level1
+#     - scan
+#     - rule_1.7.1.6
+#     - rhel7
+#
+#####
+#  - name: " 1.7.1.7 | SCAN |    Ensure SETroubleshoot is not installed "
+#    block:
+#    - name: " 1.7.1.7 | SCAN |    Ensure SETroubleshoot is not installed "
+#      shell:   rpm -q setroubleshoot
+#      register: rhel7cis_rule_1_7_1_7_rc
+#      ignore_errors: yes
+#
+#    - set_fact:
+#        rhel7cis_rule_1_7_1_7_result: false
+#      when: rhel7cis_rule_1_7_1_7_rc.rc != 1
+#    - set_fact:
+#        all_results: "{{ all_results|combine({'1.7.1.7':rhel7cis_rule_1_7_1_7_result|default(true)}) }}"
+#    when: rhel7cis_rule_1_7_1_7
+#    tags:
+#     - level1
+#     - scan
+#     - rule_1.7.1.7
+#     - rhel7
+#
+#####
+  - name: " 1.7.1.8 | SCAN | Ensure the MCS Translation Service (mcstrans) is not installed "
+    block:
+    - name: " 1.7.1.8 | SCAN | Ensure the MCS Translation Service (mcstrans) is not installed "
+      shell:   rpm -q mcstrans
+      register: rhel7cis_rule_1_7_1_8_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_7_1_8_result: false
+      when: rhel7cis_rule_1_7_1_8_rc.rc != 1
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.7.1.8':rhel7cis_rule_1_7_1_8_result|default(true)}) }}"
+    when:  rhel7cis_rule_1_7_1_8
+    tags:
+     - level1
+     - scan
+     - rule_1.7.1.8
+     - rhel7
+
+#####
+  - name: " 1.8.1.1 | SCAN | Ensure message of the day is configured properly "
+    block:
+    - name: " 1.8.1.1 | SCAN | Ensure message of the day is configured properly "
+      copy:
+        src: banner_txt
+        dest: /etc/motd
+      check_mode: yes
+      diff: yes
+      ignore_errors: yes
+      register: rhel7cis_rule_1_8_1_1_rc
+    - set_fact:
+        rhel7cis_rule_1_8_1_1_result: false
+      when: rhel7cis_rule_1_8_1_1_rc.changed == true
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.1':rhel7cis_rule_1_8_1_1_result|default(true)}) }}"
+    when: rhel7cis_rule_1_8_1_1
+    tags:
+     - level1
+     - scan
+     - rule_1.8.1.1
+     - rhel7
+
+#####
+  - name: " 1.8.1.2 | SCAN | Ensure local login warning banner is configured properly "
+    block:
+    - name: " 1.8.1.2 | SCAN | Ensure local login warning banner is configured properly "
+      copy:
+        src: banner_txt
+        dest: /etc/issue
+      check_mode: yes
+      diff: yes
+      ignore_errors: yes
+      register: rhel7cis_rule_1_8_1_2_rc
+    - set_fact:
+        rhel7cis_rule_1_8_1_2_result: false
+      when: rhel7cis_rule_1_8_1_2_rc.changed == true
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.2':rhel7cis_rule_1_8_1_2_result|default(true)}) }}"
+    when: rhel7cis_rule_1_8_1_2
+    tags:
+     - level1
+     - scan
+     - rule_1.8.1.2
+     - rhel7
+
+#####
+  - name: " 1.8.1.3 | SCAN | Ensure remote login warning banner is configured properly"
+    block:
+    - name: " 1.8.1.3 | SCAN | Ensure remote login warning banner is configured properly"
+      copy:
+        src: banner_txt
+        dest: /etc/issue.net
+      check_mode: yes
+      diff: yes
+      ignore_errors: yes
+      register: rhel7cis_rule_1_8_1_3_rc
+    - set_fact:
+         rhel7cis_rule_1_8_1_3_result: false
+      when: rhel7cis_rule_1_8_1_3_rc.changed == true
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.3':rhel7cis_rule_1_8_1_3_result|default(true)}) }}"
+    when: rhel7cis_rule_1_8_1_3
+    tags:
+     - level1
+     - scan
+     - rule_1.8.1.3
+     - rhel7
+
+#####
+  - name: " 1.8.1.4 | SCAN |  Ensure permissions on /etc/motd are configured  "
+    block:
+    - name: " 1.8.1.4 | SCAN |  Ensure permissions on /etc/motd are configured  "
+      shell:   stat /etc/motd | grep 0644/
+      register: rhel7cis_rule_1_8_1_4_a_rc
+      ignore_errors: yes
+    - shell:   stat /etc/motd | grep -E '\s*\Uid:\s+\(\s+0/\s+root\)\s+Gid:\s+\(\s+0/\s+root\)'
+      register: rhel7cis_rule_1_8_1_4_b_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_8_1_4_result: false
+      when: rhel7cis_rule_1_8_1_4_a_rc.rc != 0 or rhel7cis_rule_1_8_1_4_b_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.4':rhel7cis_rule_1_8_1_4_result|default(true)}) }}"
+    when: rhel7cis_rule_1_8_1_4
+    tags:
+     - level1
+     - scan
+     - rule_1.8.1.4
+     - rhel7
+
+#####
+  - name: " 1.8.1.5 | SCAN |  Ensure permissions on /etc/issue are configured  "
+    block:
+    - name: " 1.8.1.5 | SCAN |  Ensure permissions on /etc/issue are configured  "
+      shell:   stat /etc/issue | grep 0644/
+      register: rhel7cis_rule_1_8_1_5_a_rc
+      ignore_errors: yes
+    - shell:   stat /etc/issue | grep -E '\s*\Uid:\s+\(\s+0/\s+root\)\s+Gid:\s+\(\s+0/\s+root\)'
+      register: rhel7cis_rule_1_8_1_5_b_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_1_8_1_5_result: false
+      when: rhel7cis_rule_1_8_1_5_a_rc.rc != 0 or rhel7cis_rule_1_8_1_5_b_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.5':rhel7cis_rule_1_8_1_5_result|default(true)}) }}"
+    when: rhel7cis_rule_1_8_1_5
+    tags:
+     - level1
+     - scan
+     - rule_1.8.1.5
+     - rhel7
+
+#####
+  - name: " 1.8.1.6 | SCAN |  Ensure permissions on /etc/issue.net are configured  "
+    block:
+    - name: " 1.8.1.6 | SCAN |  Ensure permissions on /etc/issue.net are configured  "
+      shell:   stat /etc/issue.net | grep 0644/
+      register: rhel7cis_rule_1_8_1_6_a_rc
+      ignore_errors: yes
+
+    - shell:   stat /etc/issue.net | grep -E '\s*\Uid:\s+\(\s+0/\s+root\)\s+Gid:\s+\(\s+0/\s+root\)'
+      register: rhel7cis_rule_1_8_1_6_b_rc
+      ignore_errors: yes
+    - set_fact:
+        rhel7cis_rule_1_8_1_6_result: false
+      when: rhel7cis_rule_1_8_1_6_a_rc.rc != 0 or rhel7cis_rule_1_8_1_6_b_rc.rc != 0
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.8.1.6':rhel7cis_rule_1_8_1_6_result|default(true)}) }}"
+    when: rhel7cis_rule_1_8_1_6
+    tags:
+     - level1
+     - scan
+     - rule_1.8.1.6
+     - rhel7
+
+#####
+  - name: " 1.9 | SCAN |  Ensure updates, patches, and additional security software are installed  "
+    block:
+    - name: " 1.9 | SCAN |  Ensure updates, patches, and additional security software are installed  "
+      shell: |
+        yum check-update --security 2> /dev/null|egrep -iv "\-\-"
+      register: rhel7cis_rule_1_9_rc
+      ignore_errors: yes
+
+    - set_fact:
+        rhel7cis_rule_1_9_result: false
+      when: rhel7cis_rule_1_9_rc.rc != 0 or rhel7cis_rule_1_2_4_result is defined
+    - set_fact:
+        all_results: "{{ all_results|combine({'1.9':rhel7cis_rule_1_9_result|default(true)}) }}"
+    when: rhel7cis_rule_1_9
+    tags:
+     - level1
+     - scan
+     - rule_1.9
+     - rhel7
+
+#####
+  - name: " 1.10 | SCAN | Ensure GDM is removed or login is configured "
+    block:
+      - name: " 1.10 | SCAN | Ensure GDM is removed or login is configured "
+        shell:   rpm -q gdm
+        register: rhel7cis_rule_1_10_rc
+        ignore_errors: yes
+      - set_fact:
+          rhel7cis_rule_1_10_result: false
+        when: rhel7cis_rule_1_10_rc.rc != 1
+      - set_fact:
+          all_results: "{{ all_results|combine({'1.10':rhel7cis_rule_1_10_result|default(true)}) }}"
+    when: rhel7cis_rule_1_10_gdm_required == false and rhel7cis_rule_1_10
+    tags:
+     - level1
+     - scan
+     - rule_1.10
+     - rhel7
+
+  - name: " 1.10 | SCAN | Ensure GDM is removed or login is configured"
+    block:
+      - name: " 1.10 | SCAN | Ensure GDM is removed or login is configured"
+        shell:   ls -l /etc/dconf/profile/gdm
+        register: rhel7cis_rule_1_10_a_rc
+        ignore_errors: yes
+      - block:
+          - shell: grep -E 'user-db:user|system-db:gdm|file-db:/usr/share/gdm/greeter-dconf-defaults' /etc/dconf/profile/gdm | wc -l
+            ignore_errors: yes
+            register: rhel7cis_rule_1_10_b_rc
+          - shell: grep -E "[org/gnome/login-screen]|banner-message-enable=true|banner-message-text={{ login_banner_text }}"  /etc/dconf/db/gdm.d/01-banner-message | wc -l
+            ignore_errors: yes
+            register: rhel7cis_rule_1_10_c_rc
+          - shell: grep -E "[org/gnome/login-screen]|disable-user-list=true" /etc/dconf/db/gdm.d/00-login-screen | wc -l
+            ignore_errors: yes
+            register: rhel7cis_rule_1_10_d_rc
+          - set_fact:
+              rhel7cis_rule_1_10_result: false
+            when: rhel7cis_rule_1_10_b_rc.stdout != "3" or  rhel7cis_rule_1_10_c_rc.stdout != "3" or  rhel7cis_rule_1_10_d_rc.stdout != "2"
+        when: rhel7cis_rule_1_10_a_rc.rc == 0
+      - set_fact:
+          rhel7cis_rule_1_10_result: false
+        when: rhel7cis_rule_1_10_a_rc.rc != 0
+      - set_fact:
+          all_results: "{{ all_results|combine({'1.10':rhel7cis_rule_1_10_result|default(true)}) }}"
+    when: rhel7cis_rule_1_10_gdm_required == true and rhel7cis_rule_1_10
+    tags:
+     - level1
+     - scan
+     - rule_1.10
+     - rhel7
+#####
+#####
