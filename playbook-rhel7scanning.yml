@@ -72,9 +72,9 @@
     - debug:
         var: all_results
 
-    - name: MySQL DB Security Dashboard
-      import_tasks: dash-dbquery-scan-job.yml
-      tags: always
+    #- name: MySQL DB Security Dashboard
+    #  import_tasks: dash-dbquery-scan-job.yml
+    #  tags: always
 
     - name: Generate report
       block:
