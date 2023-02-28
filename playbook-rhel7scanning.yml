@@ -91,7 +91,7 @@
             [[ -f {{ rpt_file_v3 }} ]] && mv {{ rpt_file_v3 }} {{ rpt_file_v2 }}
             exit 0
           become: no
-          delegate_to: localhost
+          delegate_to: 192.168.10.172
         - template:
             src: rhel7-cis-report.html.j2
             dest: "{{ rpt_file_v3 }}"
