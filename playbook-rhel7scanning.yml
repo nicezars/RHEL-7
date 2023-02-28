@@ -19,14 +19,14 @@
           register: result
         - set_fact:
             start_time: "{{ lookup('pipe','date \"+%T %Z %F\"') }}"
-      delegate_to: localhost
+      delegate_to: 192.168.10.172
       become: no
       tags: always
 
     - set_fact:
         ign_var: "{{ group_names | to_nice_yaml | replace(' ','') | replace('-','')|replace('\n','') }}"
       become: no
-      delegate_to: localhost
+      delegate_to: 192.168.10.172
       tags: always
     - set_fact:
         rpt_path_v1: "/var/report/v1/{{ ign_var }}"
@@ -36,7 +36,7 @@
         rpt_file_v2: "/var/report/v2/{{ ign_var }}/{{ ansible_hostname }}.html"
         rpt_file_v3: "/var/report/v3/{{ ign_var }}/{{ ansible_hostname }}.html"
       become: no
-      delegate_to: localhost
+      delegate_to: 192.168.10.172
       tags: always
     - name: To create directory on Tower controller node for reports
       file:
@@ -48,7 +48,7 @@
         - "{{ rpt_path_v1 }}"
         - "{{ rpt_path_v2 }}"
         - "{{ rpt_path_v3 }}"
-      delegate_to: localhost
+      delegate_to: 192.168.10.172
       become: no
       tags: always
       ignore_errors: true
@@ -65,7 +65,7 @@
           register: result
         - set_fact:
             end_time: "{{ lookup('pipe','date \"+%T %Z %F\"') }}"
-      delegate_to: localhost
+      delegate_to: 192.168.10.172
       become: no
       tags: always
 
@@ -84,7 +84,7 @@
             key: rule
           register: rules
           no_log: false
-          delegate_to: localhost
+          delegate_to: 192.168.10.172
           become: no
         - shell: |
             [[ -f {{ rpt_file_v3 }} ]] && [[ -f {{ rpt_file_v2 }} ]] && mv {{ rpt_file_v2 }} {{ rpt_file_v1 }}
@@ -96,6 +96,6 @@
             src: rhel7-cis-report.html.j2
             dest: "{{ rpt_file_v3 }}"
             mode: '0777'
-          delegate_to: localhost
+          delegate_to: 192.168.10.172
           become: no
       tags: always
