@@ -84,7 +84,7 @@
             key: rule
           register: rules
           no_log: false
-          delegate_to: 192.168.10.172
+          delegate_to: localhost
           become: no
         - shell: |
             [[ -f {{ rpt_file_v3 }} ]] && [[ -f {{ rpt_file_v2 }} ]] && mv {{ rpt_file_v2 }} {{ rpt_file_v1 }}
